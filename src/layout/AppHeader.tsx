@@ -6,6 +6,8 @@ import { useSidebar } from "@/context/SidebarContext";
 import Link from "next/link";
 import React, { useState } from "react";
 import { usePathname } from 'next/navigation';
+import { useUser } from "@/hooks/useUser";
+import { WalletIcon } from "@heroicons/react/24/outline";
 
 // 페이지 경로에 따른 타이틀 매핑
 const pageTitles: { [key: string]: string } = {
@@ -23,6 +25,7 @@ const pageTitles: { [key: string]: string } = {
 const AppHeader: React.FC = () => {
   const { isMobileOpen, toggleSidebar, toggleMobileSidebar } = useSidebar();
   const pathname = usePathname();
+  const { user, isLoading } = useUser();
   const currentPageTitle = pageTitles[pathname] || '대시보드';
 
   const handleToggleSidebar = () => {
@@ -63,9 +66,14 @@ const AppHeader: React.FC = () => {
         <div className="flex items-center gap-3 sm:gap-4">
           <ThemeToggleButton />
           <NotificationDropdown />
-          <div className="hidden sm:flex items-center gap-2"> {/* 모바일에서는 잔액 숨김 처리 */}
-            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">잔액 ₩2,400</span>
-          </div>
+          {!isLoading && user && user.points !== undefined && (
+            <div className="flex items-center gap-2">
+              <WalletIcon className="h-6 w-6 text-gray-600 dark:text-gray-400" /> 
+              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                {user.points.toLocaleString()} P
+              </span>
+            </div>
+          )}
           <UserDropdown />
         </div>
       </div>

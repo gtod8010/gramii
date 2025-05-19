@@ -33,12 +33,38 @@ const StatCard: React.FC<StatCardProps> = ({ icon, title, value, bgColorClass = 
   );
 };
 
-const DashboardStatsCards: React.FC = () => {
+interface DashboardStatsCardsProps {
+  currentPoints: number;
+  totalSpent: number;
+  totalOrders: number;
+}
+
+const DashboardStatsCards: React.FC<DashboardStatsCardsProps> = ({ currentPoints, totalSpent, totalOrders }) => {
   const stats = [
-    { icon: <DollarIcon />, title: "예치금 잔액", value: "₩2,400", bgColorClass: 'bg-green-100 dark:bg-green-700/50' },
-    { icon: <DollarIcon />, title: "총 사용금액", value: "₩99,300", bgColorClass: 'bg-blue-100 dark:bg-blue-700/50' },
-    { icon: <ShoppingCartIcon />, title: "총 주문", value: "16", bgColorClass: 'bg-sky-100 dark:bg-sky-700/50' },
-    { icon: <ChatBubbleIcon />, title: "총 문의", value: "0", bgColorClass: 'bg-purple-100 dark:bg-purple-700/50' },
+    { 
+      icon: <DollarIcon />, 
+      title: "예치금 잔액", 
+      value: `₩${currentPoints.toLocaleString()}`,
+      bgColorClass: 'bg-green-100 dark:bg-green-700/50' 
+    },
+    { 
+      icon: <DollarIcon />, 
+      title: "총 사용금액", 
+      value: `₩${totalSpent.toLocaleString()}`,
+      bgColorClass: 'bg-blue-100 dark:bg-blue-700/50' 
+    },
+    { 
+      icon: <ShoppingCartIcon />, 
+      title: "총 주문", 
+      value: totalOrders.toLocaleString(), 
+      bgColorClass: 'bg-sky-100 dark:bg-sky-700/50' 
+    },
+    { 
+      icon: <ChatBubbleIcon />, 
+      title: "총 문의", 
+      value: "0", // API에서 아직 제공 안함, 필요시 연동
+      bgColorClass: 'bg-purple-100 dark:bg-purple-700/50' 
+    },
   ];
 
   return (

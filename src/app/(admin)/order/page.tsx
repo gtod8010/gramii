@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useUser } from '@/hooks/useUser';
 
-// 데이터 타입 정의
+// 데이터 타입 정의 (기존 정의 유지 또는 API 응답에 맞게 조정)
 interface SubServiceItem {
-  id: string;
+  id: string; // API에서 number로 온다면 string으로 변환하거나, 타입을 number로 변경
   name: string;
   pricePerUnit: number;
   minOrder: number;
@@ -13,78 +14,41 @@ interface SubServiceItem {
 }
 
 interface ServiceType {
-  id: string;
+  id: string; // API에서 number로 온다면 string으로 변환하거나, 타입을 number로 변경
   name: string;
   subServices: SubServiceItem[];
 }
 
 interface ServiceCategory {
-  id: string;
+  id: string; // API에서 number로 온다면 string으로 변환하거나, 타입을 number로 변경
   name: string;
   serviceTypes: ServiceType[];
 }
 
-// 실제 데이터 (ServiceListDisplay.tsx의 instagramLikes 데이터 반영)
-const serviceCategoriesData: ServiceCategory[] = [
-  {
-    id: 'instagram',
-    name: '인스타그램 서비스',
-    serviceTypes: [
-      {
-        id: 'insta_likes_type',
-        name: '인스타그램 유저 좋아요',
-        subServices: [
-          { id: '4', name: "[파워] [서버1] 실제 외국인 좋아요 AS30일", pricePerUnit: 0.5, minOrder: 10, maxOrder: 500000, description: "외국인 좋아요 AS30일 설명입니다." },
-          { id: '42', name: "[파워] 리얼 한국인 게시물 좋아요❤️", pricePerUnit: 3, minOrder: 50, maxOrder: 10000, description: "리얼 한국인 좋아요 설명입니다." },
-          { id: '43', name: "실제 한국인 남성 게시물 좋아요", pricePerUnit: 30, minOrder: 5, maxOrder: 5000, description: "남성 좋아요 설명." },
-          { id: '44', name: "실제 한국인 여성 게시물 좋아요", pricePerUnit: 30, minOrder: 5, maxOrder: 5000, description: "여성 좋아요 설명." },
-          { id: '45', name: "실제 한국인 20대 연령 게시물 좋아요", pricePerUnit: 30, minOrder: 5, maxOrder: 10000, description: "20대 좋아요 설명." },
-          { id: '46', name: "실제 한국인 20대 연령 남성 게시물 좋아요", pricePerUnit: 40, minOrder: 5, maxOrder: 3000, description: "20대 남성 좋아요 설명." },
-          { id: '47', name: "실제 한국인 20대 연령 여성 게시물 좋아요", pricePerUnit: 40, minOrder: 5, maxOrder: 5000, description: "20대 여성 좋아요 설명." },
-          { id: '212', name: "실제 한국인 좋아요 늘리기 ❤️", pricePerUnit: 15, minOrder: 5, maxOrder: 10000, description: "좋아요 늘리기 설명." },
-          { id: '225', name: "[파워] [서버2] 실제 외국인 좋아요 AS30일", pricePerUnit: 0.6, minOrder: 10, maxOrder: 500000, description: "외국인 좋아요 AS30일 (서버2) 설명." },
-        ]
-      },
-      {
-        id: 'insta_followers_type',
-        name: '인스타그램 유저 팔로워',
-        subServices: [
-          { id: 'foll_1', name: '기본 팔로워 늘리기', pricePerUnit: 10, minOrder: 100, maxOrder: 10000, description: '기본 팔로워 서비스입니다.'},
-          { id: 'foll_real_kr', name: '실제 한국인 팔로워', pricePerUnit: 150, minOrder: 10, maxOrder: 1000, description: '실제 활동하는 한국인 팔로워를 늘립니다.'}
-        ]
-      },
-      {
-        id: 'insta_comments_type',
-        name: '인스타그램 댓글',
-        subServices: [
-          { id: 'cmt_kr_normal', name: '실제 한국인 댓글 (일반)', pricePerUnit: 500, minOrder: 10, maxOrder: 1000, description: '자연스러운 내용의 한국인 댓글입니다.' },
-          { id: 'cmt_kr_positive', name: '실제 한국인 댓글 (칭찬/긍정)', pricePerUnit: 600, minOrder: 10, maxOrder: 1000, description: '칭찬 또는 긍정적인 내용의 한국인 댓글입니다.' },
-          { id: 'cmt_global', name: '외국인 댓글 (글로벌)', pricePerUnit: 300, minOrder: 10, maxOrder: 2000, description: '다양한 국가의 외국인 댓글입니다.' },
-        ]
-      },
-      {
-        id: 'insta_reach_type',
-        name: '인스타그램 도달 노출 프로필방문 조회수',
-        subServices: [
-          { id: 'reach_post', name: '게시물 도달 늘리기', pricePerUnit: 2, minOrder: 100, maxOrder: 100000, description: '게시물의 도달 범위를 넓힙니다.' },
-          { id: 'impression_post', name: '게시물 노출 늘리기', pricePerUnit: 1, minOrder: 100, maxOrder: 200000, description: '게시물의 노출 횟수를 증가시킵니다.' },
-          { id: 'profile_visit', name: '프로필 방문자 늘리기', pricePerUnit: 5, minOrder: 50, maxOrder: 50000, description: '프로필 방문자 수를 증가시킵니다.' },
-          { id: 'post_views', name: '게시물 조회수 늘리기 (동영상/릴스)', pricePerUnit: 0.8, minOrder: 100, maxOrder: 1000000, description: '동영상 또는 릴스 게시물의 조회수를 늘립니다.'}
-        ]
-      },
-      {
-        id: 'insta_auto_type',
-        name: '인스타그램 자동화 서비스',
-        subServices: [
-            { id: 'auto_likes_monthly', name: '한달 자동 좋아요', pricePerUnit: 30000, minOrder: 1, maxOrder: 1, description: '한달 동안 업로드되는 새 게시물에 자동으로 좋아요를 제공합니다. (가격은 월 단위)'},
-            { id: 'auto_views_monthly', name: '한달 자동 조회수 (릴스/영상)', pricePerUnit: 25000, minOrder: 1, maxOrder: 1, description: '한달 동안 업로드되는 새 릴스/영상에 자동으로 조회수를 제공합니다. (가격은 월 단위)'}
-        ]
-      },
-    ],
-  },
-];
+// API로부터 받는 원본 서비스 데이터 타입 (ServiceListDisplay와 동일하게 사용 가능)
+interface ApiService {
+  id: number;
+  name: string;
+  service_type_id: number;
+  category_id: number; // 주문 페이지에서는 카테고리 ID도 필요
+  description?: string | null;
+  price_per_unit?: number | undefined;
+  min_order_quantity?: number | undefined;
+  max_order_quantity?: number | undefined;
+  is_active: boolean;
+  service_type_name?: string; 
+  category_name?: string; 
+}
+
+// 하드코딩된 serviceCategoriesData 제거
+// const serviceCategoriesData: ServiceCategory[] = [...];
 
 export default function OrderPage() {
+  const { user, isLoading: userIsLoading, updateUserInStorage } = useUser();
+  const [serviceCategories, setServiceCategories] = useState<ServiceCategory[]>([]);
+  const [isLoadingServices, setIsLoadingServices] = useState(true);
+  const [errorServices, setErrorServices] = useState<string | null>(null);
+
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>('');
   const [availableServiceTypes, setAvailableServiceTypes] = useState<ServiceType[]>([]);
   const [selectedServiceTypeId, setSelectedServiceTypeId] = useState<string>('');
@@ -95,6 +59,100 @@ export default function OrderPage() {
   const [totalCost, setTotalCost] = useState<number>(0);
   const [serviceLink, setServiceLink] = useState<string>('');
   const [termsAgreement, setTermsAgreement] = useState<boolean>(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitMessage, setSubmitMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
+  const fetchAndStructureServices = useCallback(async () => {
+    setIsLoadingServices(true);
+    setErrorServices(null);
+    console.log('[OrderPage] Fetching services...');
+    try {
+      const response = await fetch('/api/services');
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('[OrderPage] Failed to fetch services:', errorData);
+        throw new Error(errorData.message || '서비스 목록을 불러오는데 실패했습니다.');
+      }
+      const apiServices: ApiService[] = await response.json();
+      console.log('[OrderPage] Raw API Services received:', JSON.parse(JSON.stringify(apiServices)));
+
+      const activeServices = apiServices.filter(service => service.is_active);
+      console.log('[OrderPage] Active Services (filtered):', JSON.parse(JSON.stringify(activeServices)));
+
+      const structuredData: ServiceCategory[] = [];
+      const categoryMap = new Map<string, ServiceCategory>();
+
+      activeServices.forEach((service, index) => {
+        console.log(`[OrderPage] Processing service ${index + 1}/${activeServices.length}:`, JSON.parse(JSON.stringify(service)));
+
+        // category_id를 기준으로 다시 처리 (백엔드에서 category_id를 보내주므로)
+        const categoryIdStr = String(service.category_id); 
+        const categoryName = service.category_name || '기타 카테고리'; // category_name은 여전히 사용 가능
+        
+        const serviceTypeIdStr = String(service.service_type_id);
+        const serviceTypeName = service.service_type_name || '기타 타입';
+
+        console.log(`[OrderPage] Service ${index + 1} -> Category ID: ${categoryIdStr}, Name: ${categoryName}`);
+        console.log(`[OrderPage] Service ${index + 1} -> Service Type ID: ${serviceTypeIdStr}, Name: ${serviceTypeName}`);
+
+        if (!categoryMap.has(categoryIdStr)) {
+          console.log(`[OrderPage] Creating new category in map. ID: ${categoryIdStr}, Name: ${categoryName}`);
+          const newCategory: ServiceCategory = {
+            id: categoryIdStr, // ServiceCategory의 id를 categoryIdStr로 설정
+            name: categoryName,
+            serviceTypes: [],
+          };
+          categoryMap.set(categoryIdStr, newCategory);
+          structuredData.push(newCategory);
+          console.log(`[OrderPage] Added new category to structuredData:`, JSON.parse(JSON.stringify(newCategory)));
+        }
+        
+        const currentCategory = categoryMap.get(categoryIdStr)!;
+        if (!currentCategory) {
+            console.error(`[OrderPage] CRITICAL: Could not find category ${categoryIdStr} in map! This should not happen. Skipping service:`, service);
+            return; 
+        }
+        console.log(`[OrderPage] Service ${index + 1} - Current Category from map: ID ${currentCategory.id}, Name: ${currentCategory.name}`);
+
+        let currentServiceType = currentCategory.serviceTypes.find(st => st.id === serviceTypeIdStr);
+        if (!currentServiceType) {
+          console.log(`[OrderPage] Creating new service type for ID ${serviceTypeIdStr} (Name: ${serviceTypeName}) under category '${currentCategory.name}'`);
+          currentServiceType = {
+            id: serviceTypeIdStr,
+            name: serviceTypeName,
+            subServices: [],
+          };
+          currentCategory.serviceTypes.push(currentServiceType);
+        } else {
+          console.log(`[OrderPage] Found existing service type for ID ${serviceTypeIdStr} (Name: ${serviceTypeName}) under category '${currentCategory.name}'`);
+        }
+
+        currentServiceType.subServices.push({
+          id: String(service.id),
+          name: service.name,
+          pricePerUnit: service.price_per_unit || 0,
+          minOrder: service.min_order_quantity || 1,
+          maxOrder: service.max_order_quantity || 10000,
+          description: service.description || '설명이 없습니다.',
+        });
+      });
+      
+      console.log('[OrderPage] Final structuredData to be set to state:', JSON.parse(JSON.stringify(structuredData)));
+      setServiceCategories(structuredData);
+    } catch (err: any) {
+      console.error('[OrderPage] Error in fetchAndStructureServices:', err);
+      setErrorServices(err.message);
+      setServiceCategories([]);
+    } finally {
+      setIsLoadingServices(false);
+      console.log('[OrderPage] Finished fetching and structuring services.');
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchAndStructureServices();
+  }, [fetchAndStructureServices]);
+
 
   const resetForm = () => {
     setSelectedCategoryId('');
@@ -110,36 +168,29 @@ export default function OrderPage() {
   };
 
   const handleCategoryChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    const categoryId = event.target.value;
+    const categoryId = event.target.value; 
     setSelectedCategoryId(categoryId);
-    
-    // Reset dependent states
-    setAvailableServiceTypes(categoryId ? serviceCategoriesData.find(cat => cat.id === categoryId)?.serviceTypes || [] : []);
+    setAvailableServiceTypes(categoryId ? serviceCategories.find(cat => cat.id === categoryId)?.serviceTypes || [] : []);
     setSelectedServiceTypeId('');
     setAvailableSubServices([]);
     setSelectedSubServiceId('');
     setSelectedServiceDetails(null);
     setOrderQuantity('');
-    setServiceLink('');
   };
 
   const handleServiceTypeChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const serviceTypeId = event.target.value;
     setSelectedServiceTypeId(serviceTypeId);
-
     setAvailableSubServices(serviceTypeId ? availableServiceTypes.find(st => st.id === serviceTypeId)?.subServices || [] : []);
     setSelectedSubServiceId('');
     setSelectedServiceDetails(null);
     setOrderQuantity('');
-    setServiceLink(''); 
   };
 
   const handleSubServiceChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const subServiceId = event.target.value;
     setSelectedSubServiceId(subServiceId);
     setOrderQuantity('');
-    // setServiceLink(''); // 링크는 서비스 변경시 초기화하지 않을 수 있음 (사용자 편의)
-
     if (subServiceId) {
       const serviceDetail = availableSubServices.find(sub => sub.id === subServiceId);
       setSelectedServiceDetails(serviceDetail || null);
@@ -174,35 +225,67 @@ export default function OrderPage() {
     }
   }, [selectedServiceDetails, orderQuantity]);
 
-  const handleSubmit = (event: React.MouseEvent<HTMLButtonElement>) => {
-    event.preventDefault(); // 기본 폼 제출 방지
-
-    if (!selectedServiceDetails || !orderQuantity || totalCost === 0 || !serviceLink || !termsAgreement) {
-      alert("모든 필수 항목을 입력하고 약관에 동의해주세요.");
+  const handleSubmit = async (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault(); 
+    setSubmitMessage(null);
+    if (userIsLoading) {
+      alert("사용자 정보를 불러오는 중입니다. 잠시 후 다시 시도해주세요.");
       return;
     }
-    
-    // 수량이 최소/최대 주문 범위를 벗어나는지 확인
+    if (!user) {
+      alert("로그인이 필요합니다.");
+      return;
+    }
+    if (!selectedSubServiceId || !selectedServiceDetails || !orderQuantity || totalCost <= 0 || !serviceLink || !termsAgreement) {
+      setSubmitMessage({ type: 'error', text: "모든 필수 항목을 입력하고 약관에 동의해주세요."});
+      return;
+    }
     const quantityNum = parseInt(orderQuantity, 10);
     if (selectedServiceDetails && 
         (quantityNum < selectedServiceDetails.minOrder || quantityNum > selectedServiceDetails.maxOrder)) {
-      alert(`수량은 ${selectedServiceDetails.minOrder}에서 ${selectedServiceDetails.maxOrder} 사이로 입력해주세요.`);
+      setSubmitMessage({ type: 'error', text: `수량은 ${selectedServiceDetails.minOrder}에서 ${selectedServiceDetails.maxOrder} 사이로 입력해주세요.`});
       return;
     }
-
-    const orderDetails = {
-      serviceId: selectedSubServiceId,
-      serviceName: selectedServiceDetails.name,
-      quantity: orderQuantity,
-      link: serviceLink,
-      cost: totalCost,
-      timestamp: new Date().toISOString(),
+    const orderPayload = {
+      userId: user.id, 
+      serviceId: parseInt(selectedSubServiceId, 10),
+      quantity: quantityNum, 
+      totalPrice: totalCost, 
+      requestDetails: serviceLink,
     };
-
-    console.log("주문 정보:", orderDetails);
-    alert("주문이 접수되었습니다 (콘솔에서 상세 정보 확인). 실제 기능은 백엔드 구현 후 연동됩니다.");
-    resetForm(); // 폼 초기화
+    setIsSubmitting(true);
+    try {
+      const response = await fetch('/api/orders', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(orderPayload),
+      });
+      const result = await response.json();
+      if (!response.ok) {
+        throw new Error(result.error || '주문 생성에 실패했습니다.');
+      }
+      setSubmitMessage({ type: 'success', text: `주문이 성공적으로 생성되었습니다! (주문 ID: ${result.order.id})` });
+      if (result.updatedUserPoints !== undefined && user) {
+        updateUserInStorage({ ...user, points: result.updatedUserPoints });
+      }
+      resetForm(); 
+    } catch (error: any) {
+      console.error("Order submission error:", error);
+      setSubmitMessage({ type: 'error', text: error.message || '주문 처리 중 오류가 발생했습니다.' });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
+
+  if (isLoadingServices || userIsLoading) {
+    return <div className="flex items-center justify-center h-screen"><p className="text-lg dark:text-white">정보를 불러오는 중...</p></div>;
+  }
+
+  if (errorServices) {
+    return <div className="flex items-center justify-center h-screen"><p className="text-lg text-red-500">오류: {errorServices}</p></div>;
+  }
 
   return (
     <div className="container mx-auto p-6 space-y-6">
@@ -210,25 +293,31 @@ export default function OrderPage() {
         <div className="md:col-span-2 bg-white dark:bg-gray-800 shadow-lg rounded-lg p-6 space-y-6">
           <h2 className="text-xl font-semibold text-gray-700 dark:text-gray-200">새로운 주문</h2>
           
+          {submitMessage && (
+            <div className={`p-4 rounded-md ${submitMessage.type === 'success' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+              {submitMessage.text}
+            </div>
+          )}
+
           <div>
             <label htmlFor="category" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">카테고리를 먼저 선택해주세요.</label>
             <select id="category" name="category" value={selectedCategoryId} onChange={handleCategoryChange} className="mt-1 block w-full py-2 px-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:text-white">
               <option value="">카테고리 선택</option>
-              {serviceCategoriesData.map(category => (<option key={category.id} value={category.id}>{category.name}</option>))}
+              {serviceCategories.map(category => (<option key={category.id} value={category.id}>{category.name}</option>))} 
             </select>
           </div>
           <div>
             <label htmlFor="serviceType" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">서비스 타입을 선택해주세요.</label>
             <select id="serviceType" name="serviceType" value={selectedServiceTypeId} onChange={handleServiceTypeChange} disabled={!selectedCategoryId || availableServiceTypes.length === 0} className="mt-1 block w-full py-2 px-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:text-white disabled:bg-gray-50 dark:disabled:bg-gray-700">
               <option value="">서비스 타입 선택</option>
-              {availableServiceTypes.map(st => (<option key={st.id} value={st.id}>{st.name}</option>))}
+              {availableServiceTypes.map(st => (<option key={st.id} value={st.id}>{st.name}</option>))} 
             </select>
           </div>
           <div>
             <label htmlFor="subService" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">세부 서비스를 선택해주세요.</label>
             <select id="subService" name="subService" value={selectedSubServiceId} onChange={handleSubServiceChange} disabled={!selectedServiceTypeId || availableSubServices.length === 0} className="mt-1 block w-full py-2 px-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:text-white disabled:bg-gray-50 dark:disabled:bg-gray-700">
               <option value="">세부 서비스 선택</option>
-              {availableSubServices.map(sub => (<option key={sub.id} value={sub.id}>{sub.name} (1개당: {sub.pricePerUnit}원, 주문범위: {sub.minOrder}~{sub.maxOrder})</option>))}
+              {availableSubServices.map(sub => (<option key={sub.id} value={sub.id}>{sub.name} (1개당: {sub.pricePerUnit}원, 주문범위: {sub.minOrder}~{sub.maxOrder})</option>))} 
             </select>
           </div>
 
@@ -251,12 +340,17 @@ export default function OrderPage() {
             <label htmlFor="terms-agreement" className="ml-2 block text-sm text-gray-900 dark:text-gray-300">이용약관 및 개인정보처리방침에 동의합니다.</label>
           </div>
 
-          <button type="button" onClick={handleSubmit} className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800" disabled={!selectedServiceDetails || !orderQuantity || totalCost === 0 || !serviceLink || !termsAgreement}>
-            주문하기
+          <button 
+            type="button"
+            onClick={handleSubmit} 
+            disabled={isSubmitting || !termsAgreement || !selectedSubServiceId || orderQuantity === '' || serviceLink === ''}
+            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-md focus:outline-none focus:shadow-outline disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isSubmitting ? '주문 처리 중...' : `₩${totalCost.toLocaleString()} 결제하기`}
           </button>
         </div>
 
-        {/* 오른쪽 패널 (이전과 동일) */}
+        {/* 오른쪽 패널 (선택한 서비스 정보 표시 - 기존 로직 유지) */}
         <div className="md:col-span-1 bg-white dark:bg-gray-800 shadow-lg rounded-lg p-6 space-y-4">
           <h2 className="text-xl font-semibold text-gray-700 dark:text-gray-200">선택한 서비스 정보</h2>
           <div>
@@ -279,11 +373,17 @@ export default function OrderPage() {
           </div>
           <div>
             <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">서비스 설명</h3>
-            <p className="mt-1 text-sm text-gray-900 dark:text-gray-100 h-24 overflow-y-auto border dark:border-gray-700 p-2 rounded-md" id="service-description-display">{selectedServiceDetails?.description || '서비스를 선택하면 여기에 설명이 표시됩니다.'}</p>
+            <p 
+              className="mt-1 text-sm text-gray-900 dark:text-gray-100 h-60 overflow-y-auto border dark:border-gray-700 p-2 rounded-md whitespace-pre-wrap"
+              id="service-description-display"
+            >
+              {selectedServiceDetails?.description || '서비스를 선택하면 여기에 설명이 표시됩니다.'}
+            </p>
           </div>
         </div>
       </div>
 
+      {/* 실시간 상담 버튼 (기존 UI 유지) */}
       <button className="fixed bottom-6 right-6 bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-4 rounded-full shadow-lg flex items-center" onClick={() => alert("실시간 상담 기능 구현 예정")}>
         <span role="img" aria-label="support" className="mr-2">🙋🏻‍♂️</span>
         실시간 상담

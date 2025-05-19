@@ -5,14 +5,48 @@ import { Modal } from "../ui/modal";
 import Button from "../ui/button/Button";
 import Input from "../form/input/InputField";
 import Label from "../form/Label";
+import { useUser } from "@/hooks/useUser";
 
 export default function UserInfoCard() {
   const { isOpen, openModal, closeModal } = useModal();
-  const handleSave = () => {
-    // Handle save logic here
-    console.log("Saving changes...");
+  const { user, isLoading, updateUserInStorage } = useUser();
+
+  const [editName, setEditName] = React.useState("");
+  const [editEmail, setEditEmail] = React.useState("");
+  const [editPhoneNumber, setEditPhoneNumber] = React.useState("");
+
+  React.useEffect(() => {
+    if (user) {
+      setEditName(user.name || "");
+      setEditEmail(user.email || "");
+      setEditPhoneNumber(user.phone_number || "");
+    }
+  }, [user]);
+
+  const handleSave = async () => {
+    if (user) {
+        updateUserInStorage({
+            name: editName,
+            email: editEmail,
+            phone_number: editPhoneNumber,
+            // role은 여기서 수정하지 않도록 유지하거나, 별도 관리자 기능으로 분리
+        });
+    }
     closeModal();
   };
+
+  if (isLoading) {
+    return <div className="p-5 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6 animate-pulse"><div className="h-40 bg-gray-200 dark:bg-gray-700 rounded"></div></div>;
+  }
+
+  if (!user) {
+    return (
+      <div className="p-5 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6">
+        <p className="text-gray-500 dark:text-gray-400">사용자 정보를 불러올 수 없습니다. 다시 로그인해주세요.</p>
+      </div>
+    );
+  }
+
   return (
     <div className="p-5 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6">
       <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
@@ -24,46 +58,37 @@ export default function UserInfoCard() {
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-7 2xl:gap-x-32">
             <div>
               <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
-                First Name
+                Full Name (이름)
               </p>
               <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                Musharof
+                {user.name || '정보 없음'}
               </p>
             </div>
 
             <div>
               <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
-                Last Name
+                Email address (이메일)
               </p>
               <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                Chowdhury
+                {user.email || '정보 없음'}
               </p>
             </div>
 
             <div>
               <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
-                Email address
+                Phone (전화번호)
               </p>
               <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                randomuser@pimjo.com
+                {user.phone_number || '정보 없음'}
               </p>
             </div>
 
-            <div>
+             <div>
               <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
-                Phone
+                Role (역할)
               </p>
               <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                +09 363 398 46
-              </p>
-            </div>
-
-            <div>
-              <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
-                Bio
-              </p>
-              <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                Team Manager
+                {user.role || '정보 없음'}
               </p>
             </div>
           </div>
@@ -82,108 +107,59 @@ export default function UserInfoCard() {
             xmlns="http://www.w3.org/2000/svg"
           >
             <path
-              fillRule="evenodd"
-              clipRule="evenodd"
-              d="M15.0911 2.78206C14.2125 1.90338 12.7878 1.90338 11.9092 2.78206L4.57524 10.116C4.26682 10.4244 4.0547 10.8158 3.96468 11.2426L3.31231 14.3352C3.25997 14.5833 3.33653 14.841 3.51583 15.0203C3.69512 15.1996 3.95286 15.2761 4.20096 15.2238L7.29355 14.5714C7.72031 14.4814 8.11172 14.2693 8.42013 13.9609L15.7541 6.62695C16.6327 5.74827 16.6327 4.32365 15.7541 3.44497L15.0911 2.78206ZM12.9698 3.84272C13.2627 3.54982 13.7376 3.54982 14.0305 3.84272L14.6934 4.50563C14.9863 4.79852 14.9863 5.2734 14.6934 5.56629L14.044 6.21573L12.3204 4.49215L12.9698 3.84272ZM11.2597 5.55281L5.6359 11.1766C5.53309 11.2794 5.46238 11.4099 5.43238 11.5522L5.01758 13.5185L6.98394 13.1037C7.1262 13.0737 7.25666 13.003 7.35947 12.9002L12.9833 7.27639L11.2597 5.55281Z"
+              d="M10.5298 2.52999C10.7798 2.27999 11.0923 2.15574 11.4673 2.15574C11.8423 2.15574 12.1548 2.27999 12.4048 2.52999L14.4698 4.59499C14.7198 4.84499 14.8441 5.15749 14.8441 5.53249C14.8441 5.90749 14.7198 6.21999 14.4698 6.46999L9.40483 11.535C9.15483 11.785 8.84233 11.9092 8.46733 11.9092C8.09233 11.9092 7.77983 11.785 7.52983 11.535L5.46483 9.47C5.21483 9.22 5.09058 8.9075 5.09058 8.5325C5.09058 8.1575 5.21483 7.845 5.46483 7.595L10.5298 2.52999ZM12.4611 4.09499L11.4673 3.10124L6.89983 7.66874L7.89358 8.66249L12.4611 4.09499ZM10.0348 14.0362L4.33483 14.0362C4.00483 14.0362 3.72908 13.915 3.50758 13.6725C3.28608 13.4287 3.17558 13.1425 3.17558 12.8137V7.11374C3.17558 7.05374 3.18108 6.99624 3.19208 6.94124L3.58933 5.06624L4.03858 6.03124C4.10233 6.15624 4.19233 6.27374 4.30858 6.38374L6.05708 8.13249C6.12483 8.19999 6.18358 8.25124 6.23358 8.28499L7.01358 8.78874L3.64058 12.1612C3.61058 12.1912 3.59408 12.2212 3.59058 12.2512L2.79558 12.6012C2.74058 12.6237 2.71308 12.6662 2.71308 12.7287C2.71308 12.7737 2.72708 12.8112 2.75483 12.8425C2.78258 12.8725 2.81783 12.8887 2.86058 12.8887H3.74358L9.56358 12.8887C9.64733 12.8887 9.71633 12.8737 9.77058 12.8437C9.82483 12.8137 9.86733 12.7737 9.89708 12.7237L10.0348 12.4837V14.0362Z"
               fill=""
             />
           </svg>
-          Edit
+          Edit Profile
         </button>
       </div>
 
-      <Modal isOpen={isOpen} onClose={closeModal} className="max-w-[700px] m-4">
-        <div className="no-scrollbar relative w-full max-w-[700px] overflow-y-auto rounded-3xl bg-white p-4 dark:bg-gray-900 lg:p-11">
-          <div className="px-2 pr-14">
-            <h4 className="mb-2 text-2xl font-semibold text-gray-800 dark:text-white/90">
-              Edit Personal Information
-            </h4>
-            <p className="mb-6 text-sm text-gray-500 dark:text-gray-400 lg:mb-7">
-              Update your details to keep your profile up-to-date.
-            </p>
+      {isOpen && (
+        <Modal isOpen={isOpen} onClose={closeModal}>
+          <div className="no-scrollbar relative w-full max-w-[700px] overflow-y-auto rounded-3xl bg-white p-4 dark:bg-gray-900 lg:p-11">
+            <div className="px-2 pr-14 mb-6 lg:mb-7">
+              <h4 className="text-2xl font-semibold text-gray-800 dark:text-white/90">
+                Edit Personal Information
+              </h4>
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                Update your details to keep your profile up-to-date.
+              </p>
+            </div>
+            <form className="flex flex-col" onSubmit={(e) => e.preventDefault()}>
+              <div className="custom-scrollbar h-[auto] overflow-y-auto px-2 pb-3">
+                <div className="mt-7">
+                  <h5 className="mb-5 text-lg font-medium text-gray-800 dark:text-white/90 lg:mb-6">
+                    Personal Information
+                  </h5>
+                  <div className="grid grid-cols-1 gap-x-6 gap-y-5 lg:grid-cols-2">
+                    <div className="col-span-2">
+                      <Label htmlFor="edit-name">Full Name</Label>
+                      <Input id="edit-name" type="text" value={editName} onChange={(e) => setEditName(e.target.value)} />
+                    </div>
+                    <div className="col-span-2 lg:col-span-1">
+                      <Label htmlFor="edit-email">Email Address</Label>
+                      <Input id="edit-email" type="email" value={editEmail} onChange={(e) => setEditEmail(e.target.value)} />
+                    </div>
+                    <div className="col-span-2 lg:col-span-1">
+                      <Label htmlFor="edit-phone">Phone</Label>
+                      <Input id="edit-phone" type="tel" value={editPhoneNumber} onChange={(e) => setEditPhoneNumber(e.target.value)} />
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="flex items-center gap-3 px-2 mt-6 lg:justify-end">
+                <Button size="sm" variant="outline" onClick={closeModal}>
+                  Close
+                </Button>
+                <Button size="sm" onClick={handleSave}>
+                  Save Changes
+                </Button>
+              </div>
+            </form>
           </div>
-          <form className="flex flex-col">
-            <div className="custom-scrollbar h-[450px] overflow-y-auto px-2 pb-3">
-              <div>
-                <h5 className="mb-5 text-lg font-medium text-gray-800 dark:text-white/90 lg:mb-6">
-                  Social Links
-                </h5>
-
-                <div className="grid grid-cols-1 gap-x-6 gap-y-5 lg:grid-cols-2">
-                  <div>
-                    <Label>Facebook</Label>
-                    <Input
-                      type="text"
-                      defaultValue="https://www.facebook.com/PimjoHQ"
-                    />
-                  </div>
-
-                  <div>
-                    <Label>X.com</Label>
-                    <Input type="text" defaultValue="https://x.com/PimjoHQ" />
-                  </div>
-
-                  <div>
-                    <Label>Linkedin</Label>
-                    <Input
-                      type="text"
-                      defaultValue="https://www.linkedin.com/company/pimjo"
-                    />
-                  </div>
-
-                  <div>
-                    <Label>Instagram</Label>
-                    <Input
-                      type="text"
-                      defaultValue="https://instagram.com/PimjoHQ"
-                    />
-                  </div>
-                </div>
-              </div>
-              <div className="mt-7">
-                <h5 className="mb-5 text-lg font-medium text-gray-800 dark:text-white/90 lg:mb-6">
-                  Personal Information
-                </h5>
-
-                <div className="grid grid-cols-1 gap-x-6 gap-y-5 lg:grid-cols-2">
-                  <div className="col-span-2 lg:col-span-1">
-                    <Label>First Name</Label>
-                    <Input type="text" defaultValue="Musharof" />
-                  </div>
-
-                  <div className="col-span-2 lg:col-span-1">
-                    <Label>Last Name</Label>
-                    <Input type="text" defaultValue="Chowdhury" />
-                  </div>
-
-                  <div className="col-span-2 lg:col-span-1">
-                    <Label>Email Address</Label>
-                    <Input type="text" defaultValue="randomuser@pimjo.com" />
-                  </div>
-
-                  <div className="col-span-2 lg:col-span-1">
-                    <Label>Phone</Label>
-                    <Input type="text" defaultValue="+09 363 398 46" />
-                  </div>
-
-                  <div className="col-span-2">
-                    <Label>Bio</Label>
-                    <Input type="text" defaultValue="Team Manager" />
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="flex items-center gap-3 px-2 mt-6 lg:justify-end">
-              <Button size="sm" variant="outline" onClick={closeModal}>
-                Close
-              </Button>
-              <Button size="sm" onClick={handleSave}>
-                Save Changes
-              </Button>
-            </div>
-          </form>
-        </div>
-      </Modal>
+        </Modal>
+      )}
     </div>
   );
 }

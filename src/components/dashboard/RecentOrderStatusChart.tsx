@@ -6,34 +6,49 @@ import React from "react";
 // react-apexcharts를 동적으로 임포트 (SSR 회피)
 const ReactApexChart = dynamic(() => import("react-apexcharts"), { ssr: false });
 
-const RecentOrderStatusChart: React.FC = () => {
-  // 이미지 2의 범례와 유사한 주문 상태 및 색상 정의
+// chartData prop의 타입 정의
+interface ChartDataPoint {
+  date: string; // 'MM-DD' 형식으로 예상
+  pending: number;
+  processing: number;
+  completed: number;
+  canceled: number;
+  refunded: number;
+}
+
+interface RecentOrderStatusChartProps {
+  chartData: ChartDataPoint[];
+}
+
+const RecentOrderStatusChart: React.FC<RecentOrderStatusChartProps> = ({ chartData }) => {
+  // chartData를 기반으로 series 데이터와 categories를 동적으로 생성
+  const categories = chartData.map(data => data.date);
   const series = [
     {
-      name: "완료됨",
-      data: [30, 40, 35, 50, 49, 60, 70],
+      name: "완료", // "Completed"
+      data: chartData.map(data => data.completed),
     },
     {
-      name: "처리중",
-      data: [20, 25, 30, 35, 40, 45, 50],
+      name: "처리중", // "Processing"
+      data: chartData.map(data => data.processing),
     },
     {
-      name: "픽스중",
-      data: [10, 15, 12, 18, 20, 22, 25],
+      name: "대기중", // "Pending"
+      data: chartData.map(data => data.pending),
     },
     {
-      name: "대기중",
-      data: [5, 8, 10, 12, 15, 13, 10],
+      name: "취소", // "Canceled"
+      data: chartData.map(data => data.canceled),
     },
     {
-      name: "부분완료됨",
-      data: [3, 5, 4, 6, 8, 7, 9],
+      name: "환불", // "Refunded"
+      data: chartData.map(data => data.refunded),
     },
   ];
 
   const options: ApexOptions = {
     chart: {
-      type: 'area', // 영역 차트 또는 'line'
+      type: 'area',
       height: 350,
       toolbar: {
         show: false,
@@ -42,7 +57,8 @@ const RecentOrderStatusChart: React.FC = () => {
         enabled: false,
       }
     },
-    colors: ['#22c55e', '#3b82f6', '#f97316', '#6b7280', '#8b5cf6'], // 완료(초록), 처리(파랑), 픽스(주황), 대기(회색), 부분(보라)
+    // 색상: 완료(초록), 처리중(파랑), 대기중(주황), 취소(회색), 환불(보라) - 순서대로
+    colors: ['#22c55e', '#3b82f6', '#f97316', '#6b7280', '#8b5cf6'], 
     dataLabels: {
       enabled: false,
     },
@@ -51,14 +67,14 @@ const RecentOrderStatusChart: React.FC = () => {
       width: 2,
     },
     grid: {
-      borderColor: '#e7e7e7',
+      borderColor: '#e7e7e7', // Tailwind gray-200
       row: {
-        colors: ['transparent', 'transparent'], // Alternating row colors
+        colors: ['transparent', 'transparent'],
         opacity: 0.5
       },
     },
     xaxis: {
-      categories: ['05-05', '05-06', '05-07', '05-08', '05-09', '05-10', '05-11'], // 예시 날짜
+      categories: categories, // 동적으로 생성된 날짜
       labels: {
         style: {
           colors: '#6b7280', // Tailwind gray-500
@@ -76,7 +92,7 @@ const RecentOrderStatusChart: React.FC = () => {
         style: {
           colors: '#6b7280',
         },
-        formatter: (value) => { return value.toFixed(0); },
+        formatter: (value) => { return value ? value.toFixed(0) : '0'; }, // value가 undefined일 수 있으므로 체크
       }
     },
     legend: {
@@ -110,9 +126,15 @@ const RecentOrderStatusChart: React.FC = () => {
   };
 
   return (
-    // Tailwind CSS를 사용하여 다크 모드에서도 차트 배경이 잘 보이도록 수정
     <div id="recent-order-status-chart" className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
-      <ReactApexChart options={options} series={series} type="area" height={350} />
+      {/* chartData가 유효할 때만 차트 렌더링 */}
+      {chartData && chartData.length > 0 ? (
+        <ReactApexChart options={options} series={series} type="area" height={350} />
+      ) : (
+        <div className="flex items-center justify-center h-[350px]">
+          <p className="text-gray-500">최근 주문 데이터가 없습니다.</p>
+        </div>
+      )}
     </div>
   );
 };

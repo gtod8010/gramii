@@ -2,56 +2,65 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setIsLoading(true);
+    setError(null);
     console.log('Login attempt with:', { email, password });
-    // 여기에 실제 로그인 API 호출 로직을 추가합니다.
-    // 예시:
-    // try {
-    //   const response = await fetch('/api/login', {
-    //     method: 'POST',
-    //     headers: { 'Content-Type': 'application/json' },
-    //     body: JSON.stringify({ email, password }),
-    //   });
-    //   if (response.ok) {
-    //     // 로그인 성공 처리, 예: 페이지 리디렉션
-    //     console.log('Login successful');
-    //   } else {
-    //     // 로그인 실패 처리
-    //     console.error('Login failed');
-    //     alert('이메일 또는 비밀번호가 잘못되었습니다.');
-    //   }
-    // } catch (error) {
-    //   console.error('Login error:', error);
-    //   alert('로그인 중 오류가 발생했습니다.');
-    // } finally {
-    //   setIsLoading(false);
-    // }
-    setTimeout(() => { // 임시 비동기 처리
-      alert(`로그인 시도: ${email}`);
+
+    try {
+      const response = await fetch('/api/auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        console.log('Login successful:', data);
+
+        // 사용자 정보를 localStorage에 저장
+        if (data.user) {
+          localStorage.setItem('loggedInUser', JSON.stringify(data.user));
+        }
+
+        if (data.user && data.user.role === 'admin') {
+          router.push('/manage-services');
+        } else {
+          router.push('/');
+        }
+      } else {
+        console.error('Login failed:', data);
+        setError(data.message || '이메일 또는 비밀번호가 잘못되었습니다.');
+      }
+    } catch (err) {
+      console.error('Login error:', err);
+      setError('로그인 중 오류가 발생했습니다. 네트워크 연결을 확인해주세요.');
+    } finally {
       setIsLoading(false);
-      // 로그인 성공 시 다음 경로로 이동하거나 상태 업데이트
-      // router.push('/dashboard'); 
-    }, 1000);
+    }
   };
 
   const inputClass = "mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:text-white";
   const labelClass = "block text-sm font-medium text-gray-700 dark:text-gray-300";
+  const buttonClass = "w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 dark:bg-indigo-500 dark:hover:bg-indigo-600 dark:focus:ring-indigo-700";
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="flex justify-center mb-6">
-            {/* 서비스 로고 또는 이름 */}
-            <div className="inline-flex items-center justify-center bg-pink-100 dark:bg-pink-700 p-3 rounded-md">
-              <span className="text-3xl font-bold text-pink-600 dark:text-pink-300">GRAMII</span> 
+            <div className="inline-flex items-center justify-center bg-indigo-100 dark:bg-indigo-700 p-3 rounded-md">
+              <span className="text-3xl font-bold text-indigo-600 dark:text-indigo-300">GRAMII</span>
             </div>
         </div>
         <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-white">
@@ -59,7 +68,7 @@ export default function LoginPage() {
         </h2>
         <p className="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
           또는{' '}
-          <Link href="/register" className="font-medium text-pink-600 hover:text-pink-500 dark:text-pink-400 dark:hover:text-pink-300">
+          <Link href="/register" className="font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300">
             계정이 없으신가요? 회원가입
           </Link>
         </p>
@@ -106,13 +115,19 @@ export default function LoginPage() {
               </div>
             </div>
 
+            {error && (
+              <div>
+                <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+              </div>
+            )}
+
             <div className="flex items-center justify-between">
               <div className="flex items-center">
                 <input
                   id="remember-me"
                   name="remember-me"
                   type="checkbox"
-                  className="h-4 w-4 text-pink-600 focus:ring-pink-500 border-gray-300 dark:border-gray-600 rounded dark:bg-gray-700 dark:focus:ring-pink-600"
+                  className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 dark:border-gray-600 rounded dark:bg-gray-700 dark:focus:ring-indigo-600"
                 />
                 <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900 dark:text-gray-300">
                   로그인 상태 유지
@@ -120,7 +135,7 @@ export default function LoginPage() {
               </div>
 
               <div className="text-sm">
-                <a href="#" className="font-medium text-pink-600 hover:text-pink-500 dark:text-pink-400 dark:hover:text-pink-300">
+                <a href="#" className="font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300">
                   비밀번호를 잊으셨나요?
                 </a>
               </div>
@@ -130,7 +145,7 @@ export default function LoginPage() {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-pink-600 hover:bg-pink-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500 disabled:opacity-50 dark:bg-pink-500 dark:hover:bg-pink-600 dark:focus:ring-pink-700"
+                className={buttonClass}
               >
                 {isLoading ? '로그인 중...' : '로그인'}
               </button>
@@ -150,20 +165,17 @@ export default function LoginPage() {
             </div>
 
             <div className="mt-6 grid grid-cols-1 gap-3">
-              {/* 소셜 로그인 버튼 (예시) */}
               <div>
                 <a
                   href="#"
                   className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-sm font-medium text-gray-500 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600"
                 >
                   <span className="sr-only">Google 계정으로 로그인</span>
-                  {/* Google 아이콘 SVG 또는 이미지 */}
                   <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
-                    <path fillRule="evenodd" d="M10 0C4.477 0 0 4.477 0 10s4.477 10 10 10c2.234 0 4.302-.868 5.91-2.302l-2.052-1.58C13.04 16.677 11.582 17.5 10 17.5c-2.958 0-5.43-2.078-6.246-4.893H.324v1.56C1.61 17.073 4.295 19.5 7.5 19.5c1.904 0 3.633-.727 4.964-1.926L17.143 16A9.937 9.937 0 0020 10c0-.78-.093-1.537-.268-2.262H10v4.008h5.31c-.225 1.282-.883 2.366-1.803 3.095l1.56 1.204A7.476 7.476 0 0017.5 10c0-2.234-.968-4.244-2.523-5.658L13.48 2.845C14.867 1.137 17.016 0 19.522 0 16.53 0 13.816 1.527 11.997 3.865 11.34 3.36 10.693 3.053 10 3.053c-2.958 0-5.43 2.078-6.246 4.893H.324V6.385C1.61 3.427 4.295 1 7.5 1c1.904 0 3.633.727 4.964 1.926L17.143 1A9.937 9.937 0 0010 0z" clipRule="evenodd" />
+                    <path fillRule="evenodd" d="M10 0C4.477 0 0 4.477 0 10s4.477 10 10 10c2.234 0 4.302-.868 5.91-2.302l-2.052-1.58C13.04 16.677 11.582 17.5 10 17.5c-2.958 0-5.43-2.078-6.246-4.893H.324v1.56C1.61 17.073 4.295 19.5 7.5 19.5c1.904 0 3.633-.727 4.964-1.926L17.143 16A9.937 9.937 0 0020 10c0-.78-.093-1.537-.268-2.262H10v4.008h5.31c-.225 1.282-.883 2.366-1.803 3.095l1.56 1.204A7.476 7.476 0 0017.5 10c0-2.234-.968-4.244-2.523-5.658L13.48 2.845C14.867 1.137 17.016 0 19.522 0 16.53 0 13.816 1.527 11.997 3.865 11.34 3.36 10.693 3.053 10 3.053c-2.958 0-5.43-2.078-6.246 4.893H.324V6.385C1.61 3.427 4.295 1 7.5 1c1.904 0 3.633-.727 4.964 1.926L17.143 1A9.937 9.937 0 0010 0z" clipRule="evenodd" />
                   </svg>
                 </a>
               </div>
-              {/* 다른 소셜 로그인 버튼 추가 가능 */}
             </div>
           </div>
         </div>

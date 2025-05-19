@@ -1,24 +1,45 @@
 "use client"; // 클라이언트 컴포넌트 명시
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import ServiceDescriptionModal from '@/components/services/ServiceDescriptionModal';
 
-// page.tsx에 있던 타입 정의들을 여기로 가져옴
-interface ServiceItem {
+// 기존 ServiceItem 인터페이스는 DisplayServiceItem으로 대체 또는 통합 고려
+interface DisplayServiceItem {
   id: string | number;
   name: string;
-  price: string;
-  quantity: string;
-  description: React.ReactNode;
+  price: string; // "가격 [단위당]" 형태
+  quantity: string; // "최소 / 최대"
+  description: React.ReactNode; 
+  // originalService?: any; // 필요시 원본 데이터를 포함할 수 있음 (관리 페이지에서는 사용)
+}
+
+// API로부터 받는 원본 서비스 데이터 타입 (manage-services/page.tsx와 유사하게 정의)
+interface ApiService {
+  id: number;
+  name: string;
+  service_type_id: number;
+  description?: string | null;
+  price_per_unit?: number | undefined;
+  min_order_quantity?: number | undefined;
+  max_order_quantity?: number | undefined;
+  is_active: boolean;
+  service_type_name?: string; 
+  category_name?: string; 
+}
+
+interface GroupedServices {
+  [categoryName: string]: {
+    [serviceTypeName: string]: DisplayServiceItem[];
+  };
 }
 
 interface ServiceSectionProps {
   title: string;
-  services: ServiceItem[];
-  onViewDetails: (service: ServiceItem) => void;
+  services: DisplayServiceItem[];
+  onViewDetails: (service: DisplayServiceItem) => void;
 }
 
-const ServiceTable: React.FC<{ services: ServiceItem[]; onViewDetails: (service: ServiceItem) => void }> = ({ services, onViewDetails }) => (
+const ServiceTable: React.FC<{ services: DisplayServiceItem[]; onViewDetails: (service: DisplayServiceItem) => void }> = ({ services, onViewDetails }) => (
   <div className="overflow-x-auto">
     <table className="min-w-full table-auto">
       <thead>
@@ -31,8 +52,8 @@ const ServiceTable: React.FC<{ services: ServiceItem[]; onViewDetails: (service:
         </tr>
       </thead>
       <tbody>
-        {services.map((service, index) => (
-          <tr key={index} className="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600/50">
+        {services.map((service) => (
+          <tr key={service.id} className="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600/50">
             <td className="px-4 py-3 text-sm text-gray-700 dark:text-gray-300">{service.id}</td>
             <td className="px-4 py-3 text-sm text-gray-700 dark:text-gray-300">{service.name}</td>
             <td className="px-4 py-3 text-sm text-gray-700 dark:text-gray-300">{service.price}</td>
@@ -52,20 +73,27 @@ const ServiceTable: React.FC<{ services: ServiceItem[]; onViewDetails: (service:
 );
 
 const ServiceSection: React.FC<ServiceSectionProps> = ({ title, services, onViewDetails }) => (
-  <div className="mb-8 rounded-lg border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+  <div className="mb-8">
     <div className="flex items-center justify-between mb-4">
       <h2 className="text-xl font-semibold text-gray-900 dark:text-white">{title}</h2>
     </div>
-    <ServiceTable services={services} onViewDetails={onViewDetails} />
+    {services.length > 0 ? (
+      <ServiceTable services={services} onViewDetails={onViewDetails} />
+    ) : (
+      <p className="text-sm text-gray-500 dark:text-gray-400">해당 타입의 서비스가 없습니다.</p>
+    )}
   </div>
 );
 
-// 컴포넌트 이름을 ServiceListDisplay 등으로 변경하고 export default 처리
 const ServiceListDisplay = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedService, setSelectedService] = useState<ServiceItem | null>(null);
+  const [selectedService, setSelectedService] = useState<DisplayServiceItem | null>(null);
 
-  const handleViewDetails = (service: ServiceItem) => {
+  const [groupedServices, setGroupedServices] = useState<GroupedServices>({});
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleViewDetails = (service: DisplayServiceItem) => {
     setSelectedService(service);
     setIsModalOpen(true);
   };
@@ -75,57 +103,83 @@ const ServiceListDisplay = () => {
     setSelectedService(null);
   };
 
-  const instagramFollowers: ServiceItem[] = [
-    { id: 14, name: "[고품질] 외국인 팔로워 😍", price: "6 [1개당]", quantity: "10 / 5000000", description: <p>이것은 외국인 팔로워 서비스에 대한 <strong>상세 설명</strong>입니다. <br/>여러 줄을 포함할 수 있습니다.</p> },
-    { id: 166, name: "[추천💕]실제 한국인 팔로워", price: "100 [1개당]", quantity: "10 / 50000", description: "한국인 팔로워 상세 설명입니다." },
-    { id: 236, name: "[가성비👍]고품질 한국인 팔로워", price: "30 [1개당]", quantity: "1 / 15000", description: "가성비 한국인 팔로워 설명입니다." },
-  ];
+  const fetchAndGroupServices = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const response = await fetch('/api/services'); // GET /api/services 호출
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || '서비스 목록을 불러오는데 실패했습니다.');
+      }
+      const services: ApiService[] = await response.json();
+      
+      const activeServices = services.filter(service => service.is_active);
 
-  const instagramComments: ServiceItem[] = [
-    { id: 214, name: "인스타 실제 한국인 지정 댓글", price: "200 [1개당]", quantity: "3 / 2000", description: "지정 댓글 서비스입니다." },
-    { id: 215, name: "인스타 실제 한국인 랜덤 댓글", price: "200 [1개당]", quantity: "3 / 2000", description: "랜덤 댓글 서비스입니다." },
-  ];
-  
-  const instagramReach: ServiceItem[] = [
-    { id: 9, name: "[최저] 실제 한국인 공유", price: "1 [1개당]", quantity: "100 / 5000000", description: "공유 서비스 설명입니다." },
-    { id: 10, name: "[최저] 실제 한국인 프로필 방문", price: "0.3 [1개당]", quantity: "100 / 5000000", description: "프로필 방문 서비스 설명입니다." },
-    { id: 11, name: "[최저] [묶음] 실제 한국인 노출 + 도달", price: "0.3 [1개당]", quantity: "10 / 1000000", description: "노출+도달 묶음 서비스입니다." },
-    { id: 101, name: "[최저] 실제 한국인 저장", price: "0.5 [1개당]", quantity: "10 / 1000000", description: "저장 서비스 설명입니다." },
-  ];
+      const grouped: GroupedServices = activeServices.reduce((acc, service) => {
+        const categoryName = service.category_name || '기타 카테고리';
+        const typeName = service.service_type_name || '기타 타입';
 
-  const instagramLikes: ServiceItem[] = [
-    { id: 4, name: "[파워] [서버1] 실제 외국인 좋아요 AS30일", price: "0.5 [1개당]", quantity: "10 / 500000", description: "외국인 좋아요 AS30일 설명입니다." },
-    { id: 42, name: "[파워] 리얼 한국인 게시물 좋아요❤️", price: "3 [1개당]", quantity: "50 / 10000", description: "리얼 한국인 좋아요 설명입니다." },
-    { id: 43, name: "실제 한국인 남성 게시물 좋아요", price: "30 [1개당]", quantity: "5 / 5000", description: "남성 좋아요 설명." },
-    { id: 44, name: "실제 한국인 여성 게시물 좋아요", price: "30 [1개당]", quantity: "5 / 5000", description: "여성 좋아요 설명." },
-    { id: 45, name: "실제 한국인 20대 연령 게시물 좋아요", price: "30 [1개당]", quantity: "5 / 10000", description: "20대 좋아요 설명." },
-    { id: 46, name: "실제 한국인 20대 연령 남성 게시물 좋아요", price: "40 [1개당]", quantity: "5 / 3000", description: "20대 남성 좋아요 설명." },
-    { id: 47, name: "실제 한국인 20대 연령 여성 게시물 좋아요", price: "40 [1개당]", quantity: "5 / 5000", description: "20대 여성 좋아요 설명." },
-    { id: 212, name: "실제 한국인 좋아요 늘리기 ❤️", price: "15 [1개당]", quantity: "5 / 10000", description: "좋아요 늘리기 설명." },
-    { id: 225, name: "[파워] [서버2] 실제 외국인 좋아요 AS30일", price: "0.6 [1개당]", quantity: "10 / 500000", description: "외국인 좋아요 AS30일 (서버2) 설명." },
-  ];
+        if (!acc[categoryName]) {
+          acc[categoryName] = {};
+        }
+        if (!acc[categoryName][typeName]) {
+          acc[categoryName][typeName] = [];
+        }
+
+        acc[categoryName][typeName].push({
+          id: service.id,
+          name: service.name,
+          price: `${service.price_per_unit || 0} 원`,
+          quantity: `${service.min_order_quantity || 0} / ${service.max_order_quantity || 0}`,
+          description: service.description || '설명이 없습니다.', 
+        });
+        return acc;
+      }, {} as GroupedServices);
+      setGroupedServices(grouped);
+    } catch (err: any) {
+      setError(err.message);
+      setGroupedServices({});
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchAndGroupServices();
+  }, [fetchAndGroupServices]);
+
+  if (isLoading) {
+    return <div className="flex items-center justify-center h-screen"><p className="text-lg dark:text-white">서비스 목록을 불러오는 중...</p></div>;
+  }
+
+  if (error) {
+    return <div className="flex items-center justify-center h-screen"><p className="text-lg text-red-500">오류: {error}</p></div>;
+  }
+
+  if (Object.keys(groupedServices).length === 0) {
+    return <div className="flex items-center justify-center h-screen"><p className="text-lg dark:text-white">등록된 서비스가 없습니다.</p></div>;
+  }
 
   return (
-    <div className="space-y-8"> {/* 전체 페이지 컨테이너 간격 조정 */}
+    <div className="space-y-8 p-4 md:p-6"> 
       <h1 className="text-3xl font-semibold text-gray-900 dark:text-white">서비스 목록</h1>
       
-      {/* 인스타그램 서비스 전체 컨테이너 */}
-      <div className="p-6 md:p-8 rounded-lg border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800">
-        <h2 className="text-2xl font-semibold text-gray-800 dark:text-white mb-6">인스타그램 서비스</h2>
-        
-        <ServiceSection title="팔로워" services={instagramFollowers} onViewDetails={handleViewDetails} />
-        <ServiceSection title="댓글" services={instagramComments} onViewDetails={handleViewDetails} />
-        <ServiceSection title="도달 노출 프로필방문 조회수" services={instagramReach} onViewDetails={handleViewDetails} />
-        <ServiceSection title="유저 좋아요" services={instagramLikes} onViewDetails={handleViewDetails} />
-      </div>
-      
-      {/* 다른 플랫폼 서비스가 있다면 여기에 유사한 컨테이너 추가 */}
-      {/* 예: 
-      <div className="p-6 md:p-8 rounded-lg border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800">
-        <h2 className="text-2xl font-semibold text-gray-800 dark:text-white mb-6">유튜브 서비스</h2>
-        <ServiceSection title="구독자" services={youtubeSubscribers} onViewDetails={handleViewDetails} />
-      </div>
-      */}
+      {Object.entries(groupedServices).map(([categoryName, typesByServiceType]) => (
+        <div key={categoryName} className="p-6 md:p-8 rounded-lg border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800">
+          <h2 className="text-2xl font-semibold text-gray-800 dark:text-white mb-6">
+            {categoryName}
+          </h2>
+          {Object.entries(typesByServiceType).map(([typeName, services]) => (
+            <ServiceSection 
+              key={typeName} 
+              title={typeName} 
+              services={services} 
+              onViewDetails={handleViewDetails} 
+            />
+          ))}
+        </div>
+      ))}
 
       <ServiceDescriptionModal 
         isOpen={isModalOpen} 

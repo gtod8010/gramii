@@ -1,22 +1,102 @@
-import React from 'react';
+"use client"; // 클라이언트 컴포넌트로 변경
+
+import React, { useState, useEffect } from 'react';
 import { Metadata } from 'next';
 import DashboardStatsCards from "@/components/dashboard/DashboardStatsCards";
 import RecentOrderStatusChart from "@/components/dashboard/RecentOrderStatusChart";
 import OrderStatusSummary from "@/components/dashboard/OrderStatusSummary";
+import { useUser } from '@/hooks/useUser';
 
-export const metadata: Metadata = {
-  title: "GRAMII 인스타광고",
-  description: "GRAMII 인스타광고",
-  // 다른 메타데이터 속성들...
-};
+// 차트 데이터 타입 정의
+interface ChartDataset {
+  Pending: number[];
+  Processing: number[];
+  Completed: number[];
+  Partial: number[];
+  Cancelled: number[];
+  // API에서 추가된 다른 상태들도 여기에 포함될 수 있음
+}
+
+interface RecentOrderStatusChartData {
+  labels: string[];
+  datasets: ChartDataset;
+}
+
+interface DashboardSummaryData {
+  currentPoints: number;
+  totalSpent: number;
+  totalOrders: number;
+  orderStatusSummary: Record<string, number>;
+  recentOrderStatusChartData: RecentOrderStatusChartData; // 차트 데이터 타입 추가
+}
 
 const DashboardPage = () => {
+  const { user, isLoading: userIsLoading } = useUser();
+  const [summaryData, setSummaryData] = useState<DashboardSummaryData | null>(null);
+  const [isLoadingData, setIsLoadingData] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (user && user.id) {
+      const fetchDashboardData = async () => {
+        setIsLoadingData(true);
+        setError(null);
+        try {
+          const response = await fetch(`/api/dashboard-summary?userId=${user.id}`);
+          if (!response.ok) {
+            const errData = await response.json();
+            throw new Error(errData.message || '대시보드 요약 정보를 가져오는데 실패했습니다.');
+          }
+          const data: DashboardSummaryData = await response.json();
+          setSummaryData(data);
+        } catch (err: any) {
+          console.error("Failed to fetch dashboard data:", err);
+          setError(err.message);
+        } finally {
+          setIsLoadingData(false);
+        }
+      };
+      fetchDashboardData();
+    } else if (!userIsLoading) {
+      setIsLoadingData(false);
+      setError("사용자 정보를 불러올 수 없습니다. 로그인이 필요할 수 있습니다.");
+    }
+  }, [user, userIsLoading]);
+
+  if (userIsLoading || isLoadingData) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <p className="text-lg dark:text-white">대시보드 정보를 불러오는 중...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-4 text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900 rounded-md">
+        <p>오류: {error}</p>
+      </div>
+    );
+  }
+
+  if (!summaryData) {
+    return (
+      <div className="p-4 text-gray-600 dark:text-gray-400">
+        <p>대시보드 정보를 표시할 수 없습니다.</p>
+      </div>
+    );
+  }
+
   return (
     <>
-      <DashboardStatsCards />
+      <DashboardStatsCards
+        currentPoints={summaryData.currentPoints}
+        totalSpent={summaryData.totalSpent}
+        totalOrders={summaryData.totalOrders}
+      />
       <div className="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-2">
-        <RecentOrderStatusChart />
-        <OrderStatusSummary />
+        <RecentOrderStatusChart chartData={summaryData.recentOrderStatusChartData} />
+        <OrderStatusSummary orderStatusSummary={summaryData.orderStatusSummary} />
       </div>
     </>
   );
