@@ -21,7 +21,7 @@ SET default_tablespace = '';
 SET default_table_access_method = heap;
 
 --
--- Name: orders; Type: TABLE; Schema: public; Owner: postgres
+-- Name: orders; Type: TABLE; Schema: public; Owner: "dwight.k"
 --
 
 CREATE TABLE public.orders (
@@ -37,10 +37,10 @@ CREATE TABLE public.orders (
 );
 
 
-ALTER TABLE public.orders OWNER TO postgres;
+ALTER TABLE public.orders OWNER TO "dwight.k";
 
 --
--- Name: orders_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: orders_id_seq; Type: SEQUENCE; Schema: public; Owner: "dwight.k"
 --
 
 CREATE SEQUENCE public.orders_id_seq
@@ -52,17 +52,17 @@ CREATE SEQUENCE public.orders_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.orders_id_seq OWNER TO postgres;
+ALTER TABLE public.orders_id_seq OWNER TO "dwight.k";
 
 --
--- Name: orders_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+-- Name: orders_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: "dwight.k"
 --
 
 ALTER SEQUENCE public.orders_id_seq OWNED BY public.orders.id;
 
 
 --
--- Name: point_transactions; Type: TABLE; Schema: public; Owner: postgres
+-- Name: point_transactions; Type: TABLE; Schema: public; Owner: "dwight.k"
 --
 
 CREATE TABLE public.point_transactions (
@@ -75,10 +75,10 @@ CREATE TABLE public.point_transactions (
 );
 
 
-ALTER TABLE public.point_transactions OWNER TO postgres;
+ALTER TABLE public.point_transactions OWNER TO "dwight.k";
 
 --
--- Name: point_transactions_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: point_transactions_id_seq; Type: SEQUENCE; Schema: public; Owner: "dwight.k"
 --
 
 CREATE SEQUENCE public.point_transactions_id_seq
@@ -90,17 +90,17 @@ CREATE SEQUENCE public.point_transactions_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.point_transactions_id_seq OWNER TO postgres;
+ALTER TABLE public.point_transactions_id_seq OWNER TO "dwight.k";
 
 --
--- Name: point_transactions_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+-- Name: point_transactions_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: "dwight.k"
 --
 
 ALTER SEQUENCE public.point_transactions_id_seq OWNED BY public.point_transactions.id;
 
 
 --
--- Name: service_categories; Type: TABLE; Schema: public; Owner: postgres
+-- Name: service_categories; Type: TABLE; Schema: public; Owner: "dwight.k"
 --
 
 CREATE TABLE public.service_categories (
@@ -113,10 +113,10 @@ CREATE TABLE public.service_categories (
 );
 
 
-ALTER TABLE public.service_categories OWNER TO postgres;
+ALTER TABLE public.service_categories OWNER TO "dwight.k";
 
 --
--- Name: service_categories_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: service_categories_id_seq; Type: SEQUENCE; Schema: public; Owner: "dwight.k"
 --
 
 CREATE SEQUENCE public.service_categories_id_seq
@@ -128,17 +128,17 @@ CREATE SEQUENCE public.service_categories_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.service_categories_id_seq OWNER TO postgres;
+ALTER TABLE public.service_categories_id_seq OWNER TO "dwight.k";
 
 --
--- Name: service_categories_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+-- Name: service_categories_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: "dwight.k"
 --
 
 ALTER SEQUENCE public.service_categories_id_seq OWNED BY public.service_categories.id;
 
 
 --
--- Name: service_types; Type: TABLE; Schema: public; Owner: postgres
+-- Name: service_types; Type: TABLE; Schema: public; Owner: "dwight.k"
 --
 
 CREATE TABLE public.service_types (
@@ -152,10 +152,10 @@ CREATE TABLE public.service_types (
 );
 
 
-ALTER TABLE public.service_types OWNER TO postgres;
+ALTER TABLE public.service_types OWNER TO "dwight.k";
 
 --
--- Name: service_types_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: service_types_id_seq; Type: SEQUENCE; Schema: public; Owner: "dwight.k"
 --
 
 CREATE SEQUENCE public.service_types_id_seq
@@ -167,17 +167,17 @@ CREATE SEQUENCE public.service_types_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.service_types_id_seq OWNER TO postgres;
+ALTER TABLE public.service_types_id_seq OWNER TO "dwight.k";
 
 --
--- Name: service_types_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+-- Name: service_types_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: "dwight.k"
 --
 
 ALTER SEQUENCE public.service_types_id_seq OWNED BY public.service_types.id;
 
 
 --
--- Name: services; Type: TABLE; Schema: public; Owner: postgres
+-- Name: services; Type: TABLE; Schema: public; Owner: "dwight.k"
 --
 
 CREATE TABLE public.services (
@@ -195,10 +195,10 @@ CREATE TABLE public.services (
 );
 
 
-ALTER TABLE public.services OWNER TO postgres;
+ALTER TABLE public.services OWNER TO "dwight.k";
 
 --
--- Name: services_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: services_id_seq; Type: SEQUENCE; Schema: public; Owner: "dwight.k"
 --
 
 CREATE SEQUENCE public.services_id_seq
@@ -210,17 +210,17 @@ CREATE SEQUENCE public.services_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.services_id_seq OWNER TO postgres;
+ALTER TABLE public.services_id_seq OWNER TO "dwight.k";
 
 --
--- Name: services_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+-- Name: services_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: "dwight.k"
 --
 
 ALTER SEQUENCE public.services_id_seq OWNED BY public.services.id;
 
 
 --
--- Name: users; Type: TABLE; Schema: public; Owner: postgres
+-- Name: users; Type: TABLE; Schema: public; Owner: "dwight.k"
 --
 
 CREATE TABLE public.users (
@@ -237,10 +237,10 @@ CREATE TABLE public.users (
 );
 
 
-ALTER TABLE public.users OWNER TO postgres;
+ALTER TABLE public.users OWNER TO "dwight.k";
 
 --
--- Name: users_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: users_id_seq; Type: SEQUENCE; Schema: public; Owner: "dwight.k"
 --
 
 CREATE SEQUENCE public.users_id_seq
@@ -252,59 +252,59 @@ CREATE SEQUENCE public.users_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.users_id_seq OWNER TO postgres;
+ALTER TABLE public.users_id_seq OWNER TO "dwight.k";
 
 --
--- Name: users_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+-- Name: users_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: "dwight.k"
 --
 
 ALTER SEQUENCE public.users_id_seq OWNED BY public.users.id;
 
 
 --
--- Name: orders id; Type: DEFAULT; Schema: public; Owner: postgres
+-- Name: orders id; Type: DEFAULT; Schema: public; Owner: "dwight.k"
 --
 
 ALTER TABLE ONLY public.orders ALTER COLUMN id SET DEFAULT nextval('public.orders_id_seq'::regclass);
 
 
 --
--- Name: point_transactions id; Type: DEFAULT; Schema: public; Owner: postgres
+-- Name: point_transactions id; Type: DEFAULT; Schema: public; Owner: "dwight.k"
 --
 
 ALTER TABLE ONLY public.point_transactions ALTER COLUMN id SET DEFAULT nextval('public.point_transactions_id_seq'::regclass);
 
 
 --
--- Name: service_categories id; Type: DEFAULT; Schema: public; Owner: postgres
+-- Name: service_categories id; Type: DEFAULT; Schema: public; Owner: "dwight.k"
 --
 
 ALTER TABLE ONLY public.service_categories ALTER COLUMN id SET DEFAULT nextval('public.service_categories_id_seq'::regclass);
 
 
 --
--- Name: service_types id; Type: DEFAULT; Schema: public; Owner: postgres
+-- Name: service_types id; Type: DEFAULT; Schema: public; Owner: "dwight.k"
 --
 
 ALTER TABLE ONLY public.service_types ALTER COLUMN id SET DEFAULT nextval('public.service_types_id_seq'::regclass);
 
 
 --
--- Name: services id; Type: DEFAULT; Schema: public; Owner: postgres
+-- Name: services id; Type: DEFAULT; Schema: public; Owner: "dwight.k"
 --
 
 ALTER TABLE ONLY public.services ALTER COLUMN id SET DEFAULT nextval('public.services_id_seq'::regclass);
 
 
 --
--- Name: users id; Type: DEFAULT; Schema: public; Owner: postgres
+-- Name: users id; Type: DEFAULT; Schema: public; Owner: "dwight.k"
 --
 
 ALTER TABLE ONLY public.users ALTER COLUMN id SET DEFAULT nextval('public.users_id_seq'::regclass);
 
 
 --
--- Data for Name: orders; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: orders; Type: TABLE DATA; Schema: public; Owner: "dwight.k"
 --
 
 COPY public.orders (id, user_id, service_id, quantity, link, total_price, order_status, created_at, updated_at) FROM stdin;
@@ -314,7 +314,7 @@ COPY public.orders (id, user_id, service_id, quantity, link, total_price, order_
 
 
 --
--- Data for Name: point_transactions; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: point_transactions; Type: TABLE DATA; Schema: public; Owner: "dwight.k"
 --
 
 COPY public.point_transactions (id, user_id, amount, transaction_type, related_order_id, created_at) FROM stdin;
@@ -324,7 +324,7 @@ COPY public.point_transactions (id, user_id, amount, transaction_type, related_o
 
 
 --
--- Data for Name: service_categories; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: service_categories; Type: TABLE DATA; Schema: public; Owner: "dwight.k"
 --
 
 COPY public.service_categories (id, name, description, is_active, created_at, updated_at) FROM stdin;
@@ -334,7 +334,7 @@ COPY public.service_categories (id, name, description, is_active, created_at, up
 
 
 --
--- Data for Name: service_types; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: service_types; Type: TABLE DATA; Schema: public; Owner: "dwight.k"
 --
 
 COPY public.service_types (id, category_id, name, description, is_active, created_at, updated_at) FROM stdin;
@@ -344,7 +344,7 @@ COPY public.service_types (id, category_id, name, description, is_active, create
 
 
 --
--- Data for Name: services; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: services; Type: TABLE DATA; Schema: public; Owner: "dwight.k"
 --
 
 COPY public.services (id, service_type_id, name, description, price_per_unit, min_order_quantity, max_order_quantity, external_id, is_active, created_at, updated_at) FROM stdin;
@@ -354,7 +354,7 @@ COPY public.services (id, service_type_id, name, description, price_per_unit, mi
 
 
 --
--- Data for Name: users; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: users; Type: TABLE DATA; Schema: public; Owner: "dwight.k"
 --
 
 COPY public.users (id, password, email, points, role, created_at, updated_at, name, phone_number, referrer_id) FROM stdin;
@@ -363,49 +363,49 @@ COPY public.users (id, password, email, points, role, created_at, updated_at, na
 
 
 --
--- Name: orders_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: orders_id_seq; Type: SEQUENCE SET; Schema: public; Owner: "dwight.k"
 --
 
 SELECT pg_catalog.setval('public.orders_id_seq', 6, true);
 
 
 --
--- Name: point_transactions_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: point_transactions_id_seq; Type: SEQUENCE SET; Schema: public; Owner: "dwight.k"
 --
 
 SELECT pg_catalog.setval('public.point_transactions_id_seq', 2, true);
 
 
 --
--- Name: service_categories_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: service_categories_id_seq; Type: SEQUENCE SET; Schema: public; Owner: "dwight.k"
 --
 
 SELECT pg_catalog.setval('public.service_categories_id_seq', 5, true);
 
 
 --
--- Name: service_types_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: service_types_id_seq; Type: SEQUENCE SET; Schema: public; Owner: "dwight.k"
 --
 
 SELECT pg_catalog.setval('public.service_types_id_seq', 3, true);
 
 
 --
--- Name: services_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: services_id_seq; Type: SEQUENCE SET; Schema: public; Owner: "dwight.k"
 --
 
 SELECT pg_catalog.setval('public.services_id_seq', 2, true);
 
 
 --
--- Name: users_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: users_id_seq; Type: SEQUENCE SET; Schema: public; Owner: "dwight.k"
 --
 
 SELECT pg_catalog.setval('public.users_id_seq', 3, true);
 
 
 --
--- Name: orders orders_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: orders orders_pkey; Type: CONSTRAINT; Schema: public; Owner: "dwight.k"
 --
 
 ALTER TABLE ONLY public.orders
@@ -413,7 +413,7 @@ ALTER TABLE ONLY public.orders
 
 
 --
--- Name: point_transactions point_transactions_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: point_transactions point_transactions_pkey; Type: CONSTRAINT; Schema: public; Owner: "dwight.k"
 --
 
 ALTER TABLE ONLY public.point_transactions
@@ -421,7 +421,7 @@ ALTER TABLE ONLY public.point_transactions
 
 
 --
--- Name: service_categories service_categories_name_key; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: service_categories service_categories_name_key; Type: CONSTRAINT; Schema: public; Owner: "dwight.k"
 --
 
 ALTER TABLE ONLY public.service_categories
@@ -429,7 +429,7 @@ ALTER TABLE ONLY public.service_categories
 
 
 --
--- Name: service_categories service_categories_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: service_categories service_categories_pkey; Type: CONSTRAINT; Schema: public; Owner: "dwight.k"
 --
 
 ALTER TABLE ONLY public.service_categories
@@ -437,7 +437,7 @@ ALTER TABLE ONLY public.service_categories
 
 
 --
--- Name: service_types service_types_category_id_name_key; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: service_types service_types_category_id_name_key; Type: CONSTRAINT; Schema: public; Owner: "dwight.k"
 --
 
 ALTER TABLE ONLY public.service_types
@@ -445,7 +445,7 @@ ALTER TABLE ONLY public.service_types
 
 
 --
--- Name: service_types service_types_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: service_types service_types_pkey; Type: CONSTRAINT; Schema: public; Owner: "dwight.k"
 --
 
 ALTER TABLE ONLY public.service_types
@@ -453,7 +453,7 @@ ALTER TABLE ONLY public.service_types
 
 
 --
--- Name: services services_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: services services_pkey; Type: CONSTRAINT; Schema: public; Owner: "dwight.k"
 --
 
 ALTER TABLE ONLY public.services
@@ -461,7 +461,7 @@ ALTER TABLE ONLY public.services
 
 
 --
--- Name: services services_service_type_id_name_key; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: services services_service_type_id_name_key; Type: CONSTRAINT; Schema: public; Owner: "dwight.k"
 --
 
 ALTER TABLE ONLY public.services
@@ -469,7 +469,7 @@ ALTER TABLE ONLY public.services
 
 
 --
--- Name: users users_email_key; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: users users_email_key; Type: CONSTRAINT; Schema: public; Owner: "dwight.k"
 --
 
 ALTER TABLE ONLY public.users
@@ -477,7 +477,7 @@ ALTER TABLE ONLY public.users
 
 
 --
--- Name: users users_phone_number_key; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: users users_phone_number_key; Type: CONSTRAINT; Schema: public; Owner: "dwight.k"
 --
 
 ALTER TABLE ONLY public.users
@@ -485,7 +485,7 @@ ALTER TABLE ONLY public.users
 
 
 --
--- Name: users users_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: users users_pkey; Type: CONSTRAINT; Schema: public; Owner: "dwight.k"
 --
 
 ALTER TABLE ONLY public.users
@@ -493,7 +493,7 @@ ALTER TABLE ONLY public.users
 
 
 --
--- Name: orders orders_service_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: orders orders_service_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: "dwight.k"
 --
 
 ALTER TABLE ONLY public.orders
@@ -501,7 +501,7 @@ ALTER TABLE ONLY public.orders
 
 
 --
--- Name: orders orders_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: orders orders_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: "dwight.k"
 --
 
 ALTER TABLE ONLY public.orders
@@ -509,7 +509,7 @@ ALTER TABLE ONLY public.orders
 
 
 --
--- Name: point_transactions point_transactions_related_order_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: point_transactions point_transactions_related_order_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: "dwight.k"
 --
 
 ALTER TABLE ONLY public.point_transactions
@@ -517,7 +517,7 @@ ALTER TABLE ONLY public.point_transactions
 
 
 --
--- Name: point_transactions point_transactions_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: point_transactions point_transactions_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: "dwight.k"
 --
 
 ALTER TABLE ONLY public.point_transactions
@@ -525,7 +525,7 @@ ALTER TABLE ONLY public.point_transactions
 
 
 --
--- Name: service_types service_types_category_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: service_types service_types_category_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: "dwight.k"
 --
 
 ALTER TABLE ONLY public.service_types
@@ -533,7 +533,7 @@ ALTER TABLE ONLY public.service_types
 
 
 --
--- Name: services services_service_type_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: services services_service_type_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: "dwight.k"
 --
 
 ALTER TABLE ONLY public.services
@@ -541,7 +541,7 @@ ALTER TABLE ONLY public.services
 
 
 --
--- Name: users users_referrer_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: users users_referrer_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: "dwight.k"
 --
 
 ALTER TABLE ONLY public.users

@@ -26,8 +26,8 @@ const serviceUpdateSchema = z.object({
 });
 
 // 특정 서비스 조회 (GET)
-export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
-  const id = parseInt(params.id, 10);
+export async function GET(request: NextRequest, context: { params: { id: string } }) {
+  const id = parseInt(context.params.id, 10);
   if (isNaN(id) || id <= 0) {
     return NextResponse.json({ message: '유효하지 않은 서비스 ID입니다.' }, { status: 400 });
   }
@@ -48,8 +48,8 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
 }
 
 // 특정 서비스 수정 (PUT)
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
-  const id = parseInt(params.id, 10);
+export async function PUT(request: NextRequest, context: { params: { id: string } }) {
+  const id = parseInt(context.params.id, 10);
   if (isNaN(id) || id <= 0) {
     return NextResponse.json({ message: '유효하지 않은 서비스 ID입니다.' }, { status: 400 });
   }
@@ -130,15 +130,15 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 }
 
 // 특정 서비스 삭제 (DELETE)
-export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
-  const id = parseInt(params.id, 10);
+export async function DELETE(request: NextRequest, context: { params: { id: string } }) {
+  const id = parseInt(context.params.id, 10);
   if (isNaN(id) || id <= 0) {
     return NextResponse.json({ message: '유효하지 않은 서비스 ID입니다.' }, { status: 400 });
   }
 
   try {
-    const orderItemsExist = await pool.query('SELECT id FROM order_items WHERE service_id = $1', [id]);
-    if (orderItemsExist.rows.length > 0) {
+    const ordersExist = await pool.query('SELECT id FROM orders WHERE service_id = $1 LIMIT 1', [id]);
+    if (ordersExist.rows.length > 0) {
       return NextResponse.json({ message: '해당 서비스를 참조하는 주문 내역이 있어 삭제할 수 없습니다.' }, { status: 400 });
     }
 

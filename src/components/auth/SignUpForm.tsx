@@ -85,31 +85,29 @@ export default function SignUpForm() {
             </div>
             <form>
               <div className="space-y-5">
-                <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-                  {/* <!-- First Name --> */}
-                  <div className="sm:col-span-1">
-                    <Label>
-                      First Name<span className="text-error-500">*</span>
-                    </Label>
-                    <Input
-                      type="text"
-                      id="fname"
-                      name="fname"
-                      placeholder="Enter your first name"
-                    />
-                  </div>
-                  {/* <!-- Last Name --> */}
-                  <div className="sm:col-span-1">
-                    <Label>
-                      Last Name<span className="text-error-500">*</span>
-                    </Label>
-                    <Input
-                      type="text"
-                      id="lname"
-                      name="lname"
-                      placeholder="Enter your last name"
-                    />
-                  </div>
+                {/* <!-- 이름 --> */}
+                <div>
+                  <Label>
+                    이름<span className="text-error-500">*</span>
+                  </Label>
+                  <Input
+                    type="text"
+                    id="name"
+                    name="name"
+                    placeholder="이름을 입력해주세요"
+                  />
+                </div>
+                {/* <!-- 전화번호 --> */}
+                <div>
+                  <Label>
+                    전화번호<span className="text-error-500">*</span>
+                  </Label>
+                  <Input
+                    type="tel"
+                    id="phone_number"
+                    name="phone_number"
+                    placeholder="전화번호를 입력해주세요 (예: 010-1234-5678)"
+                  />
                 </div>
                 {/* <!-- Email --> */}
                 <div>
@@ -126,7 +124,7 @@ export default function SignUpForm() {
                 {/* <!-- Password --> */}
                 <div>
                   <Label>
-                    Password<span className="text-error-500">*</span>
+                    비밀번호<span className="text-error-500">*</span>
                   </Label>
                   <div className="relative">
                     <Input
@@ -144,6 +142,18 @@ export default function SignUpForm() {
                       )}
                     </span>
                   </div>
+                </div>
+                {/* <!-- 추천인 --> */}
+                <div>
+                  <Label>
+                    추천인<span className="text-error-500">*</span>
+                  </Label>
+                  <Input
+                    type="text" // 추천인은 이메일 형식이 아닐 수 있으므로 text로 변경
+                    id="referrer"
+                    name="referrer"
+                    placeholder="추천인 ID 또는 코드를 입력해주세요"
+                  />
                 </div>
                 {/* <!-- Checkbox --> */}
                 <div className="flex items-center gap-3">

@@ -1,5 +1,7 @@
 import { Pool } from 'pg';
 
+console.log("POSTGRES_URL from env:", process.env.POSTGRES_URL);
+
 export const pool = new Pool({
   connectionString: process.env.POSTGRES_URL,
 });

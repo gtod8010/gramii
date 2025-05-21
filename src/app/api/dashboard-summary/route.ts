@@ -89,29 +89,22 @@ export async function GET(request: NextRequest) {
       // API 쿼리에서 "Partial"과 "Cancelled"를 사용했으므로, 이를 프론트엔드에서 사용하는 "canceled" 등으로 맞춰야 할 수 있음
       // 현재 RecentOrderStatusChart.tsx는 canceled, refunded를 사용함. API 쿼리 컬럼명과 일치시키거나 여기서 매핑 필요.
       // 우선 API의 컬럼명(대소문자 구분)을 그대로 사용하고, 필요시 프론트엔드에서 조정.
-      partial: r.Partial, // 또는  props에 맞게 다른 이름으로 변경 필요
-      canceled: r.Cancelled, // API는 Cancelled, 프론트엔드는 canceled
-      refunded: 0, // API 쿼리에 Refunded가 없으므로 기본값 0 또는 쿼리 수정 필요
-      // API 쿼리에서 반환하는 컬럼명은 "Pending", "Processing", "Completed", "Partial", "Cancelled" 입니다.
-      // RecentOrderStatusChart.tsx 에서는 pending, processing, completed, canceled, refunded 를 사용합니다.
-      // 여기서 이름을 맞춰줍니다.
     }));
 
     // 최종 recentOrderStatusChartData는 ChartDataPoint[] 형태가 되어야 함.
     const finalChartData = chartDataResult.rows.map(r => {
       const date = new Date(r.order_date).toLocaleDateString('ko-KR', { month: '2-digit', day: '2-digit' });
       // API 결과의 컬럼 이름은 대문자로 시작 (e.g., r.Pending).
-      // RecentOrderStatusChartProps 는 소문자로 시작하는 필드를 기대 (e.g., pending).
+      // 프론트엔드 컴포넌트에서 소문자 필드를 기대한다고 가정하고 변환합니다.
       return {
         date: date,
         pending: r.Pending || 0,
         processing: r.Processing || 0,
         completed: r.Completed || 0,
-        // 'Partial' 상태를 어떻게 처리할지 결정 필요. 여기서는 일단 0으로.
-        // 'canceled'와 'Cancelled' 이름 불일치 해결
-        canceled: r.Cancelled || 0,
+        partial: r.Partial || 0, // Partial 상태 추가
+        cancelled: r.Cancelled || 0, // API는 Cancelled, 프론트엔드는 canceled -> cancelled로 통일
         // 'refunded'는 현재 쿼리에 없으므로 0으로 설정. 필요시 쿼리 수정.
-        refunded: 0, // 예시로 0을 할당. 실제 데이터가 있다면 해당 컬럼 사용.
+        refunded: 0, 
       };
     });
 

@@ -11,17 +11,15 @@ const statusColors: { [key: string]: string } = {
   Completed: 'bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100',
   Partial: 'bg-purple-100 text-purple-800 dark:bg-purple-800 dark:text-purple-100',
   Cancelled: 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200',
-  Refunded: 'bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-100',
 };
 
 // API의 order_status 값과 프론트엔드 표시 이름 매핑
-const statusDisplayNames: { [key: string]: string } = {
+export const statusDisplayNames: { [key: string]: string } = {
   Pending: '대기중',
   Processing: '처리중',
   Completed: '완료됨',
   Partial: '부분완료됨',
   Cancelled: '취소됨',
-  Refunded: '환불됨', // API가 Refunded 상태를 반환할 경우를 위해 추가
 };
 
 // API 응답으로 받는 주문 데이터 타입 (API 응답 키와 일치하도록 수정)
@@ -53,7 +51,7 @@ const OrderHistoryPage = () => {
   const [totalOrders, setTotalOrders] = useState(0);
   const limit = 10; // 페이지 당 항목 수
 
-  const filters = ['전체', '대기중', '처리중', '완료됨', '부분완료됨', '취소됨', '환불됨'];
+  const filters = ['전체', '대기중', '처리중', '완료됨', '부분완료됨', '취소됨'];
 
   // API 호출을 위한 필터 값 변환 (예: '대기중' -> 'Pending')
   const getApiFilterStatus = (filterDisplayName: string): string | undefined => {
@@ -125,10 +123,10 @@ const OrderHistoryPage = () => {
   }, [activeFilter]);
 
   const getDisplayStatusText = (order: Order): string => {
-    const statusKey = order.status as string; // order.status를 string으로 단언
+    const statusKey = order.status as string; 
     const displayName = statusDisplayNames[statusKey];
-    // rawStatusText가 있다면 우선 사용, 없다면 displayName, 그것도 없다면 statusKey 값 그대로 사용
-    return order.rawStatusText || displayName || statusKey;
+    // displayName이 있으면 displayName을, 없으면 원래 statusKey (영문)를 반환
+    return displayName || statusKey; 
   };
   
   const getStatusColorClass = (order: Order): string => {
@@ -225,10 +223,10 @@ const OrderHistoryPage = () => {
                           <span className="font-semibold text-gray-800 dark:text-gray-100">{order.serviceName}</span>
                         </div>
                         <p><span className="font-medium">주문 링크 |</span> <a href={order.link} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline dark:text-blue-400 break-all">{order.link}</a></p>
-                        <p><span className="font-medium">주문 수량 |</span> {order.orderQuantity.toLocaleString()}</p>
-                        <p><span className="font-medium">주문 금액 |</span> ₩{order.orderPrice.toLocaleString()}</p>
-                        {order.initialQuantity !== undefined && <p><span className="font-medium">시작 수량 |</span> {order.initialQuantity.toLocaleString()}</p>}
-                        {order.remainingQuantity !== undefined && <p><span className="font-medium">남은 수량 |</span> {order.remainingQuantity.toLocaleString()}</p>}
+                        <p><span className="font-medium">주문 수량 |</span> {(order.initialQuantity ?? 0).toLocaleString()}</p>
+                        <p><span className="font-medium">주문 금액 |</span> ₩{(order.orderPrice ?? 0).toLocaleString()}</p>
+                        {order.initialQuantity !== undefined && <p><span className="font-medium">시작 수량 |</span> {(order.initialQuantity ?? 0).toLocaleString()}</p>}
+                        {order.remainingQuantity !== undefined && <p><span className="font-medium">남은 수량 |</span> {(order.remainingQuantity ?? 0).toLocaleString()}</p>}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
                         {new Date(order.orderedAt).toLocaleString('ko-KR')} {/* 날짜 포맷팅 */}

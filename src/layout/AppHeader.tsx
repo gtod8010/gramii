@@ -28,6 +28,13 @@ const AppHeader: React.FC = () => {
   const { user, isLoading } = useUser();
   const currentPageTitle = pageTitles[pathname] || '대시보드';
 
+  console.log("AppHeader User Debug:", { 
+    isLoading, 
+    user, 
+    role: user?.role, 
+    points: user?.points 
+  });
+
   const handleToggleSidebar = () => {
     if (window.innerWidth >= 1024) { // lg 브레이크포인트 기준
       toggleSidebar();
@@ -62,18 +69,18 @@ const AppHeader: React.FC = () => {
           </h1>
         </div>
 
-        {/* 오른쪽 영역: 테마 토글, 알림, 잔액, 사용자 드롭다운 */}
+        {/* 오른쪽 영역: 테마 토글, 사용자 드롭다운 */}
         <div className="flex items-center gap-3 sm:gap-4">
           <ThemeToggleButton />
-          <NotificationDropdown />
-          {!isLoading && user && user.points !== undefined && (
-            <div className="flex items-center gap-2">
-              <WalletIcon className="h-6 w-6 text-gray-600 dark:text-gray-400" /> 
+          {/* 예치금 잔액 표시 (UserDropdown 왼쪽, ThemeToggleButton 오른쪽) 부분 제거 */}
+          {/* {!isLoading && user && user.role === 'user' && user.points !== undefined && (
+            <div className="flex items-center gap-1">
+              <WalletIcon className="h-5 w-5 text-gray-500 dark:text-gray-400" /> 
               <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
                 {user.points.toLocaleString()} P
               </span>
             </div>
-          )}
+          )} */}
           <UserDropdown />
         </div>
       </div>

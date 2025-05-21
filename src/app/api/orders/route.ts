@@ -114,10 +114,10 @@ export async function GET(request: Request) {
         o.id, 
         s.name AS "serviceName", 
         o.link, 
-        o.quantity AS "orderQuantity", 
+        o.quantity AS "initialQuantity", 
+        o.processed_quantity AS "processedQuantity",
+        (o.quantity - o.processed_quantity) AS "remainingQuantity",
         o.total_price AS "orderPrice", 
-        o.initial_quantity AS "initialQuantity", 
-        o.remaining_quantity AS "remainingQuantity", 
         o.created_at AS "orderedAt", 
         o.order_status AS status,
         o.order_status AS "rawStatusText" 
@@ -151,10 +151,10 @@ export async function GET(request: Request) {
     // 프론트엔드 Order 인터페이스와 키 이름을 맞추기 위해 가공
     const orders = result.rows.map(row => ({
       ...row,
-      // serviceName, orderQuantity 등 이미 SQL에서 별칭으로 맞췄으므로 추가 가공은 최소화
-      // orderedAt은 Date 객체로 변환하거나, 프론트엔드에서 필요에 따라 포맷팅
+      initialQuantity: parseInt(row.initialQuantity, 10), // DB에서 숫자로 오지만, sum() 등 집계함수 결과는 문자열일 수 있으므로 안전하게 parseInt
+      processedQuantity: parseInt(row.processedQuantity, 10),
+      remainingQuantity: parseInt(row.remainingQuantity, 10),
       orderedAt: new Date(row.orderedAt).toISOString(), 
-      // rawStatusText는 order_status와 동일하게 설정 (프론트에서 필요시 한글로 변환)
     }));
 
     return NextResponse.json({

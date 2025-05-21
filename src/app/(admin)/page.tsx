@@ -4,22 +4,19 @@ import React, { useState, useEffect } from 'react';
 import { Metadata } from 'next';
 import DashboardStatsCards from "@/components/dashboard/DashboardStatsCards";
 import RecentOrderStatusChart from "@/components/dashboard/RecentOrderStatusChart";
-import OrderStatusSummary from "@/components/dashboard/OrderStatusSummary";
+import DetailedOrderStatusSummary from "@/components/dashboard/DetailedOrderStatusSummary";
 import { useUser } from '@/hooks/useUser';
 
-// 차트 데이터 타입 정의
-interface ChartDataset {
-  Pending: number[];
-  Processing: number[];
-  Completed: number[];
-  Partial: number[];
-  Cancelled: number[];
-  // API에서 추가된 다른 상태들도 여기에 포함될 수 있음
-}
-
-interface RecentOrderStatusChartData {
-  labels: string[];
-  datasets: ChartDataset;
+// ChartDataPoint 인터페이스를 RecentOrderStatusChart.tsx에서 가져오거나 여기에 동일하게 정의
+// 여기서는 RecentOrderStatusChart.tsx의 정의를 따른다고 가정합니다.
+interface ChartDataPoint {
+  date: string;
+  pending: number;
+  processing: number;
+  completed: number;
+  partial: number;
+  canceled: number;
+  refunded: number;
 }
 
 interface DashboardSummaryData {
@@ -27,7 +24,7 @@ interface DashboardSummaryData {
   totalSpent: number;
   totalOrders: number;
   orderStatusSummary: Record<string, number>;
-  recentOrderStatusChartData: RecentOrderStatusChartData; // 차트 데이터 타입 추가
+  recentOrderStatusChartData: ChartDataPoint[]; // 타입을 ChartDataPoint 배열로 수정
 }
 
 const DashboardPage = () => {
@@ -94,10 +91,13 @@ const DashboardPage = () => {
         totalSpent={summaryData.totalSpent}
         totalOrders={summaryData.totalOrders}
       />
-      <div className="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-2">
-        <RecentOrderStatusChart chartData={summaryData.recentOrderStatusChartData} />
-        <OrderStatusSummary orderStatusSummary={summaryData.orderStatusSummary} />
+      <div className="mt-6 grid grid-cols-1 gap-6">
+        <RecentOrderStatusChart 
+          chartData={summaryData.recentOrderStatusChartData} 
+          orderStatusSummary={summaryData.orderStatusSummary}
+        />
       </div>
+      <DetailedOrderStatusSummary orderStatusSummary={summaryData.orderStatusSummary} />
     </>
   );
 };

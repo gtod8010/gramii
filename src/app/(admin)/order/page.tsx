@@ -382,7 +382,6 @@ export default function OrderPage() {
           </div>
         </div>
       </div>
-
       {/* 실시간 상담 버튼 (기존 UI 유지) */}
       <button className="fixed bottom-6 right-6 bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-4 rounded-full shadow-lg flex items-center" onClick={() => alert("실시간 상담 기능 구현 예정")}>
         <span role="img" aria-label="support" className="mr-2">🙋🏻‍♂️</span>

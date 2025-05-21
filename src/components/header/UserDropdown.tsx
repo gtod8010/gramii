@@ -59,26 +59,19 @@ export default function UserDropdown() {
     );
   }
 
-  const userInitials = user.name ? user.name.split(' ').map(n => n[0]).join('').toUpperCase() : "U";
-
   return (
     <div className="relative">
       <button
         onClick={toggleDropdown}
         className="flex items-center text-gray-700 dark:text-gray-400 dropdown-toggle"
       >
-        <div className="mr-3 overflow-hidden rounded-full h-11 w-11 bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
-          <span className="text-xl font-semibold text-gray-600 dark:text-gray-300">{userInitials}</span>
-          {/* <Image width={44} height={44} src="/images/user/owner.jpg" alt={user.name || "User"} className="object-cover" /> */}
-        </div>
-
-        <div>
+        <div className="text-left">
           <span className="block mr-1 font-medium text-theme-sm">
             {user.name || '사용자'}
           </span>
-          {user.points !== undefined && (
+          {user.role === 'user' && user.points !== undefined && (
             <span className="block mr-1 text-xs text-gray-500 dark:text-gray-400">
-              {user.points.toLocaleString()} P
+              예치금: {user.points.toLocaleString()} P
             </span>
           )}
         </div>
@@ -115,7 +108,7 @@ export default function UserDropdown() {
           <span className="mt-0.5 block text-theme-xs text-gray-500 dark:text-gray-400">
             {user.email}
           </span>
-          {user.points !== undefined && (
+          {user.role === 'user' && user.points !== undefined && (
             <span className="mt-0.5 block text-theme-xs text-brand-500 dark:text-brand-400">
               보유 포인트: {user.points.toLocaleString()} P
             </span>
