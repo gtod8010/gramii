@@ -87,27 +87,27 @@ export default function SignUpForm() {
               <div className="space-y-5">
                 {/* <!-- 이름 --> */}
                 <div>
-                  <Label>
+                    <Label>
                     이름<span className="text-error-500">*</span>
-                  </Label>
-                  <Input
-                    type="text"
+                    </Label>
+                    <Input
+                      type="text"
                     id="name"
                     name="name"
                     placeholder="이름을 입력해주세요"
-                  />
-                </div>
+                    />
+                  </div>
                 {/* <!-- 전화번호 --> */}
                 <div>
-                  <Label>
+                    <Label>
                     전화번호<span className="text-error-500">*</span>
-                  </Label>
-                  <Input
+                    </Label>
+                    <Input
                     type="tel"
                     id="phone_number"
                     name="phone_number"
                     placeholder="전화번호를 입력해주세요 (예: 010-1234-5678)"
-                  />
+                    />
                 </div>
                 {/* <!-- Email --> */}
                 <div>

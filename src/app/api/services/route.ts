@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { pool } from '@/lib/db';
+import { getUserIdFromRequest } from '@/lib/auth'; // 가상의 인증 유틸리티 함수
 
 const serviceSchema = z.object({
   name: z.string().min(1, { message: '서비스 이름을 입력해주세요.' }).max(255),
@@ -25,38 +26,105 @@ const serviceSchema = z.object({
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const serviceTypeId = searchParams.get('serviceTypeId');
+  const limit = searchParams.get('limit');
+
+  let userId: number | null = null;
+  try {
+    userId = await getUserIdFromRequest(request); 
+  } catch (authError) {
+    console.warn("인증되지 않은 사용자의 서비스 목록 요청 또는 인증 오류:", authError);
+  }
 
   try {
-    let query = 'SELECT s.*, st.name as service_type_name, st.category_id, sc.name as category_name FROM services s JOIN service_types st ON s.service_type_id = st.id JOIN service_categories sc ON st.category_id = sc.id';
-    const queryParams = [];
+    let selectClauses = [
+      's.*',
+      'st.name as service_type_name',
+      'sc.name as category_name',
+      's.special_id',
+      'sp.name as special_name'
+    ];
+    let joinClause = `
+      FROM services s
+      JOIN service_types st ON s.service_type_id = st.id
+      JOIN service_categories sc ON st.category_id = sc.id
+      LEFT JOIN specials sp ON s.special_id = sp.id
+    `;
+    
+    const queryParams: any[] = [];
+    let paramIndex = 1;
 
-    if (serviceTypeId) {
-      query += ' WHERE s.service_type_id = $1';
-      queryParams.push(Number(serviceTypeId));
-      query += ' ORDER BY s.id ASC'; 
+    if (userId) {
+      selectClauses.push('usp.custom_price');
+      joinClause += ` 
+        LEFT JOIN user_service_prices usp 
+          ON s.id = usp.service_id AND usp.user_id = $${paramIndex++}
+      `;
+      queryParams.push(userId);
     } else {
-      query += ' ORDER BY sc.name ASC, st.name ASC, s.id ASC';
+      selectClauses.push('NULL AS custom_price');
     }
 
+    let query = `SELECT ${selectClauses.join(', ')} ${joinClause}`;
+
+    // WHERE 절 구성
+    const whereConditions: string[] = [];
+    if (serviceTypeId) {
+      whereConditions.push(`s.service_type_id = $${queryParams.length + 1}`); 
+      queryParams.push(Number(serviceTypeId));
+    }
+
+    if (whereConditions.length > 0) {
+      query += ` WHERE ${whereConditions.join(' AND ')}`;
+    }
+
+    // ORDER BY 절 구성
+    if (serviceTypeId) {
+      query += ` ORDER BY s.id ASC`;
+    } else {
+      query += ` ORDER BY sc.name ASC, st.name ASC, s.id ASC`;
+    }
+
+    if (limit) {
+      const limitValue = parseInt(limit, 10);
+      if (!isNaN(limitValue) && limitValue > 0) {
+        query += ` LIMIT $${queryParams.length + 1}`;
+        queryParams.push(limitValue);
+      }
+    }
+    
+    // console.log("Executing query:", query, queryParams); // 디버깅용 로그
     const result = await pool.query(query, queryParams);
-    return NextResponse.json(result.rows);
+    
+    // 후처리 로직은 custom_price가 항상 존재하므로 (NULL 또는 값) 더 이상 필요하지 않을 수 있음
+    // 하지만, 만약의 경우를 대비해 유지하거나, row.custom_price가 undefined인 경우만 처리하도록 수정 가능
+    const servicesWithCustomPrice = result.rows.map(row => ({
+      ...row,
+      // custom_price는 이제 쿼리에서 NULL AS custom_price로 처리되므로 항상 존재
+      // 다만, DB에서 명시적으로 NULL이 아닌 undefined를 반환하는 경우가 있다면 아래 로직 유효
+      custom_price: row.custom_price === undefined ? null : row.custom_price,
+      special_name: row.special_name === undefined ? null : row.special_name,
+      special_id: row.special_id === undefined ? null : row.special_id
+    }));
+
+    return NextResponse.json(servicesWithCustomPrice);
+
   } catch (error) {
     console.error('Error fetching services:', error);
-    return NextResponse.json({ message: '서비스 조회 중 오류가 발생했습니다.' }, { status: 500 });
+    return NextResponse.json({ message: '서비스 조회 중 오류가 발생했습니다.', error: (error as Error).message }, { status: 500 });
   }
 }
 
 export async function POST(req: Request) {
   try {
     const {
-      categoryId,
-      newCategoryName,
-      serviceTypeId,
-      newServiceTypeName,
-      serviceName,
-      minOrderQuantity,
-      maxOrderQuantity,
-      pricePerUnit,
+      category_id: categoryId,
+      new_category_name: newCategoryName,
+      service_type_id: serviceTypeId,
+      new_service_type_name: newServiceTypeName,
+      service_name: serviceName,
+      min_order_quantity: minOrderQuantity,
+      max_order_quantity: maxOrderQuantity,
+      price_per_unit: pricePerUnit,
       description,
     } = await req.json();
 
@@ -67,11 +135,10 @@ export async function POST(req: Request) {
       !serviceName ||
       minOrderQuantity === undefined ||
       maxOrderQuantity === undefined ||
-      pricePerUnit === undefined ||
-      !description
+      pricePerUnit === undefined
     ) {
       return NextResponse.json(
-        { message: '필수 입력값을 모두 제공해야 합니다. (카테고리 정보, 서비스 타입 정보, 서비스명, 수량, 가격, 설명)' },
+        { message: '필수 입력값을 모두 제공해야 합니다. (카테고리 정보, 서비스 타입 정보, 서비스명, 수량, 가격)' },
         { status: 400 }
       );
     }
@@ -79,10 +146,10 @@ export async function POST(req: Request) {
     if (newCategoryName && typeof newCategoryName !== 'string') {
         return NextResponse.json( { message: '새 카테고리 이름은 문자열이어야 합니다.' },{ status: 400 });
     }
-    if (categoryId !== undefined && typeof categoryId !== 'number') {
+    if (!newCategoryName && categoryId !== undefined && typeof categoryId !== 'number') {
         return NextResponse.json( { message: '카테고리 ID는 숫자여야 합니다.' }, { status: 400 });
     }
-    if (serviceTypeId !== undefined && typeof serviceTypeId !== 'number') {
+    if (!newServiceTypeName && serviceTypeId !== undefined && typeof serviceTypeId !== 'number') {
         return NextResponse.json( { message: '서비스 타입 ID는 숫자여야 합니다.' }, { status: 400 });
     }
     if (newServiceTypeName && typeof newServiceTypeName !== 'string') {

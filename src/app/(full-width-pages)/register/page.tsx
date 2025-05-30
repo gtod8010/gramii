@@ -10,7 +10,7 @@ export default function RegisterPage() {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [referrerEmail, setReferrerEmail] = useState('');
+  const [referrerCode, setReferrerCode] = useState('');
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -36,9 +36,9 @@ export default function RegisterPage() {
     const payload = {
       name,
       email,
-      phone_number: phoneNumber || undefined,
+      phone_number: phoneNumber,
       password,
-      referrer_email: referrerEmail || undefined,
+      referrer_code: referrerCode,
     };
 
     console.log('Register attempt with:', payload);
@@ -180,18 +180,19 @@ export default function RegisterPage() {
             </div>
 
             <div>
-              <label htmlFor="referrerEmail" className={labelClass}>
-                추천인 이메일 <span className="text-xs text-gray-500 dark:text-gray-400">(선택)</span>
+              <label htmlFor="referrerCode" className={labelClass}>
+                추천인 코드 <span className="text-xs text-gray-500 dark:text-gray-400">(선택)</span>
               </label>
               <input
-                id="referrerEmail"
-                name="referrerEmail"
-                type="email"
+                id="referrerCode"
+                name="referrerCode"
+                type="text"
                 autoComplete="off"
-                value={referrerEmail}
-                onChange={(e) => setReferrerEmail(e.target.value)}
+                value={referrerCode}
+                onChange={(e) => setReferrerCode(e.target.value)}
                 className={inputClass}
-                placeholder="referrer@example.com"
+                placeholder="추천인 코드 (6자리, 선택)"
+                maxLength={6}
               />
             </div>
             

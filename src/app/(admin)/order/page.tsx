@@ -8,6 +8,7 @@ interface SubServiceItem {
   id: string; // API에서 number로 온다면 string으로 변환하거나, 타입을 number로 변경
   name: string;
   pricePerUnit: number;
+  custom_price?: number | null;
   minOrder: number;
   maxOrder: number;
   description: string;
@@ -33,6 +34,7 @@ interface ApiService {
   category_id: number; // 주문 페이지에서는 카테고리 ID도 필요
   description?: string | null;
   price_per_unit?: number | undefined;
+  custom_price?: number | null;
   min_order_quantity?: number | undefined;
   max_order_quantity?: number | undefined;
   is_active: boolean;
@@ -67,14 +69,27 @@ export default function OrderPage() {
     setErrorServices(null);
     console.log('[OrderPage] Fetching services...');
     try {
-      const response = await fetch('/api/services');
+      // API 요청 시 X-Test-User-Id 헤더를 설정해야 custom_price가 제대로 반환될 수 있습니다.
+      // 예시: const headers = { 'X-Test-User-Id': '1' }; // 사용자 ID 1로 테스트
+      // const response = await fetch('/api/services', { headers });
+      const response = await fetch('/api/services'); // 현재는 헤더 없이 호출
+      
       if (!response.ok) {
         const errorData = await response.json();
         console.error('[OrderPage] Failed to fetch services:', errorData);
         throw new Error(errorData.message || '서비스 목록을 불러오는데 실패했습니다.');
       }
       const apiServices: ApiService[] = await response.json();
-      console.log('[OrderPage] Raw API Services received:', JSON.parse(JSON.stringify(apiServices)));
+      // --- API 응답 데이터 확인 로그 추가 ---
+      console.log('[OrderPage] Raw API Services received (immediately after fetch):', JSON.parse(JSON.stringify(apiServices)));
+      // 각 서비스의 custom_price 값 확인
+      if (apiServices.length > 0) {
+        console.log('[OrderPage] Checking custom_price in first few services:');
+        apiServices.slice(0, 5).forEach(s => {
+          console.log(`  Service ID: ${s.id}, Name: ${s.name}, Base Price: ${s.price_per_unit}, Custom Price: ${s.custom_price}`);
+        });
+      }
+      // --- 로그 추가 완료 ---
 
       const activeServices = apiServices.filter(service => service.is_active);
       console.log('[OrderPage] Active Services (filtered):', JSON.parse(JSON.stringify(activeServices)));
@@ -127,17 +142,23 @@ export default function OrderPage() {
           console.log(`[OrderPage] Found existing service type for ID ${serviceTypeIdStr} (Name: ${serviceTypeName}) under category '${currentCategory.name}'`);
         }
 
+        // service.custom_price가 여기에서도 유효한지 확인
+        if (index < 5) { // 처음 5개 서비스에 대해서만 로그 출력 (과도한 로그 방지)
+            console.log(`[OrderPage] Structuring service ${service.id} - custom_price: ${service.custom_price}`);
+        }
+
         currentServiceType.subServices.push({
           id: String(service.id),
           name: service.name,
           pricePerUnit: service.price_per_unit || 0,
+          custom_price: service.custom_price, // custom_price 할당
           minOrder: service.min_order_quantity || 1,
           maxOrder: service.max_order_quantity || 10000,
           description: service.description || '설명이 없습니다.',
         });
       });
       
-      console.log('[OrderPage] Final structuredData to be set to state:', JSON.parse(JSON.stringify(structuredData)));
+      console.log('[OrderPage] Final structuredData to be set to state (sample):', JSON.parse(JSON.stringify(structuredData.slice(0,1))));
       setServiceCategories(structuredData);
     } catch (err: any) {
       console.error('[OrderPage] Error in fetchAndStructureServices:', err);
@@ -215,7 +236,10 @@ export default function OrderPage() {
     if (selectedServiceDetails && orderQuantity) {
       const quantityNum = parseInt(orderQuantity, 10);
       if (!isNaN(quantityNum) && quantityNum > 0) {
-        const cost = selectedServiceDetails.pricePerUnit * quantityNum;
+        const priceToUse = selectedServiceDetails.custom_price !== null && selectedServiceDetails.custom_price !== undefined 
+                           ? selectedServiceDetails.custom_price 
+                           : selectedServiceDetails.pricePerUnit;
+        const cost = priceToUse * quantityNum;
         setTotalCost(cost);
       } else {
         setTotalCost(0);
@@ -317,7 +341,16 @@ export default function OrderPage() {
             <label htmlFor="subService" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">세부 서비스를 선택해주세요.</label>
             <select id="subService" name="subService" value={selectedSubServiceId} onChange={handleSubServiceChange} disabled={!selectedServiceTypeId || availableSubServices.length === 0} className="mt-1 block w-full py-2 px-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:text-white disabled:bg-gray-50 dark:disabled:bg-gray-700">
               <option value="">세부 서비스 선택</option>
-              {availableSubServices.map(sub => (<option key={sub.id} value={sub.id}>{sub.name} (1개당: {sub.pricePerUnit}원, 주문범위: {sub.minOrder}~{sub.maxOrder})</option>))} 
+              {availableSubServices.map(sub => {
+                const displayPrice = sub.custom_price !== null && sub.custom_price !== undefined && sub.custom_price < sub.pricePerUnit
+                  ? `${sub.custom_price.toLocaleString()}P (할인)`
+                  : `${sub.pricePerUnit.toLocaleString()}P`;
+                return (
+                  <option key={sub.id} value={sub.id}>
+                    {sub.name} (1개당: {displayPrice}, 주문범위: {sub.minOrder}~{sub.maxOrder})
+                  </option>
+                );
+              })} 
             </select>
           </div>
 
@@ -332,7 +365,7 @@ export default function OrderPage() {
           </div>
           
           <div className="text-lg font-semibold text-gray-800 dark:text-white">
-            총 비용: ₩ <span id="total-cost">{totalCost.toLocaleString()}</span>
+            총 비용: <span className="text-indigo-600 dark:text-indigo-400">{totalCost.toLocaleString()} P</span>
           </div>
 
           <div className="flex items-center">
@@ -346,11 +379,11 @@ export default function OrderPage() {
             disabled={isSubmitting || !termsAgreement || !selectedSubServiceId || orderQuantity === '' || serviceLink === ''}
             className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-md focus:outline-none focus:shadow-outline disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {isSubmitting ? '주문 처리 중...' : `₩${totalCost.toLocaleString()} 결제하기`}
+            {isSubmitting ? '주문 처리 중...' : `${totalCost.toLocaleString()} P 결제하기`}
           </button>
         </div>
 
-        {/* 오른쪽 패널 (선택한 서비스 정보 표시 - 기존 로직 유지) */}
+        {/* 오른쪽 패널 (선택한 서비스 정보 표시) */}
         <div className="md:col-span-1 bg-white dark:bg-gray-800 shadow-lg rounded-lg p-6 space-y-4">
           <h2 className="text-xl font-semibold text-gray-700 dark:text-gray-200">선택한 서비스 정보</h2>
           <div>
@@ -360,15 +393,33 @@ export default function OrderPage() {
           <div className="grid grid-cols-3 gap-4 text-sm">
             <div>
               <h3 className="font-medium text-gray-500 dark:text-gray-400">최소 주문 수량</h3>
-              <p className="mt-1 text-gray-900 dark:text-gray-100" id="min-order-display">{selectedServiceDetails?.minOrder?.toString() || '-'}</p>
+              <p className="mt-1 text-gray-900 dark:text-gray-100" id="min-order-display">{selectedServiceDetails?.minOrder?.toLocaleString() || '-'}</p>
             </div>
             <div>
               <h3 className="font-medium text-gray-500 dark:text-gray-400">최대 주문 수량</h3>
-              <p className="mt-1 text-gray-900 dark:text-gray-100" id="max-order-display">{selectedServiceDetails?.maxOrder?.toString() || '-'}</p>
+              <p className="mt-1 text-gray-900 dark:text-gray-100" id="max-order-display">{selectedServiceDetails?.maxOrder?.toLocaleString() || '-'}</p>
             </div>
             <div>
               <h3 className="font-medium text-gray-500 dark:text-gray-400">1개당 가격</h3>
-              <p className="mt-1 text-sm text-gray-900 dark:text-gray-100" id="price-per-unit-display">{selectedServiceDetails?.pricePerUnit ? `₩${selectedServiceDetails.pricePerUnit.toLocaleString()}` : '-'}</p>
+              {selectedServiceDetails ? (
+                selectedServiceDetails.custom_price !== null && 
+                selectedServiceDetails.custom_price !== undefined && 
+                selectedServiceDetails.custom_price < selectedServiceDetails.pricePerUnit ? (
+                  <div className="mt-1 text-sm">
+                    <span className="text-red-500 font-semibold">{selectedServiceDetails.custom_price.toLocaleString()} P</span>
+                    <span className="ml-2 text-xs text-gray-500 dark:text-gray-400">
+                      (기본: {selectedServiceDetails.pricePerUnit.toLocaleString()} P - 
+                      {(selectedServiceDetails.pricePerUnit - selectedServiceDetails.custom_price).toLocaleString()} P 할인)
+                    </span>
+                  </div>
+                ) : (
+                  <p className="mt-1 text-sm text-gray-900 dark:text-gray-100">
+                    {selectedServiceDetails.pricePerUnit.toLocaleString()} P
+                  </p>
+                )
+              ) : (
+                <p className="mt-1 text-sm text-gray-900 dark:text-gray-100">-</p>
+              )}
             </div>
           </div>
           <div>

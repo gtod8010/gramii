@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { query } from '@/lib/db';
+import { query, pool } from '@/lib/db';
 import { z } from 'zod';
 
 // 카테고리 수정을 위한 스키마 (생성과 유사하지만 모든 필드가 옵셔널일 수 있음)
@@ -88,30 +88,50 @@ export async function PUT(request: Request, { params }: { params: { id: string }
 
 // 특정 카테고리 삭제 (DELETE)
 export async function DELETE(request: Request, { params }: { params: { id: string } }) {
+  const categoryIdParam = params.id;
+  const client = await pool.connect(); 
   try {
-    const categoryId = parseInt(params.id, 10);
+    const categoryId = parseInt(categoryIdParam, 10);
     if (isNaN(categoryId)) {
       return NextResponse.json({ message: '유효하지 않은 카테고리 ID입니다.' }, { status: 400 });
     }
 
-    // TODO: 해당 카테고리에 속한 서비스 타입이나 서비스가 있는지 확인하고, 있으면 삭제 못하게 막는 로직 추가 (참조 무결성)
-    // 예: SELECT COUNT(*) FROM service_types WHERE category_id = $1
-    // 이 결과가 0보다 크면 삭제를 막거나, 사용자에게 경고 후 연관된 항목도 함께 삭제할지 선택하도록 할 수 있습니다.
+    await client.query('BEGIN');
 
-    const result = await query('DELETE FROM service_categories WHERE id = $1 RETURNING *', [categoryId]);
+    const serviceTypesResult = await client.query(
+      'SELECT id FROM service_types WHERE category_id = $1',
+      [categoryId]
+    );
+    const serviceTypeIds = serviceTypesResult.rows.map(st => st.id);
+
+    if (serviceTypeIds.length > 0) {
+      const servicePlaceholders = serviceTypeIds.map((_, i) => `$${i + 1}`).join(',');
+      await client.query(
+        `DELETE FROM services WHERE service_type_id IN (${servicePlaceholders})`,
+        serviceTypeIds
+      );
+
+      await client.query(
+        'DELETE FROM service_types WHERE category_id = $1',
+        [categoryId]
+      );
+    }
+
+    const result = await client.query('DELETE FROM service_categories WHERE id = $1 RETURNING *', [categoryId]);
 
     if (result.rowCount === 0) {
+      await client.query('ROLLBACK');
       return NextResponse.json({ message: '삭제할 카테고리를 찾을 수 없습니다.' }, { status: 404 });
     }
 
-    return NextResponse.json({ message: '카테고리가 성공적으로 삭제되었습니다.', deletedCategory: result.rows[0] });
+    await client.query('COMMIT');
+
+    return NextResponse.json({ message: '카테고리 및 관련 하위 항목들이 성공적으로 삭제되었습니다.', deletedCategory: result.rows[0] });
   } catch (error: any) {
-    console.error(`Error deleting category ${params.id}:`, error);
-    // PostgreSQL 참조 무결성 오류(foreign key constraint) 등을 여기서 처리할 수 있습니다.
-    // 예를 들어, error.code === '23503' (foreign_key_violation)
-    if (error.code === '23503') {
-        return NextResponse.json({ message: '해당 카테고리를 사용하는 서비스 타입 또는 서비스가 존재하여 삭제할 수 없습니다.'}, { status: 409 });
-    }
+    await client.query('ROLLBACK');
+    console.error(`Error deleting category ${categoryIdParam} and its dependencies:`, error);
     return NextResponse.json({ message: '카테고리 삭제 중 오류가 발생했습니다.', error: String(error) }, { status: 500 });
+  } finally {
+    client.release();
   }
 } 

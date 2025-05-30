@@ -69,7 +69,7 @@ const RecentOrderStatusChart: React.FC<RecentOrderStatusChartProps> = ({ chartDa
       axisTicks: { show: false }
     },
     yaxis: {
-      labels: { 
+      labels: {
         style: { colors: '#6b7280' },
         formatter: (value) => { return value ? value.toFixed(0) : '0'; }
       }
@@ -128,7 +128,7 @@ const RecentOrderStatusChart: React.FC<RecentOrderStatusChartProps> = ({ chartDa
               label: '총 주문',
               formatter: function (w) {
                 return w.globals.seriesTotals.reduce((a: number, b: number) => a + b, 0) + '건';
-              }
+      }
             }
           }
         }
@@ -142,10 +142,10 @@ const RecentOrderStatusChart: React.FC<RecentOrderStatusChartProps> = ({ chartDa
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
         <div>
           <h4 className="text-md font-medium text-gray-700 dark:text-gray-300 mb-2">주간 주문 상태 (건)</h4>
-          {chartData && chartData.length > 0 ? (
+      {chartData && chartData.length > 0 ? (
             <ReactApexChart options={barChartOptions} series={barChartSeries} type="bar" height={350} />
-          ) : (
-            <div className="flex items-center justify-center h-[350px]">
+      ) : (
+        <div className="flex items-center justify-center h-[350px]">
               <p className="text-gray-500">주간 주문 데이터가 없습니다.</p>
             </div>
           )}
@@ -157,8 +157,8 @@ const RecentOrderStatusChart: React.FC<RecentOrderStatusChartProps> = ({ chartDa
           ) : (
             <div className="flex items-center justify-center h-[350px]">
               <p className="text-gray-500">주문 상태 요약 데이터가 없습니다.</p>
-            </div>
-          )}
+        </div>
+      )}
         </div>
       </div>
     </div>

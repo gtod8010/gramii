@@ -10,6 +10,7 @@ interface User {
   phone_number?: string;
   role: 'user' | 'admin';
   points?: number; // points 필드 추가 (옵셔널)
+  admin_referral_code?: string; // 추천인 코드 필드 추가
   // DB에 있는 다른 필드들도 필요에 따라 추가 가능
 }
 

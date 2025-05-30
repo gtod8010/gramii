@@ -1,54 +1,89 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { ChevronLeftIcon, ArrowRightIcon } from '@/icons';
 import RechargeModal from '@/components/recharge/RechargeModal';
 
+// deposit_requests 테이블의 구조에 맞게 인터페이스 수정
 interface RechargeHistoryItem {
-  id: string;
-  paymentId: string;
-  method: string;
+  id: number;
+  paymentMethod: string; // API에서 '무통장입금'으로 고정 또는 다른 값
   amount: number;
-  date: string;
-  status?: string; // 예시 이미지에는 없지만, 상태가 있을 수 있음
+  status: string; // 'pending', 'completed', 'failed' 등
+  depositDate: string; // requested_at (요청일시)
+  // depositorName?: string; // 필요하다면 추가 (API 응답에 포함되어야 함)
 }
 
-const mockRechargeHistory: RechargeHistoryItem[] = [
-  { id: '1', paymentId: '1743217494', method: '무통장', amount: 5000, date: '2025-05-12 15:43:15' },
-  { id: '2', paymentId: '1688954334', method: '무통장', amount: 50000, date: '2025-05-12 15:43:15' },
-  { id: '3', paymentId: '1688713638', method: '무통장', amount: 20000, date: '2025-05-12 15:43:15' },
-  { id: '4', paymentId: '1674112819', method: '무통장', amount: 4000, date: '2025-05-12 15:43:15' },
-  { id: '5', paymentId: '1674112541', method: '무통장', amount: 3500, date: '2025-05-12 15:43:15' },
-  // 추가 데이터 예시 (페이지네이션 확인용)
-  { id: '6', paymentId: '1674112542', method: '무통장', amount: 10000, date: '2025-05-13 10:20:00' },
-  { id: '7', paymentId: '1674112543', method: '카드결제', amount: 25000, date: '2025-05-13 11:30:00' },
-  { id: '8', paymentId: '1674112544', method: '무통장', amount: 5000, date: '2025-05-13 12:45:00' },
-  { id: '9', paymentId: '1674112545', method: '무통장', amount: 15000, date: '2025-05-13 14:00:00' },
-  { id: '10', paymentId: '1674112546', method: '카드결제', amount: 30000, date: '2025-05-13 15:15:00' },
-  { id: '11', paymentId: '1674112547', method: '무통장', amount: 7000, date: '2025-05-13 16:30:00' },
-];
+// API 응답 전체를 위한 인터페이스 (페이지네이션 정보 포함)
+interface DepositsApiResponse {
+  deposits: RechargeHistoryItem[];
+  totalPages: number;
+  currentPage: number;
+  totalDeposits: number;
+}
 
-const ITEMS_PER_PAGE = 5;
+const ITEMS_PER_PAGE = 5; // API 요청 시 limit으로 사용될 값 (필요시 API와 동기화)
 
 export default function RechargePage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [isRechargeModalOpen, setIsRechargeModalOpen] = useState(false);
 
-  const totalPages = Math.ceil(mockRechargeHistory.length / ITEMS_PER_PAGE);
-  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-  const endIndex = startIndex + ITEMS_PER_PAGE;
-  const currentItems = mockRechargeHistory.slice(startIndex, endIndex);
+  const [rechargeHistory, setRechargeHistory] = useState<RechargeHistoryItem[]>([]);
+  const [totalPages, setTotalPages] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [lastFetchedPage, setLastFetchedPage] = useState(0); // 새로고침을 위한 상태
+
+  const fetchRechargeHistory = useCallback(async (page: number) => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const response = await fetch(`/api/deposits?page=${page}&limit=${ITEMS_PER_PAGE}`);
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || '충전 내역을 불러오는데 실패했습니다.');
+      }
+      const data: DepositsApiResponse = await response.json();
+      setRechargeHistory(data.deposits);
+      setTotalPages(data.totalPages);
+      setCurrentPage(data.currentPage); // API에서 현재 페이지를 반환하므로 동기화
+    } catch (err: any) {
+      setError(err.message);
+      setRechargeHistory([]);
+      setTotalPages(0);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchRechargeHistory(currentPage);
+  }, [currentPage, fetchRechargeHistory, lastFetchedPage]); // lastFetchedPage 의존성 추가
 
   const handlePageChange = (page: number) => {
     if (page >= 1 && page <= totalPages) {
+      // fetchRechargeHistory가 currentPage를 사용하므로, 여기서는 setCurrentPage만 호출
       setCurrentPage(page);
     }
   };
 
+  // 날짜 포맷 함수
+  const formatDate = (isoString: string) => {
+    const date = new Date(isoString);
+    return date.toLocaleString('ko-KR', { 
+      year: 'numeric', 
+      month: '2-digit', 
+      day: '2-digit', 
+      hour: '2-digit', 
+      minute: '2-digit', 
+      second: '2-digit',
+      hour12: false 
+    }).replace(/\./g, '-').replace(/ /g, ' ').replace(/-(?=[^\-]*$)/, ' ');
+    // YYYY-MM-DD HH:mm:ss 형태로 근사하게 맞춤
+  };
+
   return (
     <div className="container mx-auto p-6 space-y-8">
-      <h1 className="text-3xl font-semibold text-gray-800 dark:text-white">충전하기</h1>
-
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* 왼쪽 섹션: 충전하기 및 내역 */}
         <div className="lg:col-span-2 space-y-6">
@@ -56,7 +91,6 @@ export default function RechargePage() {
             <h2 className="text-xl font-semibold text-gray-700 dark:text-gray-200 mb-1">충전하기</h2>
             <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">원하는 결제 수단을 선택 후 충전해주세요.</p>
             
-            {/* 결제 수단 탭 (현재는 무통장 입금만) */}
             <div>
               <button 
                 onClick={() => setIsRechargeModalOpen(true)}
@@ -64,37 +98,58 @@ export default function RechargePage() {
               >
                 무통장 입금
               </button>
-              {/* 다른 결제 수단이 있다면 여기에 추가 */}
             </div>
 
-            {/* 충전 내역 테이블 */}
+            {/* 충전 요청 내역 테이블 */}
             <div className="overflow-x-auto border border-gray-200 dark:border-gray-700 border-t-0 rounded-b-md">
               <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                 <thead className="bg-gray-50 dark:bg-gray-700">
                   <tr>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">결제번호</th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">요청번호</th>
                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">결제수단</th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">결제금액</th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">결제일자</th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">요청금액</th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">요청일자</th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">상태</th>
                   </tr>
                 </thead>
                 <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                  {currentItems.map((item) => (
+                  {isLoading ? (
+                    <tr>
+                      <td colSpan={5} className="px-6 py-12 text-center text-sm text-gray-500 dark:text-gray-400">
+                        충전 요청 내역을 불러오는 중...
+                      </td>
+                    </tr>
+                  ) : error ? (
+                    <tr>
+                      <td colSpan={5} className="px-6 py-12 text-center text-sm text-red-500">
+                        오류: {error}
+                      </td>
+                    </tr>
+                  ) : rechargeHistory.length > 0 ? (
+                    rechargeHistory.map((item) => (
                     <tr key={item.id}>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{item.paymentId}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{item.id}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm">
                         <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
-                          {item.method}
+                            {item.paymentMethod}
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{item.amount.toLocaleString()}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{item.date}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{formatDate(item.depositDate)}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm">
+                          <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                            ${item.status === 'completed' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 
+                              item.status === 'pending' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200' : 
+                              'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'}`}>
+                            {item.status === 'pending' ? '확인중' : item.status === 'completed' ? '충전완료' : item.status === 'failed' ? '처리실패' : item.status}
+                          </span>
+                        </td>
                     </tr>
-                  ))}
-                  {currentItems.length === 0 && (
+                    ))
+                  ) : (
                     <tr>
-                      <td colSpan={4} className="px-6 py-12 text-center text-sm text-gray-500 dark:text-gray-400">
-                        충전 내역이 없습니다.
+                      <td colSpan={5} className="px-6 py-12 text-center text-sm text-gray-500 dark:text-gray-400">
+                        충전 요청 내역이 없습니다.
                       </td>
                     </tr>
                   )}
@@ -102,7 +157,7 @@ export default function RechargePage() {
               </table>
             </div>
             {/* 페이지네이션 */}
-            {totalPages > 1 && (
+            {!isLoading && !error && totalPages > 1 && (
               <div className="mt-6 flex items-center justify-center space-x-1">
                 <button
                   onClick={() => handlePageChange(currentPage - 1)}
@@ -171,7 +226,14 @@ export default function RechargePage() {
       </button>
 
       {isRechargeModalOpen && (
-        <RechargeModal isOpen={isRechargeModalOpen} onClose={() => setIsRechargeModalOpen(false)} />
+        <RechargeModal 
+          isOpen={isRechargeModalOpen} 
+          onClose={() => {
+            setIsRechargeModalOpen(false);
+            // 모달이 닫힐 때 충전 내역 새로고침
+            setLastFetchedPage(prev => prev + 1); // 강제로 useEffect 재실행
+          }} 
+        />
       )}
     </div>
   );

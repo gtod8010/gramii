@@ -71,7 +71,7 @@ const AppHeader: React.FC = () => {
 
         {/* 오른쪽 영역: 테마 토글, 사용자 드롭다운 */}
         <div className="flex items-center gap-3 sm:gap-4">
-          <ThemeToggleButton />
+          <ThemeToggleButton className="mr-2" />
           {/* 예치금 잔액 표시 (UserDropdown 왼쪽, ThemeToggleButton 오른쪽) 부분 제거 */}
           {/* {!isLoading && user && user.role === 'user' && user.points !== undefined && (
             <div className="flex items-center gap-1">

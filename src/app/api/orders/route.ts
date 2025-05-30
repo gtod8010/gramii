@@ -13,83 +13,139 @@ interface OrderRequestBody {
 export async function POST(request: Request) {
   try {
     const body: OrderRequestBody = await request.json();
-    const { userId, serviceId, quantity, totalPrice, requestDetails: linkValue } = body;
+    const { userId, serviceId, quantity /* , totalPrice, requestDetails: linkValue */ } = body;
+    const linkValue = body.requestDetails; // requestDetails가 linkValue로 사용됨
 
-    if (!userId || !serviceId || !quantity || !totalPrice) {
-      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+    if (!userId || !serviceId || !quantity ) { // totalPrice는 서버에서 계산하므로 요청에서 제외 가능
+      return NextResponse.json({ error: 'Missing required fields: userId, serviceId, quantity' }, { status: 400 });
     }
-
-    if (quantity <= 0 || totalPrice <= 0) {
-      return NextResponse.json({ error: 'Quantity and total price must be positive' }, { status: 400 });
+    if (quantity <= 0) {
+      return NextResponse.json({ error: 'Quantity must be positive' }, { status: 400 });
     }
 
     const client = await pool.connect();
-
     try {
       await client.query('BEGIN');
 
-      // 1. 사용자 포인트 확인
-      const userResult: QueryResult = await client.query('SELECT points FROM users WHERE id = $1', [userId]);
+      // 1. 서비스 기본 정보 조회 (컬럼 이름 수정)
+      const serviceBaseInfoQuery = 'SELECT price_per_unit, name, min_order_quantity, max_order_quantity FROM services WHERE id = $1';
+      const serviceBaseInfoResult = await client.query(serviceBaseInfoQuery, [serviceId]);
+
+      if (serviceBaseInfoResult.rows.length === 0) {
+        await client.query('ROLLBACK');
+        return NextResponse.json({ error: 'Service not found' }, { status: 404 });
+      }
+      const serviceInfo = serviceBaseInfoResult.rows[0];
+      let finalPricePerUnit = serviceInfo.price_per_unit;
+
+      // 2. 주문 수량 유효성 검사 (min_order_quantity, max_order_quantity 사용)
+      if (quantity < serviceInfo.min_order_quantity || quantity > serviceInfo.max_order_quantity) {
+        await client.query('ROLLBACK');
+        return NextResponse.json({ 
+          error: `Order quantity must be between ${serviceInfo.min_order_quantity} and ${serviceInfo.max_order_quantity}` 
+        }, { status: 400 });
+      }
+
+      // 3. 사용자 특별 단가 조회
+      const userSpecificPriceQuery = 'SELECT custom_price FROM user_service_prices WHERE user_id = $1 AND service_id = $2';
+      const userSpecificPriceResult = await client.query(userSpecificPriceQuery, [userId, serviceId]);
+
+      if (userSpecificPriceResult.rows.length > 0 && userSpecificPriceResult.rows[0].custom_price !== null) {
+        finalPricePerUnit = userSpecificPriceResult.rows[0].custom_price; // 특별 단가 적용
+      }
+
+      // 4. 최종 주문 가격 계산
+      const calculatedTotalPrice = finalPricePerUnit * quantity;
+
+      // 5. 사용자 포인트 확인 및 차감 (기존 로직과 유사하게 진행)
+      const userResult: QueryResult = await client.query('SELECT points FROM users WHERE id = $1 FOR UPDATE', [userId]);
       if (userResult.rows.length === 0) {
         await client.query('ROLLBACK');
         return NextResponse.json({ error: 'User not found' }, { status: 404 });
       }
       const currentUserPoints = userResult.rows[0].points;
 
-      if (currentUserPoints < totalPrice) {
+      if (currentUserPoints < calculatedTotalPrice) {
         await client.query('ROLLBACK');
         return NextResponse.json({ error: 'Insufficient points' }, { status: 400 });
       }
 
-      // 2. 주문 생성
+      // 6. 주문 생성
       const orderInsertQuery = `
-        INSERT INTO orders (user_id, service_id, quantity, total_price, link, order_status)
-        VALUES ($1, $2, $3, $4, $5, 'Pending')
+        INSERT INTO orders (user_id, service_id, quantity, total_price, link, order_status, processed_quantity)
+        VALUES ($1, $2, $3, $4, $5, 'pending', 0) 
         RETURNING *;
       `;
       const orderResult: QueryResult = await client.query(orderInsertQuery, [
         userId,
         serviceId,
         quantity,
-        totalPrice,
+        calculatedTotalPrice,
         linkValue || null,
       ]);
       const newOrder = orderResult.rows[0];
 
-      // 3. 사용자 포인트 차감
-      const updatedPoints = currentUserPoints - totalPrice;
-      await client.query('UPDATE users SET points = $1 WHERE id = $2', [updatedPoints, userId]);
+      // 7. 사용자 포인트 차감
+      const updatedUserPoints = currentUserPoints - calculatedTotalPrice;
+      await client.query('UPDATE users SET points = $1 WHERE id = $2', [updatedUserPoints, userId]);
 
-      // 4. 포인트 트랜잭션 기록: description 컬럼 및 값 제거
+      // 8. 포인트 트랜잭션 기록 수정: description 컬럼 제거
+      const finalBalanceAfterOrder = updatedUserPoints;
       const pointTransactionQuery = `
-        INSERT INTO point_transactions (user_id, related_order_id, amount, transaction_type) 
-        VALUES ($1, $2, $3, $4);
-      `; // description 컬럼 제거
+        INSERT INTO point_transactions (user_id, related_order_id, amount, transaction_type, balance_after_transaction)
+        VALUES ($1, $2, $3, $4, $5)
+        RETURNING id;
+      `;
       await client.query(pointTransactionQuery, [
         userId,
         newOrder.id, 
-        -totalPrice, 
+        -calculatedTotalPrice, 
         'order_payment',
-        // `Payment for order ${newOrder.id}` // description 값 제거
+        finalBalanceAfterOrder,
       ]);
 
       await client.query('COMMIT');
+      return NextResponse.json({ message: 'Order created successfully', order: newOrder, updatedUserPoints: finalBalanceAfterOrder }, { status: 201 });
 
-      return NextResponse.json({ message: 'Order created successfully', order: newOrder, updatedUserPoints: updatedPoints }, { status: 201 });
     } catch (error) {
       await client.query('ROLLBACK');
-      console.error('Order creation error:', error);
+      console.error('Order creation error within transaction:', error);
       let errorMessage = 'Failed to create order';
+      let errorCode: string | undefined = undefined;
+
       if (error instanceof Error) {
         errorMessage = error.message;
+        if (typeof (error as any).code === 'string') {
+          errorCode = (error as any).code;
+        }
+
+        if (error.message.includes('orders_user_id_fkey')) {
+            errorMessage = 'Invalid user for order.';
+        } else if (error.message.includes('orders_service_id_fkey')) {
+            errorMessage = 'Invalid service for order.';
+        } else if (error.message.includes('users_points_check')) {
+            errorMessage = 'User points validation failed.';
+        } else if (errorCode === '42703') { 
+          console.error('Specific column error:', error)
+          errorMessage = `Configuration error: A required data field is missing. Please contact support. (Details: ${error.message})`;
+        }
       }
-      return NextResponse.json({ error: errorMessage, details: error }, { status: 500 });
+      
+      const responseDetails: any = { message: errorMessage };
+      if (process.env.NODE_ENV === 'development') {
+        responseDetails.stack = error instanceof Error ? error.stack : undefined;
+        if (errorCode) {
+          responseDetails.code = errorCode;
+        }
+      }
+
+      return NextResponse.json({ error: errorMessage, details: responseDetails }, { status: 500 });
     } finally {
       client.release();
     }
   } catch (error) {
-    console.error('Request processing error:', error);
-    return NextResponse.json({ error: 'Invalid request body' }, { status: 400 });
+    console.error('Request processing error (before DB connect):', error);
+    return NextResponse.json({ error: 'Invalid request body or server error' }, { status: 400 });
   }
 }
 

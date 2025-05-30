@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
     // 이후 반드시 bcrypt 등을 사용하여 비밀번호 해싱을 구현해야 합니다.
     // --- 경고 ---
 
-    const userQueryText = 'SELECT id, password, role, email, name, phone_number, points FROM users WHERE email = $1';
+    const userQueryText = 'SELECT id, password, role, email, name, phone_number, points, admin_referral_code FROM users WHERE email = $1';
     const result = await query(userQueryText, [email]);
 
     if (result.rows.length === 0) {

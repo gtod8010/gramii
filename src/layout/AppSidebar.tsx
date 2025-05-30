@@ -59,6 +59,12 @@ const baseNavItems: NavItem[] = [
     path: "/manage-services",
     adminOnly: true,
   },
+  {
+    icon: <UserCircleIcon />,
+    name: "회원 관리",
+    path: "/manage-users",
+    adminOnly: true,
+  },
 ];
 
 const logoutItem: NavItem = {
