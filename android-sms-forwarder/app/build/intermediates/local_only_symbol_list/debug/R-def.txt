@@ -1,0 +1,20 @@
+R_DEF: Internal format may change without notice
+local
+color ic_launcher_background
+drawable ic_launcher_background
+drawable ic_launcher_foreground
+id apiTokenEditText
+id apiTokenLayout
+id apiUrlEditText
+id apiUrlLayout
+id logTextView
+id permissionButton
+id statusTitleTextView
+id titleTextView
+layout activity_main
+mipmap ic_launcher
+mipmap ic_launcher_round
+string app_name
+style Theme.GramiiSmsForwarder
+xml backup_rules
+xml data_extraction_rules

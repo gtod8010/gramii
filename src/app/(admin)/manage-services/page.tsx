@@ -68,7 +68,7 @@ const ManageServicesPage = () => {
   const [categories, setCategories] = useState<Category[]>([]); // categories 상태 복원
   const [specials, setSpecials] = useState<Special[]>([]);
   const [allRawServices, setAllRawServices] = useState<Service[]>([]); // Service 타입으로 변경 (created_at 등 포함)
-  
+
   const [groupedServices, setGroupedServices] = useState<GroupedServices>({});
   const [isLoading, setIsLoading] = useState(true); // 전체 로딩 상태
   const [isNewServiceModalOpen, setIsNewServiceModalOpen] = useState(false);
@@ -77,7 +77,7 @@ const ManageServicesPage = () => {
 
   const [isDescriptionModalOpen, setIsDescriptionModalOpen] = useState(false);
   const [selectedServiceForDescription, setSelectedServiceForDescription] = useState<DisplayServiceItem | null>(null);
-  
+
   const [collapsedCategories, setCollapsedCategories] = useState<Record<string, boolean>>({});
   const [collapsedServiceTypes, setCollapsedServiceTypes] = useState<Record<string, boolean>>({});
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc'); // 정렬 순서 상태 추가
@@ -115,7 +115,7 @@ const ManageServicesPage = () => {
       }
       const servicesData: Service[] = await response.json(); // API 응답이 Service[] 타입이라고 가정
       setAllRawServices(servicesData);
-
+      
       const grouped: GroupedServices = servicesData.reduce((acc, service) => {
         const categoryName = service.category_name || '기타 카테고리';
         const typeName = service.service_type_name || '기타 타입';
@@ -182,7 +182,7 @@ const ManageServicesPage = () => {
       setSpecials([]); // 에러 시 빈 배열
     }
   }, []);
-  
+
   useEffect(() => {
     if (!userLoading && user?.role === 'admin') {
       setIsLoading(true);
@@ -290,14 +290,14 @@ const ManageServicesPage = () => {
           <div> {/* 필요한 경우 제목 추가 */} </div>
           <div className="flex space-x-3">
             <Button onClick={handleNewService} variant="primary"> {/* 새 서비스 추가 버튼 */}
-              + 새 서비스 추가
-            </Button>
+            + 새 서비스 추가
+          </Button>
             <Button onClick={handleOpenSpecialManagementModal} variant="outline">
               스페셜 관리
             </Button>
           </div>
         </div>
-        
+
         <div className="flex justify-end mb-4">
             <Button onClick={toggleSortOrder} variant="outline" size="sm">
               등록일시 정렬 {sortOrder === 'asc' ? <ChevronUpIcon className="h-4 w-4 ml-1" /> : <ChevronDownIcon className="h-4 w-4 ml-1" />}
@@ -307,13 +307,13 @@ const ManageServicesPage = () => {
         {isLoading && Object.keys(groupedServices).length === 0 && <p>서비스 목록을 불러오는 중...</p>}
         {!isLoading && Object.keys(groupedServices).length === 0 && (
           <p className="text-center text-gray-500 dark:text-gray-400 py-8">등록된 서비스가 없습니다.</p>
-        )}
+          )}
 
-        {Object.entries(groupedServices).map(([categoryName, types]) => (
-          <div key={categoryName} className="mb-8">
-            <div 
+          {Object.entries(groupedServices).map(([categoryName, types]) => (
+            <div key={categoryName} className="mb-8">
+              <div 
               className="flex items-center justify-between text-lg font-semibold text-gray-800 dark:text-white mb-3 p-2 bg-gray-50 dark:bg-gray-700 rounded-md"
-            >
+              >
               <div onClick={() => toggleCategoryCollapse(categoryName)} className="flex-grow cursor-pointer">
                 {categoryName}
               </div>
@@ -341,58 +341,58 @@ const ManageServicesPage = () => {
               </div>
             </div>
             {!collapsedCategories[categoryName] && Object.entries(types).map(([typeName, serviceItems]) => {
-              const serviceTypeKey = `${categoryName}_${typeName}`;
-              return (
-                <div key={serviceTypeKey} className="mb-6 pl-4">
-                  <div 
-                    className="flex items-center justify-between text-md font-medium text-gray-700 dark:text-gray-300 mb-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 p-1 rounded"
-                    onClick={() => toggleServiceTypeCollapse(categoryName, typeName)}
-                  >
-                  {typeName}
-                    {collapsedServiceTypes[serviceTypeKey] ? (
-                      <ChevronDownIcon className="h-5 w-5" />
-                    ) : (
-                      <ChevronUpIcon className="h-5 w-5" />
-                    )}
-                  </div>
-                  {!collapsedServiceTypes[serviceTypeKey] && (
-                <div className="overflow-x-auto">
-                      <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                        <thead className="bg-gray-50 dark:bg-gray-700">
-                      <tr>
-                            <th scope="col" className="px-4 py-2.5 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-300">ID</th>
-                            <th scope="col" className="px-4 py-2.5 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-300">서비스명</th>
-                            <th scope="col" className="px-4 py-2.5 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-300">가격</th>
-                            <th scope="col" className="px-4 py-2.5 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-300">수량(최소/최대)</th>
-                            <th scope="col" className="px-4 py-2.5 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-300">설명</th>
-                            <th scope="col" className="px-4 py-2.5 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-300">관리</th>
-                      </tr>
-                    </thead>
-                        <tbody className="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-800">
+                const serviceTypeKey = `${categoryName}_${typeName}`;
+                return (
+                  <div key={serviceTypeKey} className="mb-6 pl-4">
+                    <div 
+                      className="flex items-center justify-between text-md font-medium text-gray-700 dark:text-gray-300 mb-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 p-1 rounded"
+                      onClick={() => toggleServiceTypeCollapse(categoryName, typeName)}
+                    >
+                    {typeName}
+                      {collapsedServiceTypes[serviceTypeKey] ? (
+                        <ChevronDownIcon className="h-5 w-5" />
+                      ) : (
+                        <ChevronUpIcon className="h-5 w-5" />
+                      )}
+                    </div>
+                    {!collapsedServiceTypes[serviceTypeKey] && (
+                  <div className="overflow-x-auto">
+                        <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                          <thead className="bg-gray-50 dark:bg-gray-700">
+                        <tr>
+                              <th scope="col" className="px-4 py-2.5 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-300">ID</th>
+                              <th scope="col" className="px-4 py-2.5 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-300">서비스명</th>
+                              <th scope="col" className="px-4 py-2.5 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-300">가격</th>
+                              <th scope="col" className="px-4 py-2.5 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-300">수량(최소/최대)</th>
+                              <th scope="col" className="px-4 py-2.5 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-300">설명</th>
+                              <th scope="col" className="px-4 py-2.5 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-300">관리</th>
+                        </tr>
+                      </thead>
+                          <tbody className="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-800">
                       {serviceItems.map((item) => ( // DisplayServiceItem 사용
                             <tr key={item.id}>
                               <td className="whitespace-nowrap px-4 py-3 text-sm text-gray-500 dark:text-gray-400">{item.id}</td>
                               <td className="whitespace-nowrap px-4 py-3 text-sm font-medium text-gray-900 dark:text-white">{item.name}</td>
                               <td className="whitespace-nowrap px-4 py-3 text-sm text-gray-500 dark:text-gray-400">{item.price}</td>
                               <td className="whitespace-nowrap px-4 py-3 text-sm text-gray-500 dark:text-gray-400">{item.quantity}</td>
-                              <td className="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">
+                                <td className="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">
                                 <Button variant="outline" size="sm" onClick={() => handleViewDescription(item)}>보기</Button>
-                          </td>
-                              <td className="whitespace-nowrap px-4 py-3 text-sm space-x-2">
+                            </td>
+                                <td className="whitespace-nowrap px-4 py-3 text-sm space-x-2">
                             <Button variant="outline" size="sm" onClick={() => handleEditService(item.originalService)}>수정</Button>
                             <Button variant="danger" size="sm" onClick={() => handleDeleteService(Number(item.originalService.id), item.originalService.name)}>삭제</Button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                    )}
                 </div>
-                  )}
-              </div>
-              );
-            })}
-          </div>
-        ))}
+                );
+              })}
+            </div>
+          ))}
       </div>
 
       <NewServiceModal

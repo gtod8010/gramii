@@ -25,7 +25,7 @@ interface Service {
   max_order_quantity?: number | undefined;
   is_active: boolean;
   service_type_name?: string; 
-  category_name?: string;
+  category_name?: string; 
   created_at?: string; // 추가 (정렬 및 표시에 사용될 수 있음)
   updated_at?: string; // 추가
   special_id?: number | null; // 스페셜 기능 관련 필드는 유지 (다른 모달에서 사용)
@@ -218,14 +218,14 @@ const NewServiceModal: React.FC<NewServiceModalProps> = ({
       return;
     }
     if (selectedServiceTypeId !== ADD_NEW_VALUE && !selectedServiceTypeId) {
-      setError('서비스 타입을 선택해주세요.');
-      setIsLoading(false);
-      return;
+        setError('서비스 타입을 선택해주세요.');
+        setIsLoading(false);
+        return;
     }
     if (selectedServiceTypeId === ADD_NEW_VALUE && !newServiceTypeName.trim()) {
-      setError('새 서비스 타입 이름을 입력해주세요.');
-      setIsLoading(false);
-      return;
+        setError('새 서비스 타입 이름을 입력해주세요.');
+        setIsLoading(false);
+        return;
     }
     if (!serviceName.trim()) {
       setError('세부 서비스명을 입력해주세요.');
@@ -318,9 +318,9 @@ const NewServiceModal: React.FC<NewServiceModalProps> = ({
       <form onSubmit={handleSubmit} className="space-y-6 p-4 md:p-5">
         {error && <p className="text-red-500 text-sm bg-red-100 p-3 rounded-md">{error}</p>}
         {successMessage && <p className="text-green-600 text-sm bg-green-100 p-3 rounded-md">{successMessage}</p>}
-
+          
         {/* 카테고리 선택 또는 새로 입력 */}
-        <div>
+          <div>
           <Label htmlFor="category">카테고리</Label>
           <div className="flex items-center space-x-2">
             <select
@@ -358,7 +358,7 @@ const NewServiceModal: React.FC<NewServiceModalProps> = ({
             </div>
           )}
         </div>
-
+          
         {/* 서비스 타입 선택 또는 새로 입력 */}
         {((selectedCategoryId && selectedCategoryId !== ADD_NEW_VALUE) || 
           (selectedCategoryId === ADD_NEW_VALUE && newCategoryName.trim() !== '')) && (
@@ -386,40 +386,40 @@ const NewServiceModal: React.FC<NewServiceModalProps> = ({
               </select>
             </div>
             {selectedServiceTypeId === ADD_NEW_VALUE && (
-              <div className="mt-2">
-                <Input
-                  type="text"
+            <div className="mt-2">
+              <Input
+                type="text"
                   placeholder="새 서비스 타입 이름"
-                  value={newServiceTypeName}
-                  onChange={(e) => setNewServiceTypeName(e.target.value)}
+                value={newServiceTypeName}
+                onChange={(e) => setNewServiceTypeName(e.target.value)}
                   className="w-full"
-                  disabled={isLoading}
-                />
-              </div>
-            )}
+                disabled={isLoading}
+              />
+            </div>
+          )}
           </div>
         )}
 
         {/* 세부 서비스 정보 입력 */}
-        <div>
+                <div>
           <Label htmlFor="serviceName">세부 서비스명</Label>
-          <Input
+                    <Input
             id="serviceName"
-            type="text"
+                    type="text"
             placeholder="예: 일반세탁 (셔츠/블라우스)"
-            value={serviceName}
-            onChange={(e) => setServiceName(e.target.value)}
-            disabled={isLoading}
+                    value={serviceName}
+                    onChange={(e) => setServiceName(e.target.value)}
+                    disabled={isLoading}
             className="dark:bg-gray-800 dark:border-gray-600 dark:text-white"
-          />
-        </div>
-        
+                    />
+                </div>
+
         <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
-            <div>
+                    <div>
               <Label htmlFor="pricePerUnit">1개당 주문 가격 (원)</Label>
-              <Input
+                        <Input
                 id="pricePerUnit"
-                type="text" 
+                        type="text"
                 placeholder="예: 3000"
                 value={pricePerUnit}
                 onChange={handleNumericInputChange(setPricePerUnit)}
@@ -434,53 +434,53 @@ const NewServiceModal: React.FC<NewServiceModalProps> = ({
           <div>
             <Label htmlFor="minOrderQuantity">최소 주문 수량</Label>
             <Input
-              id="minOrderQuantity"
+                        id="minOrderQuantity"
               type="text" 
               placeholder="예: 1"
-              value={minOrderQuantity}
+                        value={minOrderQuantity}
               onChange={handleIntegerInputChange(setMinOrderQuantity)}
-              disabled={isLoading}
+                        disabled={isLoading}
               className="w-full dark:bg-gray-800 dark:border-gray-600 dark:text-white"
-            />
-          </div>
-          <div>
+                        />
+                    </div>
+                    <div>
             <Label htmlFor="maxOrderQuantity">최대 주문 수량</Label>
-            <Input
+                        <Input
               id="maxOrderQuantity"
-              type="text" 
+                        type="text"
               placeholder="예: 10"
-              value={maxOrderQuantity}
+                        value={maxOrderQuantity}
               onChange={handleIntegerInputChange(setMaxOrderQuantity)}
-              disabled={isLoading}
+                        disabled={isLoading}
               className="w-full dark:bg-gray-800 dark:border-gray-600 dark:text-white"
-            />
-          </div>
-        </div>
+                        />
+                    </div>
+                </div>
 
-        <div>
+                <div>
           <Label htmlFor="description">서비스 설명 (선택 사항)</Label>
-          <textarea
-            id="description"
-            rows={4}
+                    <textarea
+                    id="description"
+                    rows={4}
             placeholder="서비스에 대한 상세 설명을 입력하세요."
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
             className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm disabled:bg-gray-100 dark:bg-gray-800 dark:border-gray-600 dark:text-white"
-            disabled={isLoading}
+                    disabled={isLoading}
             maxLength={500}
           />
           <p className="text-xs text-gray-500 mt-1 text-right">{description.length} / 500</p>
-        </div>
+          </div>
 
         <div className="flex justify-end space-x-3 pt-4">
           <Button type="button" variant="outline" onClick={onClose} disabled={isLoading}>
-            취소
-          </Button>
+              취소
+            </Button>
           <Button type="submit" variant="primary" isLoading={isLoading} disabled={isLoading}>
             {isEditMode ? '서비스 수정' : '서비스 추가'}
-          </Button>
-        </div>
-      </form>
+            </Button>
+          </div>
+        </form>
     </Modal>
   );
 };

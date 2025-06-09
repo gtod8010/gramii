@@ -105,9 +105,9 @@ export default function RechargeModal({ isOpen, onClose }: RechargeModalProps) {
 
         <div className="mb-6 p-4 border border-blue-200 dark:border-blue-700 rounded-md bg-blue-50 dark:bg-blue-900/30">
           <h3 className="text-md font-semibold text-blue-700 dark:text-blue-300 mb-2">입금 계좌 안내</h3>
-          <p className="text-sm text-gray-700 dark:text-gray-300"><strong>은행:</strong> 기업은행</p>
-          <p className="text-sm text-gray-700 dark:text-gray-300"><strong>계좌번호:</strong> 42007723301012</p>
-          <p className="text-sm text-gray-700 dark:text-gray-300"><strong>예금주:</strong> 강동현</p>
+          <p className="text-sm text-gray-700 dark:text-gray-300"><strong>은행:</strong> KB 국민은행</p>
+          <p className="text-sm text-gray-700 dark:text-gray-300"><strong>계좌번호:</strong> 444401-01-499150</p>
+          <p className="text-sm text-gray-700 dark:text-gray-300"><strong>예금주:</strong> 김수민(그래미)</p>
           <p className="mt-2 text-xs text-red-600 dark:text-red-400">※ 입금 시 입금자명과 신청서에 작성하신 입금자명이 반드시 동일해야 합니다.</p>
         </div>
 

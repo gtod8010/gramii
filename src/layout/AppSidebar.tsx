@@ -67,12 +67,6 @@ const baseNavItems: NavItem[] = [
   },
 ];
 
-const logoutItem: NavItem = {
-  icon: <UserCircleIcon />,
-  name: "Logout",
-  path: "/logout",
-};
-
 const AppSidebar: React.FC = () => {
   const { isExpanded, isMobileOpen, isHovered, setIsHovered, toggleMobileSidebar } = useSidebar();
   const pathname = usePathname();
@@ -267,9 +261,9 @@ const AppSidebar: React.FC = () => {
 
   return (
     <aside
-      className={`fixed left-0 top-0 z-50 flex h-screen flex-col overflow-y-hidden bg-gray-900 text-gray-100 duration-300 ease-linear dark:bg-gray-800 lg:static lg:translate-x-0 ${
+      className={`sticky top-0 self-start flex h-screen flex-col overflow-y-hidden bg-gray-900 text-gray-100 duration-300 ease-linear dark:bg-gray-800 lg:translate-x-0 ${
         isExpanded || isHovered ? "w-72" : "w-20"
-      } ${isMobileOpen ? "translate-x-0" : "-translate-x-full"}`}
+      } ${isMobileOpen ? "translate-x-0 w-72" : "-translate-x-full w-0"}`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
@@ -313,23 +307,6 @@ const AppSidebar: React.FC = () => {
             {renderMenuItems(navItems, "main")}
           </div>
         </nav>
-
-        <div className="mt-auto px-4 py-4 lg:px-6">
-          <Link
-            href={logoutItem.path!}
-            onClick={isMobileOpen ? toggleMobileSidebar : undefined}
-            className={`menu-item group ${
-              isActive(logoutItem.path!) ? "menu-item-active" : "menu-item-inactive"
-            } ${(!isExpanded && !isHovered && !isMobileOpen) && "lg:justify-center" }`}
-          >
-            <span className={` ${isActive(logoutItem.path!) ? "menu-item-icon-active" : "menu-item-icon-inactive"}`}>
-              {logoutItem.icon}
-            </span>
-            {(isExpanded || isHovered || isMobileOpen) && (
-              <span className="menu-item-text">{logoutItem.name}</span>
-            )}
-          </Link>
-        </div>
       </div>
     </aside>
   );

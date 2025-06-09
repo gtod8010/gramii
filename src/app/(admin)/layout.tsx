@@ -17,16 +17,16 @@ export default function AdminLayout({
   // const { isMobileOpen } = useSidebar(); // Backdrop을 위해 필요하다면 사용
 
   return (
-    <div className="flex h-screen bg-gray-100 dark:bg-gray-900"> {/* 전체 화면 flex 컨테이너 */}
+    <div className="flex h-full bg-gray-100 dark:bg-gray-900"> {/* 전체 화면 flex 컨테이너 */}
       <AppSidebar /> {/* 사이드바는 자체 너비를 가짐 */}
       {/* {isMobileOpen && <Backdrop />} */}
 
       {/* 메인 콘텐츠 영역 */}
-      <div className="flex-1 flex flex-col overflow-hidden"> {/* 남은 공간을 모두 차지하고, 내부 스크롤 관리 */}
+      <div className="flex-1 flex flex-col"> {/* 남은 공간을 모두 차지하고, 내부 스크롤 관리 */}
         <AppHeader />
         
         {/* 실제 페이지 내용이 렌더링되는 부분 */}
-        <main className="flex-1 overflow-x-hidden overflow-y-auto mt-6 px-[40px] pb-[40px]"> {/* 상단마진 1.5rem(24px), 좌우패딩 40px, 하단패딩 40px (예시) */}
+        <main className="flex-grow mt-6 px-[40px]"> {/* 상단마진 1.5rem(24px), 좌우패딩 40px (예시) */}
           {/* 
             페이지 내용의 최대 너비를 제한하고 싶다면 여기에 div를 추가할 수 있습니다. 
             예: <div className="max-w-screen-2xl mx-auto"> 

@@ -1,0 +1,351 @@
+"use client";
+
+import React, { useEffect, useState, useRef } from 'react';
+import Link from 'next/link';
+import Button from '@/components/ui/button/Button';
+import Image from 'next/image';
+import CountUp from 'react-countup';
+import ChatSimulation from '@/components/rootPage/ChatSimulation';
+import ServiceSection from '@/components/rootPage/ServiceSection';
+import ReviewsSection from '@/components/rootPage/ReviewsSection';
+import FaqSection from '@/components/rootPage/FaqSection';
+
+// Swiper 관련 임포트 모두 제거
+
+// React Icons (FaInstagram은 이제 직접 구현하므로 제거 가능)
+import {
+  FaFacebook, FaYoutube, FaTiktok, FaFirefoxBrowser, FaXTwitter 
+} from 'react-icons/fa6'; 
+import { BsThreads } from "react-icons/bs"; 
+import { SiNaver } from "react-icons/si";
+
+// 커스텀 인스타그램 그라데이션 아이콘 컴포넌트
+const InstagramGradientIcon = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg viewBox="0 0 448 512" {...props}>
+    <defs>
+      <linearGradient id="instagramGlobalGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" style={{stopColor: '#f09433'}} />
+        <stop offset="25%" style={{stopColor: '#e6683c'}} />
+        <stop offset="50%" style={{stopColor: '#dc2743'}} />
+        <stop offset="75%" style={{stopColor: '#cc2366'}} />
+        <stop offset="100%" style={{stopColor: '#bc1888'}} />
+      </linearGradient>
+    </defs>
+    <path 
+      d="M224.1 141c-63.6 0-114.9 51.3-114.9 114.9s51.3 114.9 114.9 114.9S339 319.5 339 255.9 287.7 141 224.1 141zm0 189.6c-41.1 0-74.7-33.5-74.7-74.7s33.5-74.7 74.7-74.7 74.7 33.5 74.7 74.7-33.6 74.7-74.7 74.7zm146.4-194.3c0 14.9-12 26.8-26.8 26.8-14.9 0-26.8-12-26.8-26.8s12-26.8 26.8-26.8 26.8 12 26.8 26.8zm76.1 27.2c-1.7-35.9-9.9-67.7-36.2-93.9-26.2-26.2-58-34.4-93.9-36.2-37-2.1-147.9-2.1-184.9 0-35.8 1.7-67.6 9.9-93.9 36.1s-34.4 58-36.2 93.9c-2.1 37-2.1 147.9 0 184.9 1.7 35.9 9.9 67.7 36.2 93.9s58 34.4 93.9 36.2c37 2.1 147.9 2.1 184.9 0 35.9-1.7 67.7-9.9 93.9-36.2 26.2-26.2 34.4-58 36.2-93.9 2.1-37 2.1-147.8 0-184.8zM398.8 388c-7.8 19.6-22.9 34.7-42.6 42.6-29.5 11.7-99.5 9-132.1 9s-102.7 2.6-132.1-9c-19.6-7.8-34.7-22.9-42.6-42.6-11.7-29.5-9-99.5-9-132.1s-2.6-102.7 9-132.1c7.8-19.6 22.9-34.7 42.6-42.6 29.5-11.7 99.5-9 132.1-9s102.7-2.6 132.1 9c19.6 7.8 34.7 22.9 42.6 42.6 11.7 29.5 9 99.5 9 132.1s2.7 102.7-9 132.1z" 
+      fill="url(#instagramGlobalGradient)" 
+    />
+  </svg>
+);
+
+interface PlatformItem {
+  name: string;
+  description: string;
+  icon: React.ElementType;
+  iconColor?: string;
+  iconGradient?: string; 
+}
+
+const platformData: PlatformItem[] = [
+  { name: '인스타그램', description: '인기 게시물, 팔로워 증가 등', icon: InstagramGradientIcon }, 
+  { name: '페이스북', description: '페이지 좋아요, 게시물 도달 등', icon: FaFacebook }, 
+  { name: '유튜브', description: '구독자, 조회수, 좋아요 등', icon: FaYoutube, iconColor: '#FF0000' },
+  { name: '틱톡', description: '팔로워, 조회수, 좋아요 등', icon: FaTiktok, iconColor: '#FE2C55' }, 
+  { name: '스레드', description: '팔로워, 참여 유도 등', icon: BsThreads, iconColor: '#000000' },
+  { name: '웹사이트', description: '트래픽 증가, SEO 최적화', icon: FaFirefoxBrowser }, 
+  { name: '네이버', description: '블로그, 플레이스, 쇼핑 등', icon: SiNaver, iconColor: '#03C75A' },
+  { name: '구 트위터', description: '팔로워, 리트윗, 참여 등', icon: FaXTwitter, iconColor: '#000000' },
+];
+
+// 카드 렌더링 컴포넌트
+const PlatformCard: React.FC<{ item: PlatformItem, style?: React.CSSProperties }> = ({ item, style }) => {
+  const iconBaseClassName = "w-12 h-12 md:w-16 md:h-16 mb-4";
+  let iconProps: { className: string; style?: React.CSSProperties; fill?: string; } = {
+    className: iconBaseClassName, 
+  };
+
+  if (item.icon === InstagramGradientIcon) {
+    // InstagramGradientIcon은 자체 스타일을 가짐
+  } else if (item.iconColor) { 
+    iconProps.className = iconBaseClassName; 
+    iconProps.style = { color: item.iconColor }; 
+  } else {
+    iconProps.className = `${iconBaseClassName} text-blue-500`;
+  }
+
+  return (
+    <div 
+      className="bg-gray-50 p-6 rounded-full shadow-lg flex flex-col items-center justify-center w-[180px] h-[180px] md:w-[200px] md:h-[200px]"
+      style={style} 
+    >
+      <item.icon {...iconProps} /> 
+      <h3 className="text-base md:text-lg font-semibold text-gray-800 mb-1">{item.name}</h3>
+      <p className="text-xs md:text-sm text-gray-600 text-center">{item.description}</p>
+    </div>
+  );
+};
+
+interface MainPageMetrics {
+  live_jobs?: number;
+  daily_completed?: number;
+  total_users?: number;
+  [key: string]: number | undefined;
+}
+
+// 페이지의 메타데이터 (선택 사항)
+// export const metadata = {
+//   title: 'MyApp에 오신 것을 환영합니다',
+//   description: '혁신적인 서비스로 당신의 삶을 변화시키세요.',
+// };
+
+const RootPage = () => {
+  const [metrics, setMetrics] = useState<MainPageMetrics | null>(null);
+  const [isLoadingMetrics, setIsLoadingMetrics] = useState(true);
+  const orbitContainerRef = useRef<HTMLDivElement>(null);
+  const animationFrameIdRef = useRef<number | null>(null);
+  const [cardStyles, setCardStyles] = useState<React.CSSProperties[]>([]);
+
+  useEffect(() => {
+    const fetchMetrics = async () => {
+      try {
+        setIsLoadingMetrics(true);
+        const response = await fetch('/api/main-metrics');
+        if (!response.ok) {
+          throw new Error('Failed to fetch metrics');
+        }
+        const data: MainPageMetrics = await response.json();
+        setMetrics(data);
+      } catch (error) {
+        console.error("Error fetching main page metrics:", error);
+        setMetrics({ live_jobs: 11328, daily_completed: 4364, total_users: 19808 });
+      } finally {
+        setIsLoadingMetrics(false);
+      }
+    };
+
+    fetchMetrics();
+  }, []);
+
+  // 3D Orbit Card Styles Calculation useEffect
+  useEffect(() => {
+    const numCards = platformData.length;
+    if (numCards === 0) {
+      setCardStyles([]);
+      return;
+    }
+
+    const radius = 280; 
+    const angleStep = (2 * Math.PI) / numCards; 
+
+    const newCardStyles: React.CSSProperties[] = platformData.map((_, index) => {
+      const angle = index * angleStep;
+      const cardAngleDegrees = (angle * 180 / Math.PI);
+      
+      const transform = `translate(-50%, -50%) rotateY(${cardAngleDegrees}deg) translateZ(${radius}px)`;
+      
+      return {
+        position: 'absolute',
+        top: '50%',
+        left: '50%',
+        transformOrigin: '50% 50%',
+        transform: transform,
+      };
+    });
+    
+    setCardStyles(newCardStyles);
+
+  }, [platformData]);
+
+  // 3D Orbit Animation useEffect
+  useEffect(() => {
+    const orbitContainer = orbitContainerRef.current;
+    if (!orbitContainer || platformData.length === 0) {
+      // 애니메이션 중지 또는 초기화 로직 (필요한 경우)
+      if (animationFrameIdRef.current) {
+        cancelAnimationFrame(animationFrameIdRef.current);
+        animationFrameIdRef.current = null;
+      }
+      if (orbitContainer) { // 컨테이너가 있으면 초기 각도로 리셋
+        orbitContainer.style.transform = 'rotateY(0rad)';
+      }
+      return;
+    }
+
+    let currentAngle = 0;
+    const animate = () => {
+      currentAngle += 0.003; 
+      if (orbitContainer) {
+        orbitContainer.style.transform = `rotateY(${currentAngle}rad)`;
+      }
+      animationFrameIdRef.current = requestAnimationFrame(animate);
+    };
+
+    animate(); // platformData.length > 0이 보장되므로 바로 시작
+
+    return () => {
+      if (animationFrameIdRef.current) {
+        cancelAnimationFrame(animationFrameIdRef.current);
+      }
+      // 선택적: 컴포넌트 언마운트 시 컨테이너 회전 초기화
+      // if (orbitContainer) {
+      //   orbitContainer.style.transform = 'rotateY(0rad)';
+      // }
+    };
+  }, [platformData.length]); // platformData.length가 변경되면 애니메이션 재시작/중지
+
+  return (
+    <div className="min-h-screen bg-white text-gray-800 flex flex-col">
+      {/* Navigation Bar */}
+      <nav className="w-full py-4 px-6 md:px-10 shadow-sm bg-white">
+        <div className="container mx-auto flex items-center justify-between">
+          <Link href="/" className="text-2xl font-bold text-blue-600">
+            GRAMII
+          </Link>
+          <div className="space-x-4 flex items-center">
+            <Link href="/services" className="text-gray-600 hover:text-blue-600 transition-colors">
+              둘러보기
+            </Link>
+            <Link href="/login" className="text-gray-600 hover:text-blue-600 transition-colors">
+              로그인
+            </Link>
+            <Link href="/signup" passHref legacyBehavior={false}>
+              <Button variant="primary" size="md" className="bg-blue-500 hover:bg-blue-600 text-white">
+                회원가입
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </nav>
+
+      {/* Hero Section */}
+      <main className="flex-grow container mx-auto px-6 md:px-10 py-12 md:py-20 flex items-center">
+        <div className="grid md:grid-cols-2 gap-8 items-center">
+          {/* Text Content */}
+          <div className="text-center md:text-left">
+            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6 leading-tight">
+              이건 트렌드가 아니라 변화다
+              <br />
+              <span className="text-blue-600">SNS</span>가 마케팅의 중심, 
+              <span className="text-blue-600"> GRAMII</span>
+            </h1>
+            <p className="text-lg text-gray-700 mb-8">
+                인플루언서도, 소상공인도, 마케팅 초보도 쉽게
+                좋아요, 팔로워, 댓글, 조회수까지 통합 관리.
+                이제 마케팅은 그래미 하나면 충분합니다.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
+              <Link href="/services" passHref legacyBehavior={false}>
+                <Button variant="primary" size="md" className="w-full sm:w-auto bg-blue-500 hover:bg-blue-600 text-white px-8 py-3 text-base">
+                  둘러보기
+                </Button>
+              </Link>
+            </div>
+          </div>
+
+          {/* Image Content */}
+          <div className="hidden md:flex justify-center items-center">
+            <Image 
+              src="/images/first_phone.png" 
+              alt="GRAMII 서비스 소개 이미지" 
+              width={400}
+              height={600}
+              className="object-contain"
+            />
+          </div>
+        </div>
+      </main>
+
+      {/* Stats Section */}
+      <section className="bg-cyan-500 py-12 md:py-16">
+        <div className="container mx-auto px-6 md:px-10">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center text-white">
+            <div className="p-4">
+              <p className="text-4xl md:text-5xl font-bold mb-2">
+                {isLoadingMetrics ? '...' : <CountUp end={metrics?.live_jobs || 0} duration={2.5} separator="," />}
+              </p>
+              <p className="text-sm uppercase tracking-wider">실시간 자동화 작업</p>
+            </div>
+            <div className="p-4 relative 
+                          md:before:content-[''] md:before:absolute md:before:left-0 md:before:top-1/2 md:before:-translate-y-1/2 md:before:h-16 md:before:w-px md:before:bg-white/50 
+                          md:after:content-[''] md:after:absolute md:after:right-0 md:after:top-1/2 md:after:-translate-y-1/2 md:after:h-16 md:after:w-px md:after:bg-white/50">
+              <p className="text-4xl md:text-5xl font-bold mb-2">
+                {isLoadingMetrics ? '...' : <CountUp end={metrics?.daily_completed || 0} duration={2.5} separator="," />}
+              </p>
+              <p className="text-sm uppercase tracking-wider">일일 요청 처리량</p>
+            </div>
+            <div className="p-4">
+              <p className="text-4xl md:text-5xl font-bold mb-2">
+                {isLoadingMetrics ? '...' : <CountUp end={metrics?.total_users || 0} duration={2.5} separator="," />}
+              </p>
+              <p className="text-sm uppercase tracking-wider">총 GRAMII 이용자</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* WHAT WE DO? */}
+      <section className="w-full bg-white py-16 md:py-24">
+        <div className="container mx-auto text-center px-6 md:px-10">
+          <h2 className="text-sm font-bold uppercase text-blue-600 tracking-widest mb-4">
+            What We Do?
+          </h2>
+          <p className="text-lg text-gray-600 mb-12">
+            GRAMII의 쉽고 빠른 마케팅을 경험해보세요.
+          </p>
+
+          {/* 3D Orbiting Platforms */}
+          <div className="relative w-full h-[400px] flex items-center justify-center perspective-1000">
+            <div ref={orbitContainerRef} className="w-full h-full transform-style-3d">
+              {cardStyles.map((style, index) => (
+                <PlatformCard key={platformData[index].name} item={platformData[index]} style={style} />
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 1:1 상담 섹션 */}
+      <section className="w-full bg-gray-50 py-20 md:py-28">
+        <div className="container mx-auto px-6 md:px-10">
+          <div className="grid md:grid-cols-2 gap-12 md:gap-20 items-center">
+
+            {/* 왼쪽 텍스트 영역 */}
+            <div className="text-center md:text-left">
+              <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-5 leading-tight">
+                언제 어디서든,
+                <br />
+                1:1 상담이 가능합니다.
+              </h2>
+              <p className="text-lg md:text-xl text-gray-700 mb-10">
+                궁금하신 사항은 담당 전문가와 1:1 상담을
+                <br />
+                통해 빠르게 해결할 수 있습니다.
+              </p>
+              <Button
+                variant="outline"
+                size="md"
+                className="border-gray-400 text-gray-800 hover:bg-gray-200 px-10 py-4 text-lg font-semibold"
+              >
+                상담사 연결하기
+              </Button>
+            </div>
+
+            {/* 오른쪽 채팅 시뮬레이션 영역 */}
+            <div className="w-full">
+              <ChatSimulation />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <ServiceSection />
+
+      <ReviewsSection />
+
+      <FaqSection />
+
+    </div>
+  );
+};
+
+export default RootPage; 

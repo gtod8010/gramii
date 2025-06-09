@@ -34,11 +34,14 @@ export default function LoginPage() {
           localStorage.setItem('loggedInUser', JSON.stringify(data.user));
         }
 
-        if (data.user && data.user.role === 'admin') {
-          router.push('/manage-services');
-        } else {
-          router.push('/');
-        }
+        // if (data.user && data.user.role === 'admin') {
+        //   router.push('/manage-services');
+        // } else {
+        //   router.push('/');
+        // }
+        // 역할(admin/user)에 관계없이 /dashboard로 리디렉션합니다.
+        router.push('/dashboard');
+
       } else {
         console.error('Login failed:', data);
         setError(data.message || '이메일 또는 비밀번호가 잘못되었습니다.');

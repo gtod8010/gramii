@@ -1,0 +1,325 @@
+-- Merging decision tree log ---
+manifest
+ADDED from /Users/dwight.k/Desktop/Utill/rhm/gramii/android-sms-forwarder/app/src/main/AndroidManifest.xml:2:1-42:12
+INJECTED from /Users/dwight.k/Desktop/Utill/rhm/gramii/android-sms-forwarder/app/src/main/AndroidManifest.xml:2:1-42:12
+INJECTED from /Users/dwight.k/Desktop/Utill/rhm/gramii/android-sms-forwarder/app/src/main/AndroidManifest.xml:2:1-42:12
+INJECTED from /Users/dwight.k/Desktop/Utill/rhm/gramii/android-sms-forwarder/app/src/main/AndroidManifest.xml:2:1-42:12
+MERGED from [androidx.databinding:viewbinding:8.2.0] /Users/dwight.k/.gradle/caches/8.12/transforms/6ce8d284446036f6b29b86db942649b9/transformed/jetified-viewbinding-8.2.0/AndroidManifest.xml:2:1-7:12
+MERGED from [com.google.android.material:material:1.11.0] /Users/dwight.k/.gradle/caches/8.12/transforms/71d7ee472edb1e36eb1f8172be09f417/transformed/material-1.11.0/AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.constraintlayout:constraintlayout:2.1.4] /Users/dwight.k/.gradle/caches/8.12/transforms/b1e4fff0460e55db66cccaba651e3324/transformed/constraintlayout-2.1.4/AndroidManifest.xml:2:1-11:12
+MERGED from [androidx.appcompat:appcompat-resources:1.6.1] /Users/dwight.k/.gradle/caches/8.12/transforms/5e2777d9d295766ba3cd011d98caf224/transformed/jetified-appcompat-resources-1.6.1/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.appcompat:appcompat:1.6.1] /Users/dwight.k/.gradle/caches/8.12/transforms/c9fc80136d39a78e8b499611123306a9/transformed/appcompat-1.6.1/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.emoji2:emoji2-views-helper:1.2.0] /Users/dwight.k/.gradle/caches/8.12/transforms/a474dc8919c6e55039ab552271d5b80e/transformed/jetified-emoji2-views-helper-1.2.0/AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.emoji2:emoji2:1.2.0] /Users/dwight.k/.gradle/caches/8.12/transforms/4827947e39fb2755bd683b4d18ca332b/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:17:1-35:12
+MERGED from [androidx.viewpager2:viewpager2:1.0.0] /Users/dwight.k/.gradle/caches/8.12/transforms/348001fc14f48d864f0340ad5a7055f9/transformed/jetified-viewpager2-1.0.0/AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.fragment:fragment:1.3.6] /Users/dwight.k/.gradle/caches/8.12/transforms/e70778f7711dcd747f04ef7cc51f2d93/transformed/fragment-1.3.6/AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.activity:activity:1.8.0] /Users/dwight.k/.gradle/caches/8.12/transforms/3a995c168c5e1806f141a6a277badaac/transformed/jetified-activity-1.8.0/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.drawerlayout:drawerlayout:1.1.1] /Users/dwight.k/.gradle/caches/8.12/transforms/635f6a7f4e8ad0a60bad26dcd047f268/transformed/drawerlayout-1.1.1/AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.coordinatorlayout:coordinatorlayout:1.1.0] /Users/dwight.k/.gradle/caches/8.12/transforms/9a31e1b63f8c3e24edd2f08406291b2d/transformed/coordinatorlayout-1.1.0/AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.dynamicanimation:dynamicanimation:1.0.0] /Users/dwight.k/.gradle/caches/8.12/transforms/158a1d23b2648f63e9222e95a1cec202/transformed/dynamicanimation-1.0.0/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.transition:transition:1.2.0] /Users/dwight.k/.gradle/caches/8.12/transforms/9386e103d3e4ee0c4ceb24a9c043696f/transformed/transition-1.2.0/AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.vectordrawable:vectordrawable-animated:1.1.0] /Users/dwight.k/.gradle/caches/8.12/transforms/613c9f3ba525d8bcef1dddd84b2048a9/transformed/vectordrawable-animated-1.1.0/AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.vectordrawable:vectordrawable:1.1.0] /Users/dwight.k/.gradle/caches/8.12/transforms/7d46138a566ce415fcc35046dc62e772/transformed/vectordrawable-1.1.0/AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.viewpager:viewpager:1.0.0] /Users/dwight.k/.gradle/caches/8.12/transforms/9ff1dd076a319c3845fddab3a6225f12/transformed/viewpager-1.0.0/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.legacy:legacy-support-core-utils:1.0.0] /Users/dwight.k/.gradle/caches/8.12/transforms/012482c8059bdabfa6113e4487208560/transformed/legacy-support-core-utils-1.0.0/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.loader:loader:1.0.0] /Users/dwight.k/.gradle/caches/8.12/transforms/cd6e2784c990f054b70e9d951e872b9c/transformed/loader-1.0.0/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.recyclerview:recyclerview:1.1.0] /Users/dwight.k/.gradle/caches/8.12/transforms/b4060dfeff92ce6d40201c05237aa8a1/transformed/recyclerview-1.1.0/AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.customview:customview:1.1.0] /Users/dwight.k/.gradle/caches/8.12/transforms/6ac50a219ed351054cce7af256f3c6e0/transformed/customview-1.1.0/AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.core:core:1.12.0] /Users/dwight.k/.gradle/caches/8.12/transforms/96bfd91bf2a39377ced47a1036eeab2d/transformed/core-1.12.0/AndroidManifest.xml:17:1-30:12
+MERGED from [androidx.savedstate:savedstate:1.2.1] /Users/dwight.k/.gradle/caches/8.12/transforms/a9d081ef1be3da1c2dc6692571483f71/transformed/jetified-savedstate-1.2.1/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.lifecycle:lifecycle-process:2.6.1] /Users/dwight.k/.gradle/caches/8.12/transforms/1c9d74d1fdd5ee7cf35916544a4669cc/transformed/jetified-lifecycle-process-2.6.1/AndroidManifest.xml:17:1-35:12
+MERGED from [androidx.lifecycle:lifecycle-livedata-core:2.6.1] /Users/dwight.k/.gradle/caches/8.12/transforms/8f36525a8183649114dbe53c17de7da1/transformed/lifecycle-livedata-core-2.6.1/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.lifecycle:lifecycle-livedata:2.6.1] /Users/dwight.k/.gradle/caches/8.12/transforms/a1e598fecbd4ae3cdf775147bac90928/transformed/lifecycle-livedata-2.6.1/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.lifecycle:lifecycle-viewmodel:2.6.1] /Users/dwight.k/.gradle/caches/8.12/transforms/5fb116bc5364d6352747e139510ca165/transformed/lifecycle-viewmodel-2.6.1/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.lifecycle:lifecycle-runtime:2.6.1] /Users/dwight.k/.gradle/caches/8.12/transforms/3e6f9ab8a874b0516e8ccf10a30ff76a/transformed/lifecycle-runtime-2.6.1/AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.lifecycle:lifecycle-viewmodel-savedstate:2.6.1] /Users/dwight.k/.gradle/caches/8.12/transforms/ddd7803ec6a6d3ce8ef35303adfc8569/transformed/jetified-lifecycle-viewmodel-savedstate-2.6.1/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.core:core-ktx:1.12.0] /Users/dwight.k/.gradle/caches/8.12/transforms/bd13e30d4c1b0d3cfc745bb1d3f37f90/transformed/jetified-core-ktx-1.12.0/AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.annotation:annotation-experimental:1.3.0] /Users/dwight.k/.gradle/caches/8.12/transforms/bab6cbc6b74c137220e7bf8532d5b55b/transformed/jetified-annotation-experimental-1.3.0/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.cursoradapter:cursoradapter:1.0.0] /Users/dwight.k/.gradle/caches/8.12/transforms/63884ae02a0bd30eadafd88bcf57e0c4/transformed/cursoradapter-1.0.0/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.cardview:cardview:1.0.0] /Users/dwight.k/.gradle/caches/8.12/transforms/716ea12dbfb1fd906a691a81cabc7d8f/transformed/cardview-1.0.0/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.interpolator:interpolator:1.0.0] /Users/dwight.k/.gradle/caches/8.12/transforms/8e9a2feaee9acf51cd15526b4430b107/transformed/interpolator-1.0.0/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.1] /Users/dwight.k/.gradle/caches/8.12/transforms/f0c72e0d4218fc86b9219211a0e92c47/transformed/versionedparcelable-1.1.1/AndroidManifest.xml:17:1-27:12
+MERGED from [androidx.profileinstaller:profileinstaller:1.3.0] /Users/dwight.k/.gradle/caches/8.12/transforms/bd307966a00c941951a9c0a65a9f13dc/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:17:1-55:12
+MERGED from [androidx.startup:startup-runtime:1.1.1] /Users/dwight.k/.gradle/caches/8.12/transforms/632de90dfefe144dfea85f554b494704/transformed/jetified-startup-runtime-1.1.1/AndroidManifest.xml:17:1-33:12
+MERGED from [androidx.tracing:tracing:1.0.0] /Users/dwight.k/.gradle/caches/8.12/transforms/e2120a429a6a23af1a5d8238e1b425c9/transformed/jetified-tracing-1.0.0/AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.arch.core:core-runtime:2.2.0] /Users/dwight.k/.gradle/caches/8.12/transforms/c2d04866387940a200814b48b78eec2a/transformed/core-runtime-2.2.0/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.documentfile:documentfile:1.0.0] /Users/dwight.k/.gradle/caches/8.12/transforms/2c6d4adaa19c7d730eec0d55193f0b31/transformed/documentfile-1.0.0/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.localbroadcastmanager:localbroadcastmanager:1.0.0] /Users/dwight.k/.gradle/caches/8.12/transforms/9f2bdf0ede1bb0be13593e1904dd26e0/transformed/localbroadcastmanager-1.0.0/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.print:print:1.0.0] /Users/dwight.k/.gradle/caches/8.12/transforms/5bd6da90414854f85c1a7296864ffa73/transformed/print-1.0.0/AndroidManifest.xml:17:1-22:12
+	package
+		INJECTED from /Users/dwight.k/Desktop/Utill/rhm/gramii/android-sms-forwarder/app/src/main/AndroidManifest.xml
+	android:versionName
+		INJECTED from /Users/dwight.k/Desktop/Utill/rhm/gramii/android-sms-forwarder/app/src/main/AndroidManifest.xml
+	xmlns:tools
+		ADDED from /Users/dwight.k/Desktop/Utill/rhm/gramii/android-sms-forwarder/app/src/main/AndroidManifest.xml:3:5-51
+	android:versionCode
+		INJECTED from /Users/dwight.k/Desktop/Utill/rhm/gramii/android-sms-forwarder/app/src/main/AndroidManifest.xml
+	xmlns:android
+		ADDED from /Users/dwight.k/Desktop/Utill/rhm/gramii/android-sms-forwarder/app/src/main/AndroidManifest.xml:2:11-69
+uses-permission#android.permission.INTERNET
+ADDED from /Users/dwight.k/Desktop/Utill/rhm/gramii/android-sms-forwarder/app/src/main/AndroidManifest.xml:6:5-67
+	android:name
+		ADDED from /Users/dwight.k/Desktop/Utill/rhm/gramii/android-sms-forwarder/app/src/main/AndroidManifest.xml:6:22-64
+uses-permission#android.permission.RECEIVE_SMS
+ADDED from /Users/dwight.k/Desktop/Utill/rhm/gramii/android-sms-forwarder/app/src/main/AndroidManifest.xml:7:5-70
+	android:name
+		ADDED from /Users/dwight.k/Desktop/Utill/rhm/gramii/android-sms-forwarder/app/src/main/AndroidManifest.xml:7:22-67
+uses-permission#android.permission.READ_SMS
+ADDED from /Users/dwight.k/Desktop/Utill/rhm/gramii/android-sms-forwarder/app/src/main/AndroidManifest.xml:8:5-67
+	android:name
+		ADDED from /Users/dwight.k/Desktop/Utill/rhm/gramii/android-sms-forwarder/app/src/main/AndroidManifest.xml:8:22-64
+application
+ADDED from /Users/dwight.k/Desktop/Utill/rhm/gramii/android-sms-forwarder/app/src/main/AndroidManifest.xml:10:5-40:19
+INJECTED from /Users/dwight.k/Desktop/Utill/rhm/gramii/android-sms-forwarder/app/src/main/AndroidManifest.xml:10:5-40:19
+MERGED from [com.google.android.material:material:1.11.0] /Users/dwight.k/.gradle/caches/8.12/transforms/71d7ee472edb1e36eb1f8172be09f417/transformed/material-1.11.0/AndroidManifest.xml:22:5-20
+MERGED from [com.google.android.material:material:1.11.0] /Users/dwight.k/.gradle/caches/8.12/transforms/71d7ee472edb1e36eb1f8172be09f417/transformed/material-1.11.0/AndroidManifest.xml:22:5-20
+MERGED from [androidx.constraintlayout:constraintlayout:2.1.4] /Users/dwight.k/.gradle/caches/8.12/transforms/b1e4fff0460e55db66cccaba651e3324/transformed/constraintlayout-2.1.4/AndroidManifest.xml:9:5-20
+MERGED from [androidx.constraintlayout:constraintlayout:2.1.4] /Users/dwight.k/.gradle/caches/8.12/transforms/b1e4fff0460e55db66cccaba651e3324/transformed/constraintlayout-2.1.4/AndroidManifest.xml:9:5-20
+MERGED from [androidx.emoji2:emoji2:1.2.0] /Users/dwight.k/.gradle/caches/8.12/transforms/4827947e39fb2755bd683b4d18ca332b/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:23:5-33:19
+MERGED from [androidx.emoji2:emoji2:1.2.0] /Users/dwight.k/.gradle/caches/8.12/transforms/4827947e39fb2755bd683b4d18ca332b/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:23:5-33:19
+MERGED from [androidx.core:core:1.12.0] /Users/dwight.k/.gradle/caches/8.12/transforms/96bfd91bf2a39377ced47a1036eeab2d/transformed/core-1.12.0/AndroidManifest.xml:28:5-89
+MERGED from [androidx.core:core:1.12.0] /Users/dwight.k/.gradle/caches/8.12/transforms/96bfd91bf2a39377ced47a1036eeab2d/transformed/core-1.12.0/AndroidManifest.xml:28:5-89
+MERGED from [androidx.lifecycle:lifecycle-process:2.6.1] /Users/dwight.k/.gradle/caches/8.12/transforms/1c9d74d1fdd5ee7cf35916544a4669cc/transformed/jetified-lifecycle-process-2.6.1/AndroidManifest.xml:23:5-33:19
+MERGED from [androidx.lifecycle:lifecycle-process:2.6.1] /Users/dwight.k/.gradle/caches/8.12/transforms/1c9d74d1fdd5ee7cf35916544a4669cc/transformed/jetified-lifecycle-process-2.6.1/AndroidManifest.xml:23:5-33:19
+MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.1] /Users/dwight.k/.gradle/caches/8.12/transforms/f0c72e0d4218fc86b9219211a0e92c47/transformed/versionedparcelable-1.1.1/AndroidManifest.xml:24:5-25:19
+MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.1] /Users/dwight.k/.gradle/caches/8.12/transforms/f0c72e0d4218fc86b9219211a0e92c47/transformed/versionedparcelable-1.1.1/AndroidManifest.xml:24:5-25:19
+MERGED from [androidx.profileinstaller:profileinstaller:1.3.0] /Users/dwight.k/.gradle/caches/8.12/transforms/bd307966a00c941951a9c0a65a9f13dc/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:23:5-53:19
+MERGED from [androidx.profileinstaller:profileinstaller:1.3.0] /Users/dwight.k/.gradle/caches/8.12/transforms/bd307966a00c941951a9c0a65a9f13dc/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:23:5-53:19
+MERGED from [androidx.startup:startup-runtime:1.1.1] /Users/dwight.k/.gradle/caches/8.12/transforms/632de90dfefe144dfea85f554b494704/transformed/jetified-startup-runtime-1.1.1/AndroidManifest.xml:25:5-31:19
+MERGED from [androidx.startup:startup-runtime:1.1.1] /Users/dwight.k/.gradle/caches/8.12/transforms/632de90dfefe144dfea85f554b494704/transformed/jetified-startup-runtime-1.1.1/AndroidManifest.xml:25:5-31:19
+	android:extractNativeLibs
+		INJECTED from /Users/dwight.k/Desktop/Utill/rhm/gramii/android-sms-forwarder/app/src/main/AndroidManifest.xml
+	android:appComponentFactory
+		ADDED from [androidx.core:core:1.12.0] /Users/dwight.k/.gradle/caches/8.12/transforms/96bfd91bf2a39377ced47a1036eeab2d/transformed/core-1.12.0/AndroidManifest.xml:28:18-86
+	android:supportsRtl
+		ADDED from /Users/dwight.k/Desktop/Utill/rhm/gramii/android-sms-forwarder/app/src/main/AndroidManifest.xml:17:9-35
+	android:label
+		ADDED from /Users/dwight.k/Desktop/Utill/rhm/gramii/android-sms-forwarder/app/src/main/AndroidManifest.xml:15:9-41
+	android:fullBackupContent
+		ADDED from /Users/dwight.k/Desktop/Utill/rhm/gramii/android-sms-forwarder/app/src/main/AndroidManifest.xml:13:9-54
+	android:roundIcon
+		ADDED from /Users/dwight.k/Desktop/Utill/rhm/gramii/android-sms-forwarder/app/src/main/AndroidManifest.xml:16:9-54
+	tools:targetApi
+		ADDED from /Users/dwight.k/Desktop/Utill/rhm/gramii/android-sms-forwarder/app/src/main/AndroidManifest.xml:20:9-29
+	android:icon
+		ADDED from /Users/dwight.k/Desktop/Utill/rhm/gramii/android-sms-forwarder/app/src/main/AndroidManifest.xml:14:9-43
+	android:allowBackup
+		ADDED from /Users/dwight.k/Desktop/Utill/rhm/gramii/android-sms-forwarder/app/src/main/AndroidManifest.xml:11:9-35
+	android:theme
+		ADDED from /Users/dwight.k/Desktop/Utill/rhm/gramii/android-sms-forwarder/app/src/main/AndroidManifest.xml:18:9-56
+	android:dataExtractionRules
+		ADDED from /Users/dwight.k/Desktop/Utill/rhm/gramii/android-sms-forwarder/app/src/main/AndroidManifest.xml:12:9-65
+	android:usesCleartextTraffic
+		ADDED from /Users/dwight.k/Desktop/Utill/rhm/gramii/android-sms-forwarder/app/src/main/AndroidManifest.xml:19:9-44
+activity#com.gramii.smsforwarder.MainActivity
+ADDED from /Users/dwight.k/Desktop/Utill/rhm/gramii/android-sms-forwarder/app/src/main/AndroidManifest.xml:21:9-28:20
+	android:exported
+		ADDED from /Users/dwight.k/Desktop/Utill/rhm/gramii/android-sms-forwarder/app/src/main/AndroidManifest.xml:23:13-36
+	android:name
+		ADDED from /Users/dwight.k/Desktop/Utill/rhm/gramii/android-sms-forwarder/app/src/main/AndroidManifest.xml:22:13-41
+intent-filter#action:name:android.intent.action.MAIN+category:name:android.intent.category.LAUNCHER
+ADDED from /Users/dwight.k/Desktop/Utill/rhm/gramii/android-sms-forwarder/app/src/main/AndroidManifest.xml:24:13-27:29
+action#android.intent.action.MAIN
+ADDED from /Users/dwight.k/Desktop/Utill/rhm/gramii/android-sms-forwarder/app/src/main/AndroidManifest.xml:25:17-69
+	android:name
+		ADDED from /Users/dwight.k/Desktop/Utill/rhm/gramii/android-sms-forwarder/app/src/main/AndroidManifest.xml:25:25-66
+category#android.intent.category.LAUNCHER
+ADDED from /Users/dwight.k/Desktop/Utill/rhm/gramii/android-sms-forwarder/app/src/main/AndroidManifest.xml:26:17-77
+	android:name
+		ADDED from /Users/dwight.k/Desktop/Utill/rhm/gramii/android-sms-forwarder/app/src/main/AndroidManifest.xml:26:27-74
+receiver#com.gramii.smsforwarder.SmsReceiver
+ADDED from /Users/dwight.k/Desktop/Utill/rhm/gramii/android-sms-forwarder/app/src/main/AndroidManifest.xml:31:9-38:20
+	android:exported
+		ADDED from /Users/dwight.k/Desktop/Utill/rhm/gramii/android-sms-forwarder/app/src/main/AndroidManifest.xml:33:13-36
+	android:permission
+		ADDED from /Users/dwight.k/Desktop/Utill/rhm/gramii/android-sms-forwarder/app/src/main/AndroidManifest.xml:34:13-66
+	android:name
+		ADDED from /Users/dwight.k/Desktop/Utill/rhm/gramii/android-sms-forwarder/app/src/main/AndroidManifest.xml:32:13-40
+intent-filter#action:name:android.provider.Telephony.SMS_RECEIVED
+ADDED from /Users/dwight.k/Desktop/Utill/rhm/gramii/android-sms-forwarder/app/src/main/AndroidManifest.xml:35:13-37:29
+action#android.provider.Telephony.SMS_RECEIVED
+ADDED from /Users/dwight.k/Desktop/Utill/rhm/gramii/android-sms-forwarder/app/src/main/AndroidManifest.xml:36:17-82
+	android:name
+		ADDED from /Users/dwight.k/Desktop/Utill/rhm/gramii/android-sms-forwarder/app/src/main/AndroidManifest.xml:36:25-79
+uses-sdk
+INJECTED from /Users/dwight.k/Desktop/Utill/rhm/gramii/android-sms-forwarder/app/src/main/AndroidManifest.xml reason: use-sdk injection requested
+INJECTED from /Users/dwight.k/Desktop/Utill/rhm/gramii/android-sms-forwarder/app/src/main/AndroidManifest.xml
+INJECTED from /Users/dwight.k/Desktop/Utill/rhm/gramii/android-sms-forwarder/app/src/main/AndroidManifest.xml
+MERGED from [androidx.databinding:viewbinding:8.2.0] /Users/dwight.k/.gradle/caches/8.12/transforms/6ce8d284446036f6b29b86db942649b9/transformed/jetified-viewbinding-8.2.0/AndroidManifest.xml:5:5-44
+MERGED from [androidx.databinding:viewbinding:8.2.0] /Users/dwight.k/.gradle/caches/8.12/transforms/6ce8d284446036f6b29b86db942649b9/transformed/jetified-viewbinding-8.2.0/AndroidManifest.xml:5:5-44
+MERGED from [com.google.android.material:material:1.11.0] /Users/dwight.k/.gradle/caches/8.12/transforms/71d7ee472edb1e36eb1f8172be09f417/transformed/material-1.11.0/AndroidManifest.xml:20:5-44
+MERGED from [com.google.android.material:material:1.11.0] /Users/dwight.k/.gradle/caches/8.12/transforms/71d7ee472edb1e36eb1f8172be09f417/transformed/material-1.11.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.constraintlayout:constraintlayout:2.1.4] /Users/dwight.k/.gradle/caches/8.12/transforms/b1e4fff0460e55db66cccaba651e3324/transformed/constraintlayout-2.1.4/AndroidManifest.xml:5:5-7:41
+MERGED from [androidx.constraintlayout:constraintlayout:2.1.4] /Users/dwight.k/.gradle/caches/8.12/transforms/b1e4fff0460e55db66cccaba651e3324/transformed/constraintlayout-2.1.4/AndroidManifest.xml:5:5-7:41
+MERGED from [androidx.appcompat:appcompat-resources:1.6.1] /Users/dwight.k/.gradle/caches/8.12/transforms/5e2777d9d295766ba3cd011d98caf224/transformed/jetified-appcompat-resources-1.6.1/AndroidManifest.xml:20:5-44
+MERGED from [androidx.appcompat:appcompat-resources:1.6.1] /Users/dwight.k/.gradle/caches/8.12/transforms/5e2777d9d295766ba3cd011d98caf224/transformed/jetified-appcompat-resources-1.6.1/AndroidManifest.xml:20:5-44
+MERGED from [androidx.appcompat:appcompat:1.6.1] /Users/dwight.k/.gradle/caches/8.12/transforms/c9fc80136d39a78e8b499611123306a9/transformed/appcompat-1.6.1/AndroidManifest.xml:20:5-44
+MERGED from [androidx.appcompat:appcompat:1.6.1] /Users/dwight.k/.gradle/caches/8.12/transforms/c9fc80136d39a78e8b499611123306a9/transformed/appcompat-1.6.1/AndroidManifest.xml:20:5-44
+MERGED from [androidx.emoji2:emoji2-views-helper:1.2.0] /Users/dwight.k/.gradle/caches/8.12/transforms/a474dc8919c6e55039ab552271d5b80e/transformed/jetified-emoji2-views-helper-1.2.0/AndroidManifest.xml:5:5-44
+MERGED from [androidx.emoji2:emoji2-views-helper:1.2.0] /Users/dwight.k/.gradle/caches/8.12/transforms/a474dc8919c6e55039ab552271d5b80e/transformed/jetified-emoji2-views-helper-1.2.0/AndroidManifest.xml:5:5-44
+MERGED from [androidx.emoji2:emoji2:1.2.0] /Users/dwight.k/.gradle/caches/8.12/transforms/4827947e39fb2755bd683b4d18ca332b/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:21:5-44
+MERGED from [androidx.emoji2:emoji2:1.2.0] /Users/dwight.k/.gradle/caches/8.12/transforms/4827947e39fb2755bd683b4d18ca332b/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:21:5-44
+MERGED from [androidx.viewpager2:viewpager2:1.0.0] /Users/dwight.k/.gradle/caches/8.12/transforms/348001fc14f48d864f0340ad5a7055f9/transformed/jetified-viewpager2-1.0.0/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.viewpager2:viewpager2:1.0.0] /Users/dwight.k/.gradle/caches/8.12/transforms/348001fc14f48d864f0340ad5a7055f9/transformed/jetified-viewpager2-1.0.0/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.fragment:fragment:1.3.6] /Users/dwight.k/.gradle/caches/8.12/transforms/e70778f7711dcd747f04ef7cc51f2d93/transformed/fragment-1.3.6/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.fragment:fragment:1.3.6] /Users/dwight.k/.gradle/caches/8.12/transforms/e70778f7711dcd747f04ef7cc51f2d93/transformed/fragment-1.3.6/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.activity:activity:1.8.0] /Users/dwight.k/.gradle/caches/8.12/transforms/3a995c168c5e1806f141a6a277badaac/transformed/jetified-activity-1.8.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.activity:activity:1.8.0] /Users/dwight.k/.gradle/caches/8.12/transforms/3a995c168c5e1806f141a6a277badaac/transformed/jetified-activity-1.8.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.drawerlayout:drawerlayout:1.1.1] /Users/dwight.k/.gradle/caches/8.12/transforms/635f6a7f4e8ad0a60bad26dcd047f268/transformed/drawerlayout-1.1.1/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.drawerlayout:drawerlayout:1.1.1] /Users/dwight.k/.gradle/caches/8.12/transforms/635f6a7f4e8ad0a60bad26dcd047f268/transformed/drawerlayout-1.1.1/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.coordinatorlayout:coordinatorlayout:1.1.0] /Users/dwight.k/.gradle/caches/8.12/transforms/9a31e1b63f8c3e24edd2f08406291b2d/transformed/coordinatorlayout-1.1.0/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.coordinatorlayout:coordinatorlayout:1.1.0] /Users/dwight.k/.gradle/caches/8.12/transforms/9a31e1b63f8c3e24edd2f08406291b2d/transformed/coordinatorlayout-1.1.0/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.dynamicanimation:dynamicanimation:1.0.0] /Users/dwight.k/.gradle/caches/8.12/transforms/158a1d23b2648f63e9222e95a1cec202/transformed/dynamicanimation-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.dynamicanimation:dynamicanimation:1.0.0] /Users/dwight.k/.gradle/caches/8.12/transforms/158a1d23b2648f63e9222e95a1cec202/transformed/dynamicanimation-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.transition:transition:1.2.0] /Users/dwight.k/.gradle/caches/8.12/transforms/9386e103d3e4ee0c4ceb24a9c043696f/transformed/transition-1.2.0/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.transition:transition:1.2.0] /Users/dwight.k/.gradle/caches/8.12/transforms/9386e103d3e4ee0c4ceb24a9c043696f/transformed/transition-1.2.0/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.vectordrawable:vectordrawable-animated:1.1.0] /Users/dwight.k/.gradle/caches/8.12/transforms/613c9f3ba525d8bcef1dddd84b2048a9/transformed/vectordrawable-animated-1.1.0/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.vectordrawable:vectordrawable-animated:1.1.0] /Users/dwight.k/.gradle/caches/8.12/transforms/613c9f3ba525d8bcef1dddd84b2048a9/transformed/vectordrawable-animated-1.1.0/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.vectordrawable:vectordrawable:1.1.0] /Users/dwight.k/.gradle/caches/8.12/transforms/7d46138a566ce415fcc35046dc62e772/transformed/vectordrawable-1.1.0/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.vectordrawable:vectordrawable:1.1.0] /Users/dwight.k/.gradle/caches/8.12/transforms/7d46138a566ce415fcc35046dc62e772/transformed/vectordrawable-1.1.0/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.viewpager:viewpager:1.0.0] /Users/dwight.k/.gradle/caches/8.12/transforms/9ff1dd076a319c3845fddab3a6225f12/transformed/viewpager-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.viewpager:viewpager:1.0.0] /Users/dwight.k/.gradle/caches/8.12/transforms/9ff1dd076a319c3845fddab3a6225f12/transformed/viewpager-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.legacy:legacy-support-core-utils:1.0.0] /Users/dwight.k/.gradle/caches/8.12/transforms/012482c8059bdabfa6113e4487208560/transformed/legacy-support-core-utils-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.legacy:legacy-support-core-utils:1.0.0] /Users/dwight.k/.gradle/caches/8.12/transforms/012482c8059bdabfa6113e4487208560/transformed/legacy-support-core-utils-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.loader:loader:1.0.0] /Users/dwight.k/.gradle/caches/8.12/transforms/cd6e2784c990f054b70e9d951e872b9c/transformed/loader-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.loader:loader:1.0.0] /Users/dwight.k/.gradle/caches/8.12/transforms/cd6e2784c990f054b70e9d951e872b9c/transformed/loader-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.recyclerview:recyclerview:1.1.0] /Users/dwight.k/.gradle/caches/8.12/transforms/b4060dfeff92ce6d40201c05237aa8a1/transformed/recyclerview-1.1.0/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.recyclerview:recyclerview:1.1.0] /Users/dwight.k/.gradle/caches/8.12/transforms/b4060dfeff92ce6d40201c05237aa8a1/transformed/recyclerview-1.1.0/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.customview:customview:1.1.0] /Users/dwight.k/.gradle/caches/8.12/transforms/6ac50a219ed351054cce7af256f3c6e0/transformed/customview-1.1.0/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.customview:customview:1.1.0] /Users/dwight.k/.gradle/caches/8.12/transforms/6ac50a219ed351054cce7af256f3c6e0/transformed/customview-1.1.0/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.core:core:1.12.0] /Users/dwight.k/.gradle/caches/8.12/transforms/96bfd91bf2a39377ced47a1036eeab2d/transformed/core-1.12.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.core:core:1.12.0] /Users/dwight.k/.gradle/caches/8.12/transforms/96bfd91bf2a39377ced47a1036eeab2d/transformed/core-1.12.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.savedstate:savedstate:1.2.1] /Users/dwight.k/.gradle/caches/8.12/transforms/a9d081ef1be3da1c2dc6692571483f71/transformed/jetified-savedstate-1.2.1/AndroidManifest.xml:20:5-44
+MERGED from [androidx.savedstate:savedstate:1.2.1] /Users/dwight.k/.gradle/caches/8.12/transforms/a9d081ef1be3da1c2dc6692571483f71/transformed/jetified-savedstate-1.2.1/AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-process:2.6.1] /Users/dwight.k/.gradle/caches/8.12/transforms/1c9d74d1fdd5ee7cf35916544a4669cc/transformed/jetified-lifecycle-process-2.6.1/AndroidManifest.xml:21:5-44
+MERGED from [androidx.lifecycle:lifecycle-process:2.6.1] /Users/dwight.k/.gradle/caches/8.12/transforms/1c9d74d1fdd5ee7cf35916544a4669cc/transformed/jetified-lifecycle-process-2.6.1/AndroidManifest.xml:21:5-44
+MERGED from [androidx.lifecycle:lifecycle-livedata-core:2.6.1] /Users/dwight.k/.gradle/caches/8.12/transforms/8f36525a8183649114dbe53c17de7da1/transformed/lifecycle-livedata-core-2.6.1/AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-livedata-core:2.6.1] /Users/dwight.k/.gradle/caches/8.12/transforms/8f36525a8183649114dbe53c17de7da1/transformed/lifecycle-livedata-core-2.6.1/AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-livedata:2.6.1] /Users/dwight.k/.gradle/caches/8.12/transforms/a1e598fecbd4ae3cdf775147bac90928/transformed/lifecycle-livedata-2.6.1/AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-livedata:2.6.1] /Users/dwight.k/.gradle/caches/8.12/transforms/a1e598fecbd4ae3cdf775147bac90928/transformed/lifecycle-livedata-2.6.1/AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-viewmodel:2.6.1] /Users/dwight.k/.gradle/caches/8.12/transforms/5fb116bc5364d6352747e139510ca165/transformed/lifecycle-viewmodel-2.6.1/AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-viewmodel:2.6.1] /Users/dwight.k/.gradle/caches/8.12/transforms/5fb116bc5364d6352747e139510ca165/transformed/lifecycle-viewmodel-2.6.1/AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-runtime:2.6.1] /Users/dwight.k/.gradle/caches/8.12/transforms/3e6f9ab8a874b0516e8ccf10a30ff76a/transformed/lifecycle-runtime-2.6.1/AndroidManifest.xml:5:5-44
+MERGED from [androidx.lifecycle:lifecycle-runtime:2.6.1] /Users/dwight.k/.gradle/caches/8.12/transforms/3e6f9ab8a874b0516e8ccf10a30ff76a/transformed/lifecycle-runtime-2.6.1/AndroidManifest.xml:5:5-44
+MERGED from [androidx.lifecycle:lifecycle-viewmodel-savedstate:2.6.1] /Users/dwight.k/.gradle/caches/8.12/transforms/ddd7803ec6a6d3ce8ef35303adfc8569/transformed/jetified-lifecycle-viewmodel-savedstate-2.6.1/AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-viewmodel-savedstate:2.6.1] /Users/dwight.k/.gradle/caches/8.12/transforms/ddd7803ec6a6d3ce8ef35303adfc8569/transformed/jetified-lifecycle-viewmodel-savedstate-2.6.1/AndroidManifest.xml:20:5-44
+MERGED from [androidx.core:core-ktx:1.12.0] /Users/dwight.k/.gradle/caches/8.12/transforms/bd13e30d4c1b0d3cfc745bb1d3f37f90/transformed/jetified-core-ktx-1.12.0/AndroidManifest.xml:5:5-44
+MERGED from [androidx.core:core-ktx:1.12.0] /Users/dwight.k/.gradle/caches/8.12/transforms/bd13e30d4c1b0d3cfc745bb1d3f37f90/transformed/jetified-core-ktx-1.12.0/AndroidManifest.xml:5:5-44
+MERGED from [androidx.annotation:annotation-experimental:1.3.0] /Users/dwight.k/.gradle/caches/8.12/transforms/bab6cbc6b74c137220e7bf8532d5b55b/transformed/jetified-annotation-experimental-1.3.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.annotation:annotation-experimental:1.3.0] /Users/dwight.k/.gradle/caches/8.12/transforms/bab6cbc6b74c137220e7bf8532d5b55b/transformed/jetified-annotation-experimental-1.3.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.cursoradapter:cursoradapter:1.0.0] /Users/dwight.k/.gradle/caches/8.12/transforms/63884ae02a0bd30eadafd88bcf57e0c4/transformed/cursoradapter-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.cursoradapter:cursoradapter:1.0.0] /Users/dwight.k/.gradle/caches/8.12/transforms/63884ae02a0bd30eadafd88bcf57e0c4/transformed/cursoradapter-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.cardview:cardview:1.0.0] /Users/dwight.k/.gradle/caches/8.12/transforms/716ea12dbfb1fd906a691a81cabc7d8f/transformed/cardview-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.cardview:cardview:1.0.0] /Users/dwight.k/.gradle/caches/8.12/transforms/716ea12dbfb1fd906a691a81cabc7d8f/transformed/cardview-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.interpolator:interpolator:1.0.0] /Users/dwight.k/.gradle/caches/8.12/transforms/8e9a2feaee9acf51cd15526b4430b107/transformed/interpolator-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.interpolator:interpolator:1.0.0] /Users/dwight.k/.gradle/caches/8.12/transforms/8e9a2feaee9acf51cd15526b4430b107/transformed/interpolator-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.1] /Users/dwight.k/.gradle/caches/8.12/transforms/f0c72e0d4218fc86b9219211a0e92c47/transformed/versionedparcelable-1.1.1/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.1] /Users/dwight.k/.gradle/caches/8.12/transforms/f0c72e0d4218fc86b9219211a0e92c47/transformed/versionedparcelable-1.1.1/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.profileinstaller:profileinstaller:1.3.0] /Users/dwight.k/.gradle/caches/8.12/transforms/bd307966a00c941951a9c0a65a9f13dc/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:21:5-44
+MERGED from [androidx.profileinstaller:profileinstaller:1.3.0] /Users/dwight.k/.gradle/caches/8.12/transforms/bd307966a00c941951a9c0a65a9f13dc/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:21:5-44
+MERGED from [androidx.startup:startup-runtime:1.1.1] /Users/dwight.k/.gradle/caches/8.12/transforms/632de90dfefe144dfea85f554b494704/transformed/jetified-startup-runtime-1.1.1/AndroidManifest.xml:21:5-23:41
+MERGED from [androidx.startup:startup-runtime:1.1.1] /Users/dwight.k/.gradle/caches/8.12/transforms/632de90dfefe144dfea85f554b494704/transformed/jetified-startup-runtime-1.1.1/AndroidManifest.xml:21:5-23:41
+MERGED from [androidx.tracing:tracing:1.0.0] /Users/dwight.k/.gradle/caches/8.12/transforms/e2120a429a6a23af1a5d8238e1b425c9/transformed/jetified-tracing-1.0.0/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.tracing:tracing:1.0.0] /Users/dwight.k/.gradle/caches/8.12/transforms/e2120a429a6a23af1a5d8238e1b425c9/transformed/jetified-tracing-1.0.0/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.arch.core:core-runtime:2.2.0] /Users/dwight.k/.gradle/caches/8.12/transforms/c2d04866387940a200814b48b78eec2a/transformed/core-runtime-2.2.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.arch.core:core-runtime:2.2.0] /Users/dwight.k/.gradle/caches/8.12/transforms/c2d04866387940a200814b48b78eec2a/transformed/core-runtime-2.2.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.documentfile:documentfile:1.0.0] /Users/dwight.k/.gradle/caches/8.12/transforms/2c6d4adaa19c7d730eec0d55193f0b31/transformed/documentfile-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.documentfile:documentfile:1.0.0] /Users/dwight.k/.gradle/caches/8.12/transforms/2c6d4adaa19c7d730eec0d55193f0b31/transformed/documentfile-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.localbroadcastmanager:localbroadcastmanager:1.0.0] /Users/dwight.k/.gradle/caches/8.12/transforms/9f2bdf0ede1bb0be13593e1904dd26e0/transformed/localbroadcastmanager-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.localbroadcastmanager:localbroadcastmanager:1.0.0] /Users/dwight.k/.gradle/caches/8.12/transforms/9f2bdf0ede1bb0be13593e1904dd26e0/transformed/localbroadcastmanager-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.print:print:1.0.0] /Users/dwight.k/.gradle/caches/8.12/transforms/5bd6da90414854f85c1a7296864ffa73/transformed/print-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.print:print:1.0.0] /Users/dwight.k/.gradle/caches/8.12/transforms/5bd6da90414854f85c1a7296864ffa73/transformed/print-1.0.0/AndroidManifest.xml:20:5-44
+	android:targetSdkVersion
+		INJECTED from /Users/dwight.k/Desktop/Utill/rhm/gramii/android-sms-forwarder/app/src/main/AndroidManifest.xml
+	android:minSdkVersion
+		INJECTED from /Users/dwight.k/Desktop/Utill/rhm/gramii/android-sms-forwarder/app/src/main/AndroidManifest.xml
+provider#androidx.startup.InitializationProvider
+ADDED from [androidx.emoji2:emoji2:1.2.0] /Users/dwight.k/.gradle/caches/8.12/transforms/4827947e39fb2755bd683b4d18ca332b/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:24:9-32:20
+MERGED from [androidx.lifecycle:lifecycle-process:2.6.1] /Users/dwight.k/.gradle/caches/8.12/transforms/1c9d74d1fdd5ee7cf35916544a4669cc/transformed/jetified-lifecycle-process-2.6.1/AndroidManifest.xml:24:9-32:20
+MERGED from [androidx.lifecycle:lifecycle-process:2.6.1] /Users/dwight.k/.gradle/caches/8.12/transforms/1c9d74d1fdd5ee7cf35916544a4669cc/transformed/jetified-lifecycle-process-2.6.1/AndroidManifest.xml:24:9-32:20
+MERGED from [androidx.profileinstaller:profileinstaller:1.3.0] /Users/dwight.k/.gradle/caches/8.12/transforms/bd307966a00c941951a9c0a65a9f13dc/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:24:9-32:20
+MERGED from [androidx.profileinstaller:profileinstaller:1.3.0] /Users/dwight.k/.gradle/caches/8.12/transforms/bd307966a00c941951a9c0a65a9f13dc/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:24:9-32:20
+MERGED from [androidx.startup:startup-runtime:1.1.1] /Users/dwight.k/.gradle/caches/8.12/transforms/632de90dfefe144dfea85f554b494704/transformed/jetified-startup-runtime-1.1.1/AndroidManifest.xml:26:9-30:34
+MERGED from [androidx.startup:startup-runtime:1.1.1] /Users/dwight.k/.gradle/caches/8.12/transforms/632de90dfefe144dfea85f554b494704/transformed/jetified-startup-runtime-1.1.1/AndroidManifest.xml:26:9-30:34
+	tools:node
+		ADDED from [androidx.emoji2:emoji2:1.2.0] /Users/dwight.k/.gradle/caches/8.12/transforms/4827947e39fb2755bd683b4d18ca332b/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:28:13-31
+	android:authorities
+		ADDED from [androidx.emoji2:emoji2:1.2.0] /Users/dwight.k/.gradle/caches/8.12/transforms/4827947e39fb2755bd683b4d18ca332b/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:26:13-68
+	android:exported
+		ADDED from [androidx.emoji2:emoji2:1.2.0] /Users/dwight.k/.gradle/caches/8.12/transforms/4827947e39fb2755bd683b4d18ca332b/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:27:13-37
+	android:name
+		ADDED from [androidx.emoji2:emoji2:1.2.0] /Users/dwight.k/.gradle/caches/8.12/transforms/4827947e39fb2755bd683b4d18ca332b/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:25:13-67
+meta-data#androidx.emoji2.text.EmojiCompatInitializer
+ADDED from [androidx.emoji2:emoji2:1.2.0] /Users/dwight.k/.gradle/caches/8.12/transforms/4827947e39fb2755bd683b4d18ca332b/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:29:13-31:52
+	android:value
+		ADDED from [androidx.emoji2:emoji2:1.2.0] /Users/dwight.k/.gradle/caches/8.12/transforms/4827947e39fb2755bd683b4d18ca332b/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:31:17-49
+	android:name
+		ADDED from [androidx.emoji2:emoji2:1.2.0] /Users/dwight.k/.gradle/caches/8.12/transforms/4827947e39fb2755bd683b4d18ca332b/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:30:17-75
+permission#${applicationId}.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION
+ADDED from [androidx.core:core:1.12.0] /Users/dwight.k/.gradle/caches/8.12/transforms/96bfd91bf2a39377ced47a1036eeab2d/transformed/core-1.12.0/AndroidManifest.xml:22:5-24:47
+	android:protectionLevel
+		ADDED from [androidx.core:core:1.12.0] /Users/dwight.k/.gradle/caches/8.12/transforms/96bfd91bf2a39377ced47a1036eeab2d/transformed/core-1.12.0/AndroidManifest.xml:24:9-44
+	android:name
+		ADDED from [androidx.core:core:1.12.0] /Users/dwight.k/.gradle/caches/8.12/transforms/96bfd91bf2a39377ced47a1036eeab2d/transformed/core-1.12.0/AndroidManifest.xml:23:9-81
+permission#com.gramii.smsforwarder.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION
+ADDED from [androidx.core:core:1.12.0] /Users/dwight.k/.gradle/caches/8.12/transforms/96bfd91bf2a39377ced47a1036eeab2d/transformed/core-1.12.0/AndroidManifest.xml:22:5-24:47
+	android:protectionLevel
+		ADDED from [androidx.core:core:1.12.0] /Users/dwight.k/.gradle/caches/8.12/transforms/96bfd91bf2a39377ced47a1036eeab2d/transformed/core-1.12.0/AndroidManifest.xml:24:9-44
+	android:name
+		ADDED from [androidx.core:core:1.12.0] /Users/dwight.k/.gradle/caches/8.12/transforms/96bfd91bf2a39377ced47a1036eeab2d/transformed/core-1.12.0/AndroidManifest.xml:23:9-81
+uses-permission#${applicationId}.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION
+ADDED from [androidx.core:core:1.12.0] /Users/dwight.k/.gradle/caches/8.12/transforms/96bfd91bf2a39377ced47a1036eeab2d/transformed/core-1.12.0/AndroidManifest.xml:26:5-97
+	android:name
+		ADDED from [androidx.core:core:1.12.0] /Users/dwight.k/.gradle/caches/8.12/transforms/96bfd91bf2a39377ced47a1036eeab2d/transformed/core-1.12.0/AndroidManifest.xml:26:22-94
+uses-permission#com.gramii.smsforwarder.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION
+ADDED from [androidx.core:core:1.12.0] /Users/dwight.k/.gradle/caches/8.12/transforms/96bfd91bf2a39377ced47a1036eeab2d/transformed/core-1.12.0/AndroidManifest.xml:26:5-97
+	android:name
+		ADDED from [androidx.core:core:1.12.0] /Users/dwight.k/.gradle/caches/8.12/transforms/96bfd91bf2a39377ced47a1036eeab2d/transformed/core-1.12.0/AndroidManifest.xml:26:22-94
+meta-data#androidx.lifecycle.ProcessLifecycleInitializer
+ADDED from [androidx.lifecycle:lifecycle-process:2.6.1] /Users/dwight.k/.gradle/caches/8.12/transforms/1c9d74d1fdd5ee7cf35916544a4669cc/transformed/jetified-lifecycle-process-2.6.1/AndroidManifest.xml:29:13-31:52
+	android:value
+		ADDED from [androidx.lifecycle:lifecycle-process:2.6.1] /Users/dwight.k/.gradle/caches/8.12/transforms/1c9d74d1fdd5ee7cf35916544a4669cc/transformed/jetified-lifecycle-process-2.6.1/AndroidManifest.xml:31:17-49
+	android:name
+		ADDED from [androidx.lifecycle:lifecycle-process:2.6.1] /Users/dwight.k/.gradle/caches/8.12/transforms/1c9d74d1fdd5ee7cf35916544a4669cc/transformed/jetified-lifecycle-process-2.6.1/AndroidManifest.xml:30:17-78
+meta-data#androidx.profileinstaller.ProfileInstallerInitializer
+ADDED from [androidx.profileinstaller:profileinstaller:1.3.0] /Users/dwight.k/.gradle/caches/8.12/transforms/bd307966a00c941951a9c0a65a9f13dc/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:29:13-31:52
+	android:value
+		ADDED from [androidx.profileinstaller:profileinstaller:1.3.0] /Users/dwight.k/.gradle/caches/8.12/transforms/bd307966a00c941951a9c0a65a9f13dc/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:31:17-49
+	android:name
+		ADDED from [androidx.profileinstaller:profileinstaller:1.3.0] /Users/dwight.k/.gradle/caches/8.12/transforms/bd307966a00c941951a9c0a65a9f13dc/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:30:17-85
+receiver#androidx.profileinstaller.ProfileInstallReceiver
+ADDED from [androidx.profileinstaller:profileinstaller:1.3.0] /Users/dwight.k/.gradle/caches/8.12/transforms/bd307966a00c941951a9c0a65a9f13dc/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:34:9-52:20
+	android:enabled
+		ADDED from [androidx.profileinstaller:profileinstaller:1.3.0] /Users/dwight.k/.gradle/caches/8.12/transforms/bd307966a00c941951a9c0a65a9f13dc/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:37:13-35
+	android:exported
+		ADDED from [androidx.profileinstaller:profileinstaller:1.3.0] /Users/dwight.k/.gradle/caches/8.12/transforms/bd307966a00c941951a9c0a65a9f13dc/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:38:13-36
+	android:permission
+		ADDED from [androidx.profileinstaller:profileinstaller:1.3.0] /Users/dwight.k/.gradle/caches/8.12/transforms/bd307966a00c941951a9c0a65a9f13dc/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:39:13-57
+	android:directBootAware
+		ADDED from [androidx.profileinstaller:profileinstaller:1.3.0] /Users/dwight.k/.gradle/caches/8.12/transforms/bd307966a00c941951a9c0a65a9f13dc/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:36:13-44
+	android:name
+		ADDED from [androidx.profileinstaller:profileinstaller:1.3.0] /Users/dwight.k/.gradle/caches/8.12/transforms/bd307966a00c941951a9c0a65a9f13dc/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:35:13-76
+intent-filter#action:name:androidx.profileinstaller.action.INSTALL_PROFILE
+ADDED from [androidx.profileinstaller:profileinstaller:1.3.0] /Users/dwight.k/.gradle/caches/8.12/transforms/bd307966a00c941951a9c0a65a9f13dc/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:40:13-42:29
+action#androidx.profileinstaller.action.INSTALL_PROFILE
+ADDED from [androidx.profileinstaller:profileinstaller:1.3.0] /Users/dwight.k/.gradle/caches/8.12/transforms/bd307966a00c941951a9c0a65a9f13dc/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:41:17-91
+	android:name
+		ADDED from [androidx.profileinstaller:profileinstaller:1.3.0] /Users/dwight.k/.gradle/caches/8.12/transforms/bd307966a00c941951a9c0a65a9f13dc/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:41:25-88
+intent-filter#action:name:androidx.profileinstaller.action.SKIP_FILE
+ADDED from [androidx.profileinstaller:profileinstaller:1.3.0] /Users/dwight.k/.gradle/caches/8.12/transforms/bd307966a00c941951a9c0a65a9f13dc/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:43:13-45:29
+action#androidx.profileinstaller.action.SKIP_FILE
+ADDED from [androidx.profileinstaller:profileinstaller:1.3.0] /Users/dwight.k/.gradle/caches/8.12/transforms/bd307966a00c941951a9c0a65a9f13dc/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:44:17-85
+	android:name
+		ADDED from [androidx.profileinstaller:profileinstaller:1.3.0] /Users/dwight.k/.gradle/caches/8.12/transforms/bd307966a00c941951a9c0a65a9f13dc/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:44:25-82
+intent-filter#action:name:androidx.profileinstaller.action.SAVE_PROFILE
+ADDED from [androidx.profileinstaller:profileinstaller:1.3.0] /Users/dwight.k/.gradle/caches/8.12/transforms/bd307966a00c941951a9c0a65a9f13dc/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:46:13-48:29
+action#androidx.profileinstaller.action.SAVE_PROFILE
+ADDED from [androidx.profileinstaller:profileinstaller:1.3.0] /Users/dwight.k/.gradle/caches/8.12/transforms/bd307966a00c941951a9c0a65a9f13dc/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:47:17-88
+	android:name
+		ADDED from [androidx.profileinstaller:profileinstaller:1.3.0] /Users/dwight.k/.gradle/caches/8.12/transforms/bd307966a00c941951a9c0a65a9f13dc/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:47:25-85
+intent-filter#action:name:androidx.profileinstaller.action.BENCHMARK_OPERATION
+ADDED from [androidx.profileinstaller:profileinstaller:1.3.0] /Users/dwight.k/.gradle/caches/8.12/transforms/bd307966a00c941951a9c0a65a9f13dc/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:49:13-51:29
+action#androidx.profileinstaller.action.BENCHMARK_OPERATION
+ADDED from [androidx.profileinstaller:profileinstaller:1.3.0] /Users/dwight.k/.gradle/caches/8.12/transforms/bd307966a00c941951a9c0a65a9f13dc/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:50:17-95
+	android:name
+		ADDED from [androidx.profileinstaller:profileinstaller:1.3.0] /Users/dwight.k/.gradle/caches/8.12/transforms/bd307966a00c941951a9c0a65a9f13dc/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:50:25-92
