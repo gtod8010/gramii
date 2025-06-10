@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useUser } from '@/hooks/useUser';
 import PageBreadCrumb from '@/components/common/PageBreadCrumb';
 import Button from '@/components/ui/button/Button';
-import { statusDisplayNames } from '@/app/(admin)/order-history/page';
+import { statusDisplayNames } from '@/lib/constants';
 
 interface ManagedUser {
   id: number;
@@ -140,8 +140,12 @@ const ManageUsersPage = () => {
       }
       const data = await response.json();
       setUsers(data);
-    } catch (err: any) {
-      setErrorUsers(err.message);
+    } catch (err) {
+      if (err instanceof Error) {
+        setErrorUsers(err.message);
+      } else {
+        setErrorUsers('An unknown error occurred');
+      }
       setUsers([]);
     } finally {
       setIsLoadingUsers(false);
@@ -184,9 +188,13 @@ const ManageUsersPage = () => {
       fetchUsers(); 
       setEditingUserId(null);
       setEditingPoints("");
-    } catch (err: any) {
+    } catch (err) {
       console.error('Error saving points:', err);
-      alert(`오류: ${err.message}`);
+      if (err instanceof Error) {
+        alert(`오류: ${err.message}`);
+      } else {
+        alert('An unknown error occurred');
+      }
     }
   };
 
@@ -207,8 +215,7 @@ const ManageUsersPage = () => {
       const fetchAndCombineActivities = async () => {
         setIsLoadingActivities(true);
         setErrorActivities(null);
-        let combinedActivities: ActivityItem[] = [];
-
+        
         try {
           const ordersResponse = await fetch(`/api/orders?userId=${selectedUserForModal.id}&limit=50`);
           if (!ordersResponse.ok) {
@@ -267,8 +274,12 @@ const ManageUsersPage = () => {
           tempCombinedActivities.sort((a, b) => b.date.getTime() - a.date.getTime());
           setCurrentUserActivities(tempCombinedActivities);
 
-        } catch (err: any) {
-          setErrorActivities(err.message);
+        } catch (err) {
+          if (err instanceof Error) {
+            setErrorActivities(err.message);
+          } else {
+            setErrorActivities('An unknown error occurred');
+          }
           setCurrentUserActivities([]);
         } finally {
           setIsLoadingActivities(false);
@@ -331,7 +342,7 @@ const ManageUsersPage = () => {
         // servicesArray.forEach(s => s.service_type_name = '기타');
       }
       setAllServices(servicesArray);
-    } catch (err: any) {
+    } catch (err) {
       console.error("Error fetching all services:", err);
       setAllServices([]);
       // 사용자에게 오류 표시 (예: 토스트 메시지)
@@ -351,8 +362,12 @@ const ManageUsersPage = () => {
       }
       const data: UserServicePriceItem[] = await response.json();
       setUserServicePrices(data);
-    } catch (err: any) {
-      setErrorUserServicePrices(err.message);
+    } catch (err) {
+      if (err instanceof Error) {
+        setErrorUserServicePrices(err.message);
+      } else {
+        setErrorUserServicePrices('An unknown error occurred');
+      }
       setUserServicePrices([]);
     } finally {
       setIsLoadingUserServicePrices(false);
@@ -417,8 +432,12 @@ const ManageUsersPage = () => {
       alert(editingSpecificPrice ? '특별 단가가 성공적으로 수정되었습니다.' : '특별 단가가 성공적으로 추가되었습니다.');
       fetchUserServicePricesForModal(selectedUserForPriceModal.id);
       handleCancelEditSpecificPrice();
-    } catch (err: any) {
-      alert(`오류: ${err.message}`);
+    } catch (err) {
+      if (err instanceof Error) {
+        alert(`오류: ${err.message}`);
+      } else {
+        alert('An unknown error occurred');
+      }
     }
   };
 
@@ -435,8 +454,12 @@ const ManageUsersPage = () => {
       }
       alert('특별 단가가 성공적으로 삭제되었습니다.');
       fetchUserServicePricesForModal(selectedUserForPriceModal.id);
-    } catch (err: any) {
-      alert(`오류: ${err.message}`);
+    } catch (err) {
+      if (err instanceof Error) {
+        alert(`오류: ${err.message}`);
+      } else {
+        alert('An unknown error occurred');
+      }
     }
   };
 
@@ -618,7 +641,7 @@ const ManageUsersPage = () => {
                 </h4>
                 {isLoadingAllServices && <p>서비스 목록 로딩 중...</p>}
                 {!isLoadingAllServices && Object.keys(categorizedServices).length === 0 && allServices.length > 0 && (
-                   <p className="text-sm text-gray-500 dark:text-gray-400">서비스 카테고리 정보를 불러오지 못했습니다. 서비스 목록에 'service_type_name' 필드가 필요합니다.</p>
+                   <p className="text-sm text-gray-500 dark:text-gray-400">서비스 카테고리 정보를 불러오지 못했습니다. 서비스 목록에 <code className="text-xs bg-gray-200 dark:bg-gray-600 p-1 rounded">service_type_name</code> 필드가 필요합니다.</p>
                 )}
                 {!isLoadingAllServices && Object.keys(categorizedServices).length > 0 && (
                   <>
@@ -635,7 +658,7 @@ const ManageUsersPage = () => {
                               className="w-full flex justify-between items-center px-3 py-2 text-left bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 focus:outline-none disabled:opacity-70"
                             >
                               <span className="font-semibold text-sm text-gray-700 dark:text-gray-200">{category} ({servicesInCategory.length})</span>
-                              <span className={`transform transition-transform duration-200 ${expandedCategories.has(category) ? 'rotate-180' : ''}`}>
+                              <span className={`transform transition-transform duration-200 ${expandedCategories.has(category) ? "rotate-180" : ""}`}>
                                 ▼
                               </span>
                             </button>

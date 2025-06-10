@@ -12,7 +12,7 @@ import PageBreadCrumb from '@/components/common/PageBreadCrumb';
 // import CategoryModal from '@/components/services/CategoryModal'; // 스페셜 관리 모달로 변경 예정
 import SpecialManagementModal from '@/components/services/SpecialManagementModal'; 
 import ServiceDescriptionModal from '@/components/services/ServiceDescriptionModal'; // 상세 보기 모달 추가
-import { ChevronUpIcon, ChevronDownIcon, TrashIcon, PencilSquareIcon as PencilIcon } from '@heroicons/react/24/solid';
+import { ChevronUpIcon, ChevronDownIcon, TrashIcon } from '@heroicons/react/24/solid';
 
 interface Category { // Category 인터페이스 추가
   id: number;
@@ -240,9 +240,13 @@ const ManageServicesPage = () => {
         alert('서비스가 성공적으로 삭제되었습니다.');
         fetchAllServicesAndGroup(); // 목록 새로고침
         // fetchCategories(); // 카테고리/타입에 영향이 없다면 생략 가능
-      } catch (error: any) {
+      } catch (error) {
         console.error("Error deleting service:", error);
-        alert(`서비스 삭제 중 오류 발생: ${error.message}`);
+        if (error instanceof Error) {
+          alert(`서비스 삭제 중 오류 발생: ${error.message}`);
+        } else {
+          alert(`서비스 삭제 중 알 수 없는 오류 발생`);
+        }
       } finally {
         setIsLoading(false); // 로딩 상태 종료
       }
@@ -263,9 +267,13 @@ const ManageServicesPage = () => {
         alert('카테고리가 성공적으로 삭제되었습니다.');
         fetchCategories(); // 카테고리 목록 새로고침
         fetchAllServicesAndGroup(); // 전체 서비스 목록 새로고침
-      } catch (error: any) {
+      } catch (error) {
         console.error("Error deleting category:", error);
-        alert(`카테고리 삭제 중 오류 발생: ${error.message}`);
+        if (error instanceof Error) {
+          alert(`카테고리 삭제 중 오류 발생: ${error.message}`);
+        } else {
+          alert(`카테고리 삭제 중 알 수 없는 오류 발생`);
+        }
       } finally {
         setIsLoading(false);
       }

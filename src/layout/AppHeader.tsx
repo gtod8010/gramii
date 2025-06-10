@@ -1,13 +1,10 @@
 "use client";
 import { ThemeToggleButton } from "@/components/common/ThemeToggleButton";
-import NotificationDropdown from "@/components/header/NotificationDropdown";
 import UserDropdown from "@/components/header/UserDropdown";
 import { useSidebar } from "@/context/SidebarContext";
-import Link from "next/link";
-import React, { useState } from "react";
+import React from "react";
 import { usePathname } from 'next/navigation';
 import { useUser } from "@/hooks/useUser";
-import { WalletIcon } from "@heroicons/react/24/outline";
 
 // 페이지 경로에 따른 타이틀 매핑
 const pageTitles: { [key: string]: string } = {
@@ -72,15 +69,6 @@ const AppHeader: React.FC = () => {
         {/* 오른쪽 영역: 테마 토글, 사용자 드롭다운 */}
         <div className="flex items-center gap-3 sm:gap-4">
           <ThemeToggleButton className="mr-2" />
-          {/* 예치금 잔액 표시 (UserDropdown 왼쪽, ThemeToggleButton 오른쪽) 부분 제거 */}
-          {/* {!isLoading && user && user.role === 'user' && user.points !== undefined && (
-            <div className="flex items-center gap-1">
-              <WalletIcon className="h-5 w-5 text-gray-500 dark:text-gray-400" /> 
-              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                {user.points.toLocaleString()} P
-              </span>
-            </div>
-          )} */}
           <UserDropdown />
         </div>
       </div>

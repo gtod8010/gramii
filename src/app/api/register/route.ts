@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { query } from '@/lib/db';
 import bcrypt from 'bcrypt';
+import { DatabaseError } from 'pg';
 
 const SALT_ROUNDS = 10; // 해시 강도, 숫자가 클수록 보안은 강해지지만 해싱 시간이 오래 걸림
 
@@ -95,15 +96,16 @@ export async function POST(req: NextRequest) {
       user: newUserResult.rows[0],
     }, { status: 201 });
 
-  } catch (error: any) {
+  } catch (error) {
     console.error('Registration API error:', error);
-    if (error.code === '23505') { // Unique violation
+    if (error instanceof DatabaseError && error.code === '23505') { // Unique violation
       let violatedField = 'A unique field';
       if (error.constraint === 'users_email_key') violatedField = 'Email';
       if (error.constraint === 'users_phone_number_key') violatedField = 'Phone number';
       if (error.constraint === 'users_admin_referral_code_key') violatedField = 'Admin referral code (system error, please try again)'; 
       return NextResponse.json({ message: `${violatedField} already exists. ${error.detail || ''}` }, { status: 409 });
     }
-    return NextResponse.json({ message: 'An internal server error occurred', error: error.message }, { status: 500 });
+    const errorMessage = error instanceof Error ? error.message : 'An internal server error occurred';
+    return NextResponse.json({ message: errorMessage }, { status: 500 });
   }
 }

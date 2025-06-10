@@ -160,9 +160,13 @@ export default function OrderPage() {
       
       console.log('[OrderPage] Final structuredData to be set to state (sample):', JSON.parse(JSON.stringify(structuredData.slice(0,1))));
       setServiceCategories(structuredData);
-    } catch (err: any) {
+    } catch (err) {
       console.error('[OrderPage] Error in fetchAndStructureServices:', err);
-      setErrorServices(err.message);
+      if (err instanceof Error) {
+        setErrorServices(err.message);
+      } else {
+        setErrorServices('An unknown error occurred while fetching services.');
+      }
       setServiceCategories([]);
     } finally {
       setIsLoadingServices(false);
@@ -295,9 +299,13 @@ export default function OrderPage() {
         updateUserInStorage({ ...user, points: result.updatedUserPoints });
       }
       resetForm(); 
-    } catch (error: any) {
+    } catch (error) {
       console.error("Order submission error:", error);
-      setSubmitMessage({ type: 'error', text: error.message || '주문 처리 중 오류가 발생했습니다.' });
+      if (error instanceof Error) {
+        setSubmitMessage({ type: 'error', text: error.message || '주문 처리 중 오류가 발생했습니다.' });
+      } else {
+        setSubmitMessage({ type: 'error', text: '주문 처리 중 알 수 없는 오류가 발생했습니다.' });
+      }
     } finally {
       setIsSubmitting(false);
     }

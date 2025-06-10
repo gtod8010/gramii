@@ -1,26 +1,10 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from 'react';
+import Image from 'next/image';
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import { useUser } from '@/hooks/useUser'; // useUser 훅 임포트
-
-// 주문 상태에 따른 뱃지 색상을 정의합니다.
-const statusColors: { [key: string]: string } = {
-  Pending: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-100',
-  Processing: 'bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-100',
-  Completed: 'bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100',
-  Partial: 'bg-purple-100 text-purple-800 dark:bg-purple-800 dark:text-purple-100',
-  Cancelled: 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200',
-};
-
-// API의 order_status 값과 프론트엔드 표시 이름 매핑
-export const statusDisplayNames: { [key: string]: string } = {
-  Pending: '대기중',
-  Processing: '처리중',
-  Completed: '완료됨',
-  Partial: '부분완료됨',
-  Cancelled: '취소됨',
-};
+import { statusColors, statusDisplayNames } from '@/lib/constants';
 
 // API 응답으로 받는 주문 데이터 타입 (API 응답 키와 일치하도록 수정)
 interface Order {
@@ -56,7 +40,7 @@ const OrderHistoryPage = () => {
   // API 호출을 위한 필터 값 변환 (예: '대기중' -> 'Pending')
   const getApiFilterStatus = (filterDisplayName: string): string | undefined => {
     if (filterDisplayName === '전체') return undefined;
-    const entry = Object.entries(statusDisplayNames).find(([_, value]) => value === filterDisplayName);
+    const entry = Object.entries(statusDisplayNames).find(([, value]) => value === filterDisplayName);
     return entry ? entry[0] : undefined;
   };
 
@@ -93,9 +77,13 @@ const OrderHistoryPage = () => {
       setTotalOrders(data.totalOrders || 0);
       setCurrentPage(data.currentPage || 1); // API에서 현재 페이지를 반환하면 사용
 
-    } catch (err: any) {
+    } catch (err) {
       console.error("Failed to fetch orders:", err);
-      setError(err.message);
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("An unknown error occurred while fetching orders.");
+      }
       setOrders([]); // 오류 발생 시 주문 목록 비우기
     } finally {
       setIsLoading(false);
@@ -219,7 +207,7 @@ const OrderHistoryPage = () => {
                       </td>
                       <td className="px-6 py-4 whitespace-pre-wrap text-sm text-gray-500 dark:text-gray-300 max-w-md">
                         <div className="flex items-center mb-1">
-                          {order.serviceIcon && <span className="mr-2"><img src={order.serviceIcon} alt="icon" className="w-4 h-4"/></span>} {/* API에 serviceIcon URL이 있다면 img 태그 사용 */}
+                          {order.serviceIcon && <span className="mr-2"><Image src={order.serviceIcon} alt="icon" width={16} height={16} /></span>} {/* API에 serviceIcon URL이 있다면 img 태그 사용 */}
                           <span className="font-semibold text-gray-800 dark:text-gray-100">{order.serviceName}</span>
                         </div>
                         <p><span className="font-medium">주문 링크 |</span> <a href={order.link} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline dark:text-blue-400 break-all">{order.link}</a></p>

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Modal } from '@/components/ui/modal';
 import Input from '@/components/form/input/InputField';
 import Button from '@/components/ui/button/Button';
@@ -128,8 +128,9 @@ const SpecialManagementModal: React.FC<SpecialManagementModalProps> = ({
       // 여기서는 모달을 닫도록 처리 (목록으로 돌아가기는 사용자가 취소 버튼을 누르는 것과 유사)
       // 또는 setMode('list')로 변경하여 목록을 다시 보여줄 수도 있음
       onClose(); 
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : '알 수 없는 오류가 발생했습니다.';
+      setError(message);
     } finally {
       setIsSubmitting(false);
     }
@@ -151,8 +152,9 @@ const SpecialManagementModal: React.FC<SpecialManagementModalProps> = ({
       }
       onSpecialManagementUpdated(); // 목록 새로고침
       // mode는 여전히 'list'이므로 별도 변경 불필요
-    } catch (err: any) {
-      setError(err.message); // 에러 메시지 표시
+    } catch (err) {
+      const message = err instanceof Error ? err.message : '알 수 없는 오류가 발생했습니다.';
+      setError(message); // 에러 메시지 표시
     } finally {
       setIsSubmitting(false);
     }

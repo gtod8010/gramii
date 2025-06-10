@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { type NextRequest, NextResponse } from 'next/server';
 import { getClient } from '@/lib/db';
 import { z } from 'zod';
 
@@ -10,10 +10,11 @@ const updateSpecialSchema = z.object({
 });
 
 // 특정 스페셜 조회 (GET by ID) - 트랜잭션 불필요
-export async function GET(request: Request, { params }: { params: { id: string } }) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id: idParam } = await params;
   const { query } = await import('@/lib/db'); // GET을 위해 query 임시 사용
   try {
-    const specialId = parseInt(params.id, 10);
+    const specialId = parseInt(idParam, 10);
     if (isNaN(specialId)) {
       return NextResponse.json({ message: '유효하지 않은 스페셜 ID입니다.' }, { status: 400 });
     }
@@ -28,17 +29,18 @@ export async function GET(request: Request, { params }: { params: { id: string }
     }
     return NextResponse.json(special);
   } catch (error) {
-    console.error(`Error fetching special ${params.id}:`, error);
+    console.error(`Error fetching special ${idParam}:`, error);
     return NextResponse.json({ message: '스페셜 조회 중 오류 발생', error: String(error) }, { status: 500 });
   }
 }
 
 // 특정 스페셜 수정 (PUT)
-export async function PUT(request: Request, { params }: { params: { id: string } }) {
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id: idParam } = await params;
   const client = await getClient();
   try {
     await client.query('BEGIN');
-    const specialId = parseInt(params.id, 10);
+    const specialId = parseInt(idParam, 10);
     if (isNaN(specialId)) {
       return NextResponse.json({ message: '유효하지 않은 스페셜 ID입니다.' }, { status: 400 });
     }
@@ -99,9 +101,9 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     }
     return NextResponse.json(updatedSpecial);
 
-  } catch (error: any) {
+  } catch (error) {
     await client.query('ROLLBACK');
-    console.error(`Error updating special ${params.id}:`, error);
+    console.error(`Error updating special ${idParam}:`, error);
     if (error instanceof z.ZodError) {
         return NextResponse.json({ message: '입력값 유효성 검사 실패', errors: error.flatten().fieldErrors }, { status: 400 });
     }
@@ -112,11 +114,12 @@ export async function PUT(request: Request, { params }: { params: { id: string }
 }
 
 // 특정 스페셜 삭제 (DELETE)
-export async function DELETE(request: Request, { params }: { params: { id: string } }) {
+export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id: idParam } = await params;
   const client = await getClient();
   try {
     await client.query('BEGIN');
-    const specialId = parseInt(params.id, 10);
+    const specialId = parseInt(idParam, 10);
     if (isNaN(specialId)) {
       return NextResponse.json({ message: '유효하지 않은 스페셜 ID입니다.' }, { status: 400 });
     }
@@ -132,9 +135,9 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
     await client.query('COMMIT');
     return NextResponse.json({ message: '스페셜이 성공적으로 삭제되었습니다.', deletedSpecial: result.rows[0] });
 
-  } catch (error: any) {
+  } catch (error) {
     await client.query('ROLLBACK');
-    console.error(`Error deleting special ${params.id}:`, error);
+    console.error(`Error deleting special ${idParam}:`, error);
     return NextResponse.json({ message: '스페셜 삭제 중 오류가 발생했습니다.', error: String(error) }, { status: 500 });
   } finally {
     client.release();

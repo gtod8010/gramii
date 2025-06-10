@@ -24,7 +24,7 @@ export async function getUserIdFromRequest(request: NextRequest): Promise<number
 }
 
 // 필요하다면 사용자 역할을 가져오는 임시 함수도 만들 수 있습니다.
-export async function getUserRoleFromRequest(request: NextRequest): Promise<string | null> {
+export async function getUserRoleFromRequest(): Promise<string | null> {
   // const userId = await getUserIdFromRequest(request);
   // 여기서 userId를 기반으로 역할을 반환하는 로직 추가 가능
   console.log('[Auth Mock] getUserRoleFromRequest called, returning null for role.');

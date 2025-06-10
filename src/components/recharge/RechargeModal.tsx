@@ -79,10 +79,11 @@ export default function RechargeModal({ isOpen, onClose }: RechargeModalProps) {
       }
       alert("입금 신청이 완료되었습니다. 관리자 확인 후 처리됩니다.");
       onClose();
-    } catch (error: any) {
+    } catch (error) {
       console.error("Recharge request submission error:", error);
-      setSubmitError(error.message || '알 수 없는 오류가 발생했습니다.');
-      alert(`오류: ${error.message || '알 수 없는 오류가 발생했습니다.'}`);
+      const message = error instanceof Error ? error.message : '알 수 없는 오류가 발생했습니다.';
+      setSubmitError(message);
+      alert(`오류: ${message}`);
     } finally {
       setIsSubmitting(false);
     }

@@ -1,27 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { z } from 'zod';
 import { pool } from '@/lib/db';
 import { getUserIdFromRequest } from '@/lib/auth'; // 가상의 인증 유틸리티 함수
-
-const serviceSchema = z.object({
-  name: z.string().min(1, { message: '서비스 이름을 입력해주세요.' }).max(255),
-  service_type_id: z.number().int().positive({ message: '서비스 타입 ID는 양의 정수여야 합니다.' }),
-  description: z.string().nullable().optional(),
-  price_per_unit: z.number().nonnegative({ message: '개당 가격은 0 이상이어야 합니다.' }).default(0),
-  min_order_quantity: z.number().int().min(1, {message: '최소 주문 수량은 1 이상이어야 합니다.' }).default(1),
-  max_order_quantity: z.number().int().min(1, {message: '최대 주문 수량은 1 이상이어야 합니다.' })
-    .refine(val => val > 0, { message: '최대 주문 수량은 양의 정수여야 합니다.' }),
-  is_active: z.boolean().default(true).optional(),
-  external_id: z.string().max(255).nullable().optional(),
-}).refine(data => {
-    if (data.max_order_quantity !== undefined && data.min_order_quantity !== undefined) {
-        return data.max_order_quantity >= data.min_order_quantity;
-    }
-    return true;
-}, {
-  message: '최대 주문 수량은 최소 주문 수량보다 크거나 같아야 합니다.',
-  path: ['max_order_quantity'], 
-});
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
@@ -36,7 +15,7 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    let selectClauses = [
+    const selectClauses = [
       's.*',
       'st.name as service_type_name',
       'sc.name as category_name',
@@ -50,7 +29,7 @@ export async function GET(request: NextRequest) {
       LEFT JOIN specials sp ON s.special_id = sp.id
     `;
     
-    const queryParams: any[] = [];
+    const queryParams: (string | number)[] = [];
     let paramIndex = 1;
 
     if (userId) {

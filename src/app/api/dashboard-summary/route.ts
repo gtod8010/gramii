@@ -80,17 +80,6 @@ export async function GET(request: NextRequest) {
     `;
     const chartDataResult: QueryResult = await client.query(chartDataQuery, [userId]);
     
-    // 프론트엔드 RecentOrderStatusChart 컴포넌트가 기대하는 ChartDataPoint[] 형태로 가공
-    const recentOrderStatusChartData: any[] = chartDataResult.rows.map(r => ({
-      date: new Date(r.order_date).toLocaleDateString('ko-KR', { month: '2-digit', day: '2-digit' }),
-      pending: r.Pending,
-      processing: r.Processing,
-      completed: r.Completed,
-      // API 쿼리에서 "Partial"과 "Cancelled"를 사용했으므로, 이를 프론트엔드에서 사용하는 "canceled" 등으로 맞춰야 할 수 있음
-      // 현재 RecentOrderStatusChart.tsx는 canceled, refunded를 사용함. API 쿼리 컬럼명과 일치시키거나 여기서 매핑 필요.
-      // 우선 API의 컬럼명(대소문자 구분)을 그대로 사용하고, 필요시 프론트엔드에서 조정.
-    }));
-
     // 최종 recentOrderStatusChartData는 ChartDataPoint[] 형태가 되어야 함.
     const finalChartData = chartDataResult.rows.map(r => {
       const date = new Date(r.order_date).toLocaleDateString('ko-KR', { month: '2-digit', day: '2-digit' });

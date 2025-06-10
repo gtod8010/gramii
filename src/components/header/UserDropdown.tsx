@@ -1,6 +1,5 @@
 // src/components/header/UserDropdown.tsx
 "use client";
-import Image from "next/image";
 import Link from "next/link";
 import React, { useState, useEffect } from "react";
 import { Dropdown } from "../ui/dropdown/Dropdown";

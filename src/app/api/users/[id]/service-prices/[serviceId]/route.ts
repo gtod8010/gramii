@@ -3,9 +3,10 @@ import { pool } from '@/lib/db';
 import { QueryResult } from 'pg';
 
 // 특정 사용자의 특정 서비스에 대한 특별 단가 삭제
-export async function DELETE(request: NextRequest, { params }: { params: { id: string, serviceId: string } }) { // userId -> id
-  const userId = parseInt(params.id, 10); // userId -> id
-  const serviceId = parseInt(params.serviceId, 10);
+export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string, serviceId: string }> }) {
+  const { id: userIdParam, serviceId: serviceIdParam } = await params;
+  const userId = parseInt(userIdParam, 10);
+  const serviceId = parseInt(serviceIdParam, 10);
 
   if (isNaN(userId) || isNaN(serviceId)) {
     return NextResponse.json({ message: '유효하지 않은 사용자 ID 또는 서비스 ID입니다.' }, { status: 400 });

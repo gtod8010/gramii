@@ -115,8 +115,8 @@ export async function POST(request: Request) {
 
       if (error instanceof Error) {
         errorMessage = error.message;
-        if (typeof (error as any).code === 'string') {
-          errorCode = (error as any).code;
+        if (typeof error === 'object' && error !== null && 'code' in error && typeof (error as { code: unknown }).code === 'string') {
+          errorCode = (error as { code: string }).code;
         }
 
         if (error.message.includes('orders_user_id_fkey')) {
@@ -131,7 +131,7 @@ export async function POST(request: Request) {
         }
       }
       
-      const responseDetails: any = { message: errorMessage };
+      const responseDetails: { message: string, stack?: string, code?: string } = { message: errorMessage };
       if (process.env.NODE_ENV === 'development') {
         responseDetails.stack = error instanceof Error ? error.stack : undefined;
         if (errorCode) {
@@ -181,7 +181,7 @@ export async function GET(request: Request) {
       JOIN services s ON o.service_id = s.id
       WHERE o.user_id = $1
     `;
-    const queryParams: any[] = [userId];
+    const queryParams: (string | number)[] = [userId];
     let paramCount = 2;
 
     if (status) {
@@ -225,7 +225,7 @@ export async function GET(request: Request) {
     if (error instanceof Error) {
       errorMessage = error.message;
     }
-    return NextResponse.json({ error: errorMessage, details: error }, { status: 500 });
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
   } finally {
     client.release();
   }

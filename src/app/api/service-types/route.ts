@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { pool } from '@/lib/db';
+import { DatabaseError } from 'pg';
 
 // 서비스 타입 생성을 위한 스키마
 const serviceTypeSchema = z.object({
@@ -53,8 +54,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(result.rows[0], { status: 201 });
   } catch (error) {
     console.error('Error creating service type:', error);
-    // @ts-ignore
-    if (error.code === '23505' && error.constraint === 'service_types_category_id_name_key') {
+    if (error instanceof DatabaseError && error.code === '23505' && error.constraint === 'service_types_category_id_name_key') {
       return NextResponse.json({ message: '해당 카테고리 내에 동일한 서비스 타입 이름이 이미 존재합니다.' }, { status: 409 });
     }
     return NextResponse.json({ message: '서비스 타입 생성 중 오류가 발생했습니다.' }, { status: 500 });

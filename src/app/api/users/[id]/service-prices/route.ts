@@ -8,8 +8,9 @@ interface UserSpecificPriceBody {
 }
 
 // 특정 사용자의 모든 특별 단가 조회
-export async function GET(request: NextRequest, { params }: { params: { id: string } }) { // userId -> id
-  const userId = parseInt(params.id, 10); // userId -> id
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) { // userId -> id
+  const { id } = await params;
+  const userId = parseInt(id, 10); // userId -> id
 
   if (isNaN(userId)) {
     return NextResponse.json({ message: '유효하지 않은 사용자 ID입니다.' }, { status: 400 });
@@ -42,8 +43,9 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
 }
 
 // 특정 사용자에게 서비스 특별 단가 설정 또는 업데이트 (UPSERT)
-export async function POST(request: NextRequest, { params }: { params: { id: string } }) { // userId -> id
-  const userId = parseInt(params.id, 10); // userId -> id
+export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) { // userId -> id
+  const { id } = await params;
+  const userId = parseInt(id, 10); // userId -> id
 
   if (isNaN(userId)) {
     return NextResponse.json({ message: '유효하지 않은 사용자 ID입니다.' }, { status: 400 });
@@ -83,7 +85,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
     } catch (dbError) {
       await client.query('ROLLBACK');
       console.error(`Database error setting user specific price for user ${userId}, service ${service_id}:`, dbError);
-      if ((dbError as any).code === '23503') {
+      if (typeof dbError === 'object' && dbError !== null && 'code' in dbError && dbError.code === '23503') {
         return NextResponse.json({ message: '존재하지 않는 사용자 또는 서비스 ID입니다.' }, { status: 404 });
       }
       return NextResponse.json({ message: '데이터베이스 처리 중 오류 발생', error: (dbError as Error).message }, { status: 500 });

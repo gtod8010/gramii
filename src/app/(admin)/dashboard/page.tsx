@@ -1,7 +1,6 @@
 "use client"; // 클라이언트 컴포넌트로 변경
 
 import React, { useState, useEffect } from 'react';
-import { Metadata } from 'next';
 import DashboardStatsCards from "@/components/dashboard/DashboardStatsCards";
 import RecentOrderStatusChart from "@/components/dashboard/RecentOrderStatusChart";
 import DetailedOrderStatusSummary from "@/components/dashboard/DetailedOrderStatusSummary";
@@ -46,9 +45,13 @@ const DashboardPage = () => {
           }
           const data: DashboardSummaryData = await response.json();
           setSummaryData(data);
-        } catch (err: any) {
+        } catch (err) {
           console.error("Failed to fetch dashboard data:", err);
-          setError(err.message);
+          if (err instanceof Error) {
+            setError(err.message);
+          } else {
+            setError('An unknown error occurred');
+          }
         } finally {
           setIsLoadingData(false);
         }

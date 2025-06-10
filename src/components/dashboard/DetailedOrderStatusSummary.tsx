@@ -8,7 +8,7 @@ import {
   ExclamationCircleIcon, // 취소됨 (또는 XCircleIcon)
   MinusCircleIcon, // 부분완료됨 (또는 PuzzlePieceIcon)
 } from '@heroicons/react/24/outline';
-import { statusDisplayNames } from '@/app/(admin)/order-history/page'; // 주문 상태 표시 이름
+import { statusDisplayNames } from '@/lib/constants'; // 주문 상태 표시 이름
 
 interface DetailedOrderStatusSummaryProps {
   orderStatusSummary: Record<string, number>;

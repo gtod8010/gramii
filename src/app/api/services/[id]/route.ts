@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { pool } from '@/lib/db';
+import { DatabaseError } from 'pg';
 
 // 서비스 수정을 위한 스키마
 const serviceUpdateSchema = z.object({
@@ -26,8 +27,9 @@ const serviceUpdateSchema = z.object({
 });
 
 // 특정 서비스 조회 (GET)
-export async function GET(request: NextRequest, context: { params: { id: string } }) {
-  const id = parseInt(context.params.id, 10);
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id: idParam } = await params;
+  const id = parseInt(idParam, 10);
   if (isNaN(id) || id <= 0) {
     return NextResponse.json({ message: '유효하지 않은 서비스 ID입니다.' }, { status: 400 });
   }
@@ -48,8 +50,9 @@ export async function GET(request: NextRequest, context: { params: { id: string 
 }
 
 // 특정 서비스 수정 (PUT)
-export async function PUT(request: NextRequest, context: { params: { id: string } }) {
-  const id = parseInt(context.params.id, 10);
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id: idParam } = await params;
+  const id = parseInt(idParam, 10);
   if (isNaN(id) || id <= 0) {
     return NextResponse.json({ message: '유효하지 않은 서비스 ID입니다.' }, { status: 400 });
   }
@@ -90,7 +93,7 @@ export async function PUT(request: NextRequest, context: { params: { id: string 
     }
 
     const updateFields: string[] = [];
-    const updateValues: any[] = [];
+    const updateValues: (string | number | boolean | null)[] = [];
     let paramCount = 1;
 
     // 각 필드가 undefined가 아닐 때만 업데이트 목록에 추가
@@ -118,9 +121,7 @@ export async function PUT(request: NextRequest, context: { params: { id: string 
     return NextResponse.json(result.rows[0]);
   } catch (error) {
     console.error('Error updating service:', error);
-    // @ts-ignore
-    if (error.code === '23505') { 
-        // @ts-ignore
+    if (error instanceof DatabaseError && error.code === '23505') { 
         if (error.constraint === 'services_service_type_id_name_key') { 
              return NextResponse.json({ message: '해당 서비스 타입 내에 동일한 이름의 서비스가 이미 존재합니다.' }, { status: 409 });
         }
@@ -130,8 +131,9 @@ export async function PUT(request: NextRequest, context: { params: { id: string 
 }
 
 // 특정 서비스 삭제 (DELETE)
-export async function DELETE(request: NextRequest, context: { params: { id: string } }) {
-  const id = parseInt(context.params.id, 10);
+export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id:string }> }) {
+  const { id: idParam } = await params;
+  const id = parseInt(idParam, 10);
   if (isNaN(id) || id <= 0) {
     return NextResponse.json({ message: '유효하지 않은 서비스 ID입니다.' }, { status: 400 });
   }
@@ -149,7 +151,9 @@ export async function DELETE(request: NextRequest, context: { params: { id: stri
     return NextResponse.json({ message: '서비스가 성공적으로 삭제되었습니다.' });
   } catch (error) {
     console.error('Error deleting service:', error);
-    // @ts-ignore // DELETE에서는 23503 에러를 위에서 이미 처리함.
+    if (error instanceof DatabaseError) {
+        return NextResponse.json({ message: `데이터베이스 오류 발생: ${error.message}` }, { status: 500 });
+    }
     return NextResponse.json({ message: '서비스 삭제 중 오류가 발생했습니다.' }, { status: 500 });
   }
 } 

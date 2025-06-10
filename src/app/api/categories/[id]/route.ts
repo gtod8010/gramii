@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { type NextRequest, NextResponse } from 'next/server';
 import { query, pool } from '@/lib/db';
 import { z } from 'zod';
 
@@ -9,9 +9,13 @@ const updateCategorySchema = z.object({
 });
 
 // 특정 카테고리 조회 (GET by ID) - 필요시 추가 가능
-export async function GET(request: Request, { params }: { params: { id: string } }) {
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
+) {
   try {
-    const categoryId = parseInt(params.id, 10);
+    const { id } = await params;
+    const categoryId = parseInt(id, 10);
     if (isNaN(categoryId)) {
       return NextResponse.json({ message: '유효하지 않은 카테고리 ID입니다.' }, { status: 400 });
     }
@@ -22,16 +26,21 @@ export async function GET(request: Request, { params }: { params: { id: string }
     }
     return NextResponse.json(result.rows[0]);
   } catch (error) {
-    console.error(`Error fetching category ${params.id}:`, error);
+    const id = (await (params as Promise<{ id: string }>)).id;
+    console.error(`Error fetching category ${id}:`, error);
     return NextResponse.json({ message: '카테고리 조회 중 오류 발생', error: String(error) }, { status: 500 });
   }
 }
 
 
 // 특정 카테고리 수정 (PUT)
-export async function PUT(request: Request, { params }: { params: { id: string } }) {
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
+) {
   try {
-    const categoryId = parseInt(params.id, 10);
+    const { id } = await params;
+    const categoryId = parseInt(id, 10);
     if (isNaN(categoryId)) {
       return NextResponse.json({ message: '유효하지 않은 카테고리 ID입니다.' }, { status: 400 });
     }
@@ -77,8 +86,9 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     }
 
     return NextResponse.json(result.rows[0]);
-  } catch (error: any) {
-    console.error(`Error updating category ${params.id}:`, error);
+  } catch (error) {
+    const id = (await (params as Promise<{ id: string }>)).id;
+    console.error(`Error updating category ${id}:`, error);
     if (error instanceof z.ZodError) {
         return NextResponse.json({ message: '입력값 유효성 검사 실패', errors: error.flatten().fieldErrors }, { status: 400 });
     }
@@ -87,9 +97,12 @@ export async function PUT(request: Request, { params }: { params: { id: string }
 }
 
 // 특정 카테고리 삭제 (DELETE)
-export async function DELETE(request: Request, { params }: { params: { id: string } }) {
-  const categoryIdParam = params.id;
-  const client = await pool.connect(); 
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  const { id: categoryIdParam } = await params;
+  const client = await pool.connect();
   try {
     const categoryId = parseInt(categoryIdParam, 10);
     if (isNaN(categoryId)) {
@@ -127,7 +140,7 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
     await client.query('COMMIT');
 
     return NextResponse.json({ message: '카테고리 및 관련 하위 항목들이 성공적으로 삭제되었습니다.', deletedCategory: result.rows[0] });
-  } catch (error: any) {
+  } catch (error) {
     await client.query('ROLLBACK');
     console.error(`Error deleting category ${categoryIdParam} and its dependencies:`, error);
     return NextResponse.json({ message: '카테고리 삭제 중 오류가 발생했습니다.', error: String(error) }, { status: 500 });

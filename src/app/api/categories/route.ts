@@ -43,7 +43,7 @@ export async function POST(request: Request) {
     ); // pool.query 대신 query 사용
 
     return NextResponse.json(result.rows[0], { status: 201 });
-  } catch (error: any) { // error 타입을 any로 명시적 지정
+  } catch (error) {
     console.error('Error creating category:', error);
     // Zod 에러와 다른 에러를 구분해서 처리할 수도 있습니다.
     if (error instanceof z.ZodError) {

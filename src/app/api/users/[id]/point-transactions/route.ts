@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { pool } from '@/lib/db';
 
-export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
-  const userId = parseInt(params.id, 10);
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const userId = parseInt(id, 10);
 
   // TODO: 관리자만 접근 가능하도록 인증/인가 로직 추가 필요
 

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { pool } from '@/lib/db';
+import { DatabaseError } from 'pg';
 
 const serviceTypeUpdateSchema = z.object({
   name: z.string().min(1, { message: '이름을 입력해주세요.' }).optional(),
@@ -8,8 +9,9 @@ const serviceTypeUpdateSchema = z.object({
 });
 
 // 특정 서비스 타입 조회 (GET)
-export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
-  const id = parseInt(params.id, 10);
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id: idParam } = await params;
+  const id = parseInt(idParam, 10);
 
   if (isNaN(id) || id <= 0) {
     return NextResponse.json({ message: '유효하지 않은 서비스 타입 ID입니다.' }, { status: 400 });
@@ -28,8 +30,9 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
 }
 
 // 특정 서비스 타입 수정 (PUT)
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
-  const id = parseInt(params.id, 10);
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id: idParam } = await params;
+  const id = parseInt(idParam, 10);
 
   if (isNaN(id) || id <= 0) {
     return NextResponse.json({ message: '유효하지 않은 서비스 타입 ID입니다.' }, { status: 400 });
@@ -79,8 +82,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
     return NextResponse.json(result.rows[0]);
   } catch (error) {
     console.error('Error updating service type:', error);
-    // @ts-ignore
-    if (error.code === '23505' && error.constraint === 'service_types_category_id_name_key') {
+    if (error instanceof DatabaseError && error.code === '23505' && error.constraint === 'service_types_category_id_name_key') {
       return NextResponse.json({ message: '해당 카테고리 내에 동일한 서비스 타입 이름이 이미 존재합니다.' }, { status: 409 });
     }
     return NextResponse.json({ message: '서비스 타입 수정 중 오류가 발생했습니다.' }, { status: 500 });
@@ -88,8 +90,9 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 }
 
 // 특정 서비스 타입 삭제 (DELETE)
-export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
-  const id = parseInt(params.id, 10);
+export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id: idParam } = await params;
+  const id = parseInt(idParam, 10);
 
   if (isNaN(id) || id <= 0) {
     return NextResponse.json({ message: '유효하지 않은 서비스 타입 ID입니다.' }, { status: 400 });

@@ -45,7 +45,7 @@ const Input: FC<InputProps> = ({
     finalClassNames = `form-checkbox h-5 w-5 text-brand-600 border-gray-300 rounded focus:ring-brand-500 dark:border-gray-600 dark:bg-gray-700 dark:checked:bg-brand-500 ${className}`.trim();
   } else {
     // 기본 스타일 (모든 non-checkbox input에 적용)
-    let baseInputClasses = "h-11 w-full rounded-lg border appearance-none px-4 py-2.5 text-sm shadow-theme-xs placeholder:text-gray-400 focus:outline-none focus:ring-3";
+    const baseInputClasses = "h-11 w-full rounded-lg border appearance-none px-4 py-2.5 text-sm shadow-theme-xs placeholder:text-gray-400 focus:outline-none focus:ring-3";
 
     // 상태별 스타일
     let stateSpecificClasses = "";

@@ -8,7 +8,7 @@ export const pool = new Pool({
 
 // 데이터베이스 쿼리를 실행하는 함수
 // 필요에 따라 더 복잡한 트랜잭션 처리 등을 추가할 수 있습니다.
-export const query = async (text: string, params?: any[]) => {
+export const query = async (text: string, params?: (string | number | boolean | null)[]) => {
   const start = Date.now();
   try {
     const res = await pool.query(text, params);

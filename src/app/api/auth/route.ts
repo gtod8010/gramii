@@ -37,7 +37,8 @@ export async function POST(req: NextRequest) {
     // 로그인 성공
     // 실제 애플리케이션에서는 여기서 JWT 같은 세션 토큰을 생성하여 반환해야 합니다.
     // 현재는 사용자 정보 중 비밀번호를 제외하고 반환합니다.
-    const { password: _, ...userWithoutPassword } = user; // 비밀번호 필드 제외
+    const { id, role, name, phone_number, points, admin_referral_code } = user;
+    const userWithoutPassword = { id, role, email: user.email, name, phone_number, points, admin_referral_code };
 
     return NextResponse.json({
       message: 'Login successful',

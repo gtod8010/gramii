@@ -60,7 +60,7 @@ const platformData: PlatformItem[] = [
 // 카드 렌더링 컴포넌트
 const PlatformCard: React.FC<{ item: PlatformItem, style?: React.CSSProperties }> = ({ item, style }) => {
   const iconBaseClassName = "w-12 h-12 md:w-16 md:h-16 mb-4";
-  let iconProps: { className: string; style?: React.CSSProperties; fill?: string; } = {
+  const iconProps: { className: string; style?: React.CSSProperties; fill?: string; } = {
     className: iconBaseClassName, 
   };
 
@@ -154,7 +154,7 @@ const RootPage = () => {
     
     setCardStyles(newCardStyles);
 
-  }, [platformData]);
+  }, []);
 
   // 3D Orbit Animation useEffect
   useEffect(() => {
@@ -191,7 +191,7 @@ const RootPage = () => {
       //   orbitContainer.style.transform = 'rotateY(0rad)';
       // }
     };
-  }, [platformData.length]); // platformData.length가 변경되면 애니메이션 재시작/중지
+  }, []); // platformData.length가 변경되면 애니메이션 재시작/중지
 
   return (
     <div className="min-h-screen bg-white text-gray-800 flex flex-col">

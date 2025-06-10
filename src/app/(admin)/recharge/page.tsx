@@ -47,8 +47,12 @@ export default function RechargePage() {
       setRechargeHistory(data.deposits);
       setTotalPages(data.totalPages);
       setCurrentPage(data.currentPage); // API에서 현재 페이지를 반환하므로 동기화
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError('An unknown error occurred while fetching recharge history.');
+      }
       setRechargeHistory([]);
       setTotalPages(0);
     } finally {

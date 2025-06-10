@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { pool } from '@/lib/db';
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   // TODO: 관리자만 접근 가능하도록 인증/인가 로직 추가 필요 (예: useUser 또는 세션 확인)
   try {
     const query = `

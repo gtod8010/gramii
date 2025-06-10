@@ -2,7 +2,7 @@
 import { ApexOptions } from "apexcharts";
 import dynamic from "next/dynamic";
 import React from "react";
-import { statusDisplayNames } from "@/app/(admin)/order-history/page"; // 주문 상태 표시 이름을 가져옵니다.
+import { statusDisplayNames, statusColors as chartStatusColors } from "@/lib/constants";
 
 // react-apexcharts를 동적으로 임포트 (SSR 회피)
 const ReactApexChart = dynamic(() => import("react-apexcharts"), { ssr: false });
@@ -22,16 +22,6 @@ interface RecentOrderStatusChartProps {
   chartData: ChartDataPoint[];
   orderStatusSummary: Record<string, number>;
 }
-
-// 색상 정의 (order-history 페이지와 일관성 유지 또는 여기서 직접 정의)
-const chartStatusColors: { [key: string]: string } = {
-  Pending: '#f97316',    // 주황 (대기중)
-  Processing: '#3b82f6', // 파랑 (처리중)
-  Completed: '#22c55e',  // 초록 (완료됨)
-  Partial: '#8b5cf6',    // 보라 (부분완료됨)
-  Cancelled: '#6b7280',  // 회색 (취소됨)
-  // Refunded는 현재 사용 안함
-};
 
 const RecentOrderStatusChart: React.FC<RecentOrderStatusChartProps> = ({ chartData, orderStatusSummary }) => {
   // 1. 막대그래프 데이터 및 옵션 (최근 7일간 주문 상태)
@@ -112,7 +102,7 @@ const RecentOrderStatusChart: React.FC<RecentOrderStatusChartProps> = ({ chartDa
     },
     tooltip: {
       y: {
-        formatter: (value, { series, seriesIndex, dataPointIndex, w }) => {
+        formatter: (value, { seriesIndex }) => {
           const label = pieChartLabels[seriesIndex] || '' ; 
           return `${label}: ${value}건`;
         }

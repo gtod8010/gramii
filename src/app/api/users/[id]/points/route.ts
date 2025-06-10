@@ -6,8 +6,9 @@ interface PointsRequestBody {
   // action?: 'adjust' | 'set'; // 현재는 adjust만 사용. 필요시 확장
 }
 
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
-  const userId = parseInt(params.id, 10);
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const userId = parseInt(id, 10);
   // TODO: 요청한 관리자 ID 가져오기 (예: 세션 또는 JWT 토큰에서)
   // const adminUserId = ...; 
 
@@ -43,13 +44,11 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
     const finalBalance = userUpdateResult.rows[0].points;
 
     // 포인트 변경 내역 기록
-    const transactionDescription = `관리자에 의한 포인트 조정: ${diffAmount > 0 ? '+' : ''}${diffAmount}`;
     const insertTransactionQuery = `
       INSERT INTO point_transactions (user_id, amount, transaction_type, balance_after_transaction) 
       VALUES ($1, $2, $3, $4)
       RETURNING id;
-    `; 
-    // DB에 description 컬럼이 있다면 위 쿼리에 description, $4 추가하고 아래 값에 transactionDescription 추가
+    `;
     await client.query(insertTransactionQuery, [userId, diffAmount, 'admin_adjustment', finalBalance]);
 
     await client.query('COMMIT');

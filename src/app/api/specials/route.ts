@@ -11,7 +11,7 @@ const createSpecialSchema = z.object({
 
 // 모든 스페셜 조회 (GET)
 export async function GET() {
-  const { query, getClient } = await import('@/lib/db'); // getClient 추가
+  const { getClient } = await import('@/lib/db'); // getClient 추가
   const client = await getClient(); // 클라이언트 사용
   try {
     // 모든 스페셜 기본 정보 조회
@@ -85,7 +85,7 @@ export async function POST(request: Request) {
     await client.query('COMMIT');
     // 생성된 스페셜 정보 (연결된 서비스 정보 포함 여부는 선택)
     return NextResponse.json(newSpecial, { status: 201 });
-  } catch (error: any) { 
+  } catch (error) { 
     await client.query('ROLLBACK');
     console.error('Error creating special:', error);
     if (error instanceof z.ZodError) {

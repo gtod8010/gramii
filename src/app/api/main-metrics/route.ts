@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
-import { query, pool } from '@/lib/db'; // 가정: pool도 export 되어 트랜잭션 등에 사용 가능
+import { pool } from '@/lib/db'; // 가정: pool도 export 되어 트랜잭션 등에 사용 가능
 
-export async function GET(request: Request) {
+export async function GET() {
   const client = await pool.connect();
   try {
     await client.query('BEGIN');

@@ -70,8 +70,6 @@ const ServiceTable: React.FC<{ services: DisplayServiceItem[]; onViewDetails: (s
           const isCustomPriceApplicable = service.custom_price !== null && service.custom_price !== undefined;
           const effectivePrice = isCustomPriceApplicable ? service.custom_price! : service.pricePerUnit;
           const isDiscounted = isCustomPriceApplicable && service.custom_price! < service.pricePerUnit;
-          // 특별가가 있지만 할인되지 않은 경우 (즉, 같거나 높은 경우)는 일반 가격처럼 표시
-          const showAsNormalPrice = !isDiscounted; 
 
           return (
           <tr key={service.id} className="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600/50">
@@ -124,7 +122,6 @@ const ServiceListDisplay = () => {
   const [selectedService, setSelectedService] = useState<DisplayServiceItem | null>(null);
 
   // 스페셜 관련 상태 추가
-  const [specials, setSpecials] = useState<Special[]>([]);
   const [displaySpecials, setDisplaySpecials] = useState<DisplaySpecialPublic[]>([]);
   const [collapsedSpecials, setCollapsedSpecials] = useState<Record<number, boolean>>({});
 
@@ -170,7 +167,6 @@ const ServiceListDisplay = () => {
         throw new Error(errorData.message || '스페셜 목록을 불러오는데 실패했습니다.');
       }
       const specialsData: Special[] = await specialsResponse.json();
-      setSpecials(specialsData); // 가져온 스페셜 데이터 저장
       
       const activeServices = services.filter(service => service.is_active);
 
@@ -227,8 +223,9 @@ const ServiceListDisplay = () => {
         return acc;
       }, {} as GroupedServices);
       setGroupedServices(grouped);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : '알 수 없는 오류가 발생했습니다.';
+      setError(message);
       setGroupedServices({});
     } finally {
       setIsLoading(false);

@@ -254,10 +254,10 @@ const NewServiceModal: React.FC<NewServiceModalProps> = ({
     }
 
 
-    let categoryIdToUse = selectedCategoryId === ADD_NEW_VALUE ? null : parseInt(selectedCategoryId);
-    let serviceTypeIdToUse = selectedServiceTypeId === ADD_NEW_VALUE ? null : parseInt(selectedServiceTypeId);
+    const categoryIdToUse = selectedCategoryId === ADD_NEW_VALUE ? null : parseInt(selectedCategoryId);
+    const serviceTypeIdToUse = selectedServiceTypeId === ADD_NEW_VALUE ? null : parseInt(selectedServiceTypeId);
 
-    const serviceData: any = {
+    const serviceData = {
       service_name: serviceName.trim(),
       description: description.trim(),
       min_order_quantity: parseInt(minOrderQuantity),
@@ -270,12 +270,8 @@ const NewServiceModal: React.FC<NewServiceModalProps> = ({
       
       service_type_id: serviceTypeIdToUse,
       new_service_type_name: selectedServiceTypeId === ADD_NEW_VALUE ? newServiceTypeName.trim() : undefined,
+      id: isEditMode && editingService ? editingService.id : undefined,
     };
-
-    // 수정 모드일 경우 ID 추가
-    if (isEditMode && editingService) {
-      serviceData.id = editingService.id;
-    }
     
     console.log('Submitting service data:', serviceData);
 
@@ -293,7 +289,7 @@ const NewServiceModal: React.FC<NewServiceModalProps> = ({
         throw new Error(errorData.message || (isEditMode ? '서비스 수정에 실패했습니다.' : '서비스 추가에 실패했습니다.'));
       }
 
-      const result = await response.json();
+      await response.json();
       setSuccessMessage(isEditMode ? '서비스가 성공적으로 수정되었습니다.' : '서비스가 성공적으로 추가되었습니다.');
       
       if (onServiceAdded) {
@@ -305,8 +301,9 @@ const NewServiceModal: React.FC<NewServiceModalProps> = ({
         onClose();
       }, 1500);
 
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : '알 수 없는 오류가 발생했습니다.';
+      setError(message);
     } finally {
       setIsLoading(false);
     }
