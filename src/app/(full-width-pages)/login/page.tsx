@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -15,39 +15,26 @@ export default function LoginPage() {
     event.preventDefault();
     setIsLoading(true);
     setError(null);
-    console.log('Login attempt with:', { email, password });
 
     try {
       const response = await fetch('/api/auth', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ username, password }),
       });
 
       const data = await response.json();
 
       if (response.ok) {
-        console.log('Login successful:', data);
-
-        // 사용자 정보를 localStorage에 저장
         if (data.user) {
           localStorage.setItem('loggedInUser', JSON.stringify(data.user));
         }
-
-        // if (data.user && data.user.role === 'admin') {
-        //   router.push('/manage-services');
-        // } else {
-        //   router.push('/');
-        // }
-        // 역할(admin/user)에 관계없이 /dashboard로 리디렉션합니다.
         router.push('/dashboard');
 
       } else {
-        console.error('Login failed:', data);
-        setError(data.message || '이메일 또는 비밀번호가 잘못되었습니다.');
+        setError(data.message || '아이디 또는 비밀번호가 잘못되었습니다.');
       }
-    } catch (err) {
-      console.error('Login error:', err);
+    } catch {
       setError('로그인 중 오류가 발생했습니다. 네트워크 연결을 확인해주세요.');
     } finally {
       setIsLoading(false);
@@ -81,20 +68,20 @@ export default function LoginPage() {
         <div className="bg-white dark:bg-gray-800 py-8 px-4 shadow sm:rounded-lg sm:px-10">
           <form className="space-y-6" onSubmit={handleSubmit}>
             <div>
-              <label htmlFor="email" className={labelClass}>
-                이메일 주소
+              <label htmlFor="username" className={labelClass}>
+                아이디
               </label>
               <div className="mt-1">
                 <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  autoComplete="email"
+                  id="username"
+                  name="username"
+                  type="text"
+                  autoComplete="username"
                   required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
                   className={inputClass}
-                  placeholder="you@example.com"
+                  placeholder="아이디를 입력하세요"
                 />
               </div>
             </div>

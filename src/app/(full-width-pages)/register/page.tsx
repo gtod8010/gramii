@@ -1,22 +1,33 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
 export default function RegisterPage() {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [phoneNumber, setPhoneNumber] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+  const [name, setName] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [email, setEmail] = useState('');
   const [referrerCode, setReferrerCode] = useState('');
+  
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const router = useRouter();
+
+  useEffect(() => {
+    if (password && confirmPassword && password !== confirmPassword) {
+      setPasswordError('비밀번호가 일치하지 않습니다.');
+    } else {
+      setPasswordError('');
+    }
+  }, [password, confirmPassword]);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -34,14 +45,13 @@ export default function RegisterPage() {
     setIsLoading(true);
 
     const payload = {
-      name,
-      email,
-      phone_number: phoneNumber,
+      username,
       password,
+      name,
+      phone_number: phoneNumber,
+      email,
       referrer_code: referrerCode,
     };
-
-    console.log('Register attempt with:', payload);
 
     try {
       const response = await fetch('/api/register', {
@@ -53,17 +63,14 @@ export default function RegisterPage() {
       const data = await response.json();
 
       if (response.ok) {
-        setSuccessMessage('회원가입이 완료되었습니다! 로그인 페이지로 이동합니다.');
-        console.log('Registration successful:', data);
+        setSuccessMessage('회원가입이 완료되었습니다! 잠시 후 로그인 페이지로 이동합니다.');
         setTimeout(() => {
           router.push('/login');
         }, 2000);
       } else {
-        console.error('Registration failed:', data);
         setError(data.message || '회원가입 중 오류가 발생했습니다.');
       }
-    } catch (err) {
-      console.error('Registration error:', err);
+    } catch {
       setError('회원가입 중 오류가 발생했습니다. 네트워크 연결을 확인해주세요.');
     } finally {
       setIsLoading(false);
@@ -94,54 +101,22 @@ export default function RegisterPage() {
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white dark:bg-gray-800 py-8 px-4 shadow sm:rounded-lg sm:px-10">
-          <form className="space-y-6" onSubmit={handleSubmit}>
+          <form className="space-y-4" onSubmit={handleSubmit}>
+            
             <div>
-              <label htmlFor="name" className={labelClass}>
-                이름 (실명)
+              <label htmlFor="username" className={labelClass}>
+                아이디
               </label>
               <input
-                id="name"
-                name="name"
+                id="username"
+                name="username"
                 type="text"
-                autoComplete="name"
+                autoComplete="username"
                 required
-                value={name}
-                onChange={(e) => setName(e.target.value)}
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
                 className={inputClass}
-                placeholder="홍길동"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="email" className={labelClass}>
-                이메일 주소
-              </label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                autoComplete="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className={inputClass}
-                placeholder="you@example.com"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="phoneNumber" className={labelClass}>
-                전화번호 <span className="text-xs text-gray-500 dark:text-gray-400">(선택)</span>
-              </label>
-              <input
-                id="phoneNumber"
-                name="phoneNumber"
-                type="tel"
-                autoComplete="tel"
-                value={phoneNumber}
-                onChange={(e) => setPhoneNumber(e.target.value)}
-                className={inputClass}
-                placeholder="010-1234-5678"
+                placeholder="사용하실 아이디를 입력하세요"
               />
             </div>
 
@@ -177,6 +152,60 @@ export default function RegisterPage() {
                 className={inputClass}
                 placeholder="••••••••"
               />
+              {passwordError && <p className="mt-2 text-sm text-red-600">{passwordError}</p>}
+            </div>
+            
+            <hr className="border-gray-300 dark:border-gray-600" />
+
+            <div>
+              <label htmlFor="name" className={labelClass}>
+                성함
+              </label>
+              <input
+                id="name"
+                name="name"
+                type="text"
+                autoComplete="name"
+                required
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className={inputClass}
+                placeholder="홍길동"
+              />
+            </div>
+            
+            <div>
+              <label htmlFor="phoneNumber" className={labelClass}>
+                연락처
+              </label>
+              <input
+                id="phoneNumber"
+                name="phoneNumber"
+                type="tel"
+                autoComplete="tel"
+                required
+                value={phoneNumber}
+                onChange={(e) => setPhoneNumber(e.target.value)}
+                className={inputClass}
+                placeholder="010-1234-5678"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="email" className={labelClass}>
+                이메일
+              </label>
+              <input
+                id="email"
+                name="email"
+                type="email"
+                autoComplete="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className={inputClass}
+                placeholder="you@example.com"
+              />
             </div>
 
             <div>
@@ -191,11 +220,11 @@ export default function RegisterPage() {
                 value={referrerCode}
                 onChange={(e) => setReferrerCode(e.target.value)}
                 className={inputClass}
-                placeholder="추천인 코드 (6자리, 선택)"
+                placeholder="추천인 코드를 입력하세요"
                 maxLength={6}
               />
             </div>
-            
+
             {error && (
               <p className="text-sm text-red-600 dark:text-red-400 text-center">{error}</p>
             )}
@@ -203,7 +232,7 @@ export default function RegisterPage() {
               <p className="text-sm text-green-600 dark:text-green-400 text-center">{successMessage}</p>
             )}
 
-            <div className="flex items-start">
+            <div className="flex items-start pt-2">
                 <div className="flex items-center h-5">
                     <input
                     id="terms"
@@ -216,15 +245,15 @@ export default function RegisterPage() {
                 </div>
                 <div className="ml-3 text-sm">
                     <label htmlFor="terms" className="font-medium text-gray-700 dark:text-gray-300">
-                    이용약관 및 개인정보처리방침에 동의합니다. <a href="/terms" target="_blank" rel="noopener noreferrer" className="text-pink-600 hover:text-pink-500 dark:text-pink-400 dark:hover:text-pink-300">(보기)</a>
+                    이용약관 및 개인정보처리방침에 동의합니다.
                     </label>
                 </div>
             </div>
 
-            <div>
+            <div className="pt-2">
               <button
                 type="submit"
-                disabled={isLoading || !agreedToTerms}
+                disabled={isLoading || !agreedToTerms || !!passwordError}
                 className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-pink-600 hover:bg-pink-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500 disabled:opacity-50 dark:bg-pink-500 dark:hover:bg-pink-600 dark:focus:ring-pink-700"
               >
                 {isLoading ? '가입 중...' : '계정 만들기'}

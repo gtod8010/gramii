@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
+import { toast } from 'react-hot-toast';
 
 interface RechargeModalProps {
   isOpen: boolean;
@@ -17,6 +18,7 @@ export default function RechargeModal({ isOpen, onClose }: RechargeModalProps) {
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [amountError, setAmountError] = useState<string | null>(null);
 
   // 세금계산서 필드
   const [companyName, setCompanyName] = useState('');
@@ -42,24 +44,64 @@ export default function RechargeModal({ isOpen, onClose }: RechargeModalProps) {
       setPhoneNumber('');
       setIsSubmitting(false);
       setSubmitError(null);
+      setAmountError(null);
     }
   }, [isOpen]);
 
   if (!isOpen) return null;
 
+  const validateAmount = (value: string): boolean => {
+    const numValue = parseInt(value, 10);
+    if (isNaN(numValue) || numValue < 10000 || numValue % 1000 !== 0) {
+      setAmountError('최소 충전 금액은 10,000원이며, 1,000원 단위로 입력해야 합니다.');
+      return false;
+    }
+    setAmountError(null);
+    return true;
+  }
+
+  const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setAmount(value);
+    if (value) {
+      validateAmount(value);
+    } else {
+      setAmountError(null);
+    }
+  };
+
   const handleSubmit = async () => {
-    if (!amount || !depositorName || !agreedToTerms) {
-      alert('필수 항목을 모두 입력하고 약관에 동의해주세요.');
+    if (!agreedToTerms) {
+      toast.error('이용약관에 동의해주세요.');
       return;
     }
-    const parsedAmount = parseInt(amount, 10);
-    if (isNaN(parsedAmount) || parsedAmount <= 0) {
-      alert('충전 금액은 0보다 커야 합니다.');
+    if (!amount || !depositorName) {
+      toast.error('필수 항목을 모두 입력해주세요.');
+      return;
+    }
+    if (!validateAmount(amount)) {
       return;
     }
 
     setIsSubmitting(true);
     setSubmitError(null);
+
+    let userId = null;
+    try {
+      const storedUser = localStorage.getItem('loggedInUser');
+      if (storedUser) {
+        userId = JSON.parse(storedUser).id;
+      }
+    } catch (error) {
+      console.error("Failed to get user from localStorage", error);
+    }
+    
+    if (!userId) {
+      toast.error('로그인 정보가 유효하지 않습니다. 다시 로그인해주세요.');
+      setSubmitError('로그인 정보가 유효하지 않습니다.');
+      setIsSubmitting(false);
+      return;
+    }
 
     try {
       const response = await fetch('/api/recharge-requests', {
@@ -68,22 +110,28 @@ export default function RechargeModal({ isOpen, onClose }: RechargeModalProps) {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-      amount: parsedAmount,
+          amount: parseInt(amount, 10),
           depositorName: depositorName,
+          userId: userId,
         }),
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || '충전 요청에 실패했습니다.');
+        try {
+          const errorData = await response.json();
+          throw new Error(errorData.error || '충전 요청에 실패했습니다.');
+        } catch {
+          const errorText = await response.text();
+          throw new Error(errorText || '충전 요청에 실패했습니다.');
+        }
       }
-      alert("입금 신청이 완료되었습니다. 관리자 확인 후 처리됩니다.");
+      toast.success("입금 신청이 완료되었습니다. 관리자 확인 후 처리됩니다.");
       onClose();
     } catch (error) {
       console.error("Recharge request submission error:", error);
       const message = error instanceof Error ? error.message : '알 수 없는 오류가 발생했습니다.';
       setSubmitError(message);
-      alert(`오류: ${message}`);
+      toast.error(`오류: ${message}`);
     } finally {
       setIsSubmitting(false);
     }
@@ -115,7 +163,8 @@ export default function RechargeModal({ isOpen, onClose }: RechargeModalProps) {
         <div className="space-y-4 max-h-[60vh] sm:max-h-[70vh] overflow-y-auto pr-2">
           <div>
             <label htmlFor="amount" className={labelClass}>충전 금액을 입력해주세요.</label>
-            <input type="number" id="amount" value={amount} onChange={(e) => setAmount(e.target.value)} className={inputClass} placeholder="0" disabled={isSubmitting} />
+            <input type="number" id="amount" value={amount} onChange={handleAmountChange} className={inputClass} placeholder="10000" disabled={isSubmitting} />
+            {amountError && <p className="mt-1 text-xs text-red-500">{amountError}</p>}
           </div>
           <div>
             <label htmlFor="depositorName" className={labelClass}>입금자명을 입력해주세요.</label>

@@ -4,10 +4,10 @@ import bcrypt from 'bcrypt'; // bcrypt 임포트
 
 export async function POST(req: NextRequest) {
   try {
-    const { email, password } = await req.json();
+    const { username, password } = await req.json();
 
-    if (!email || !password) {
-      return NextResponse.json({ message: 'Email and password are required' }, { status: 400 });
+    if (!username || !password) {
+      return NextResponse.json({ message: '아이디와 비밀번호를 모두 입력해주세요.' }, { status: 400 });
     }
 
     // --- 경고 ---
@@ -16,12 +16,12 @@ export async function POST(req: NextRequest) {
     // 이후 반드시 bcrypt 등을 사용하여 비밀번호 해싱을 구현해야 합니다.
     // --- 경고 ---
 
-    const userQueryText = 'SELECT id, password, role, email, name, phone_number, points, admin_referral_code FROM users WHERE email = $1';
-    const result = await query(userQueryText, [email]);
+    const userQueryText = 'SELECT id, username, email, password, role, name, phone_number, points, admin_referral_code FROM users WHERE username = $1';
+    const result = await query(userQueryText, [username]);
 
     if (result.rows.length === 0) {
       // 사용자가 존재하지 않음
-      return NextResponse.json({ message: 'Invalid email or password' }, { status: 401 });
+      return NextResponse.json({ message: '아이디 또는 비밀번호가 잘못되었습니다.' }, { status: 401 });
     }
 
     const user = result.rows[0];
@@ -31,23 +31,23 @@ export async function POST(req: NextRequest) {
 
     if (!passwordMatches) {
       // 비밀번호 불일치
-      return NextResponse.json({ message: 'Invalid email or password' }, { status: 401 });
+      return NextResponse.json({ message: '아이디 또는 비밀번호가 잘못되었습니다.' }, { status: 401 });
     }
 
     // 로그인 성공
     // 실제 애플리케이션에서는 여기서 JWT 같은 세션 토큰을 생성하여 반환해야 합니다.
     // 현재는 사용자 정보 중 비밀번호를 제외하고 반환합니다.
-    const { id, role, name, phone_number, points, admin_referral_code } = user;
-    const userWithoutPassword = { id, role, email: user.email, name, phone_number, points, admin_referral_code };
+    const userWithoutPassword = { ...user };
+    delete (userWithoutPassword as { password?: string }).password;
 
     return NextResponse.json({
-      message: 'Login successful',
+      message: '로그인 성공',
       user: userWithoutPassword,
     }, { status: 200 });
 
   } catch (error) {
     console.error('Login API error:', error);
     // 클라이언트에게 너무 자세한 오류 메시지를 보내지 않도록 주의
-    return NextResponse.json({ message: 'An internal server error occurred' }, { status: 500 });
+    return NextResponse.json({ message: '서버 오류가 발생했습니다.' }, { status: 500 });
   }
 }

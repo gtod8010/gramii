@@ -27,6 +27,7 @@ const ITEMS_PER_PAGE = 5; // API 요청 시 limit으로 사용될 값 (필요시
 export default function RechargePage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [isRechargeModalOpen, setIsRechargeModalOpen] = useState(false);
+  const [isCardModalOpen, setIsCardModalOpen] = useState(false); // 카드 결제 모달 상태
 
   const [rechargeHistory, setRechargeHistory] = useState<RechargeHistoryItem[]>([]);
   const [totalPages, setTotalPages] = useState(0);
@@ -95,17 +96,8 @@ export default function RechargePage() {
             <h2 className="text-xl font-semibold text-gray-700 dark:text-gray-200 mb-1">충전하기</h2>
             <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">원하는 결제 수단을 선택 후 충전해주세요.</p>
             
-            <div>
-              <button 
-                onClick={() => setIsRechargeModalOpen(true)}
-                className="bg-slate-700 text-white font-semibold py-3 px-6 rounded-t-md w-full text-left"
-              >
-                무통장 입금
-              </button>
-            </div>
-
             {/* 충전 요청 내역 테이블 */}
-            <div className="overflow-x-auto border border-gray-200 dark:border-gray-700 border-t-0 rounded-b-md">
+            <div className="overflow-x-auto border border-gray-200 dark:border-gray-700 rounded-md">
               <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                 <thead className="bg-gray-50 dark:bg-gray-700">
                   <tr>
@@ -160,6 +152,23 @@ export default function RechargePage() {
                 </tbody>
               </table>
             </div>
+
+            {/* 결제 버튼 영역 */}
+            <div className="mt-6 flex flex-col sm:flex-row gap-4">
+                <button
+                    onClick={() => setIsRechargeModalOpen(true)}
+                    className="w-full sm:w-auto flex-1 bg-blue-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors duration-200"
+                >
+                    무통장 입금
+                </button>
+                <button
+                    onClick={() => setIsCardModalOpen(true)}
+                    className="w-full sm:w-auto flex-1 bg-gray-700 text-white font-bold py-3 px-6 rounded-lg hover:bg-gray-800 transition-colors duration-200"
+                >
+                    카드 결제 (준비중)
+                </button>
+            </div>
+
             {/* 페이지네이션 */}
             {!isLoading && !error && totalPages > 1 && (
               <div className="mt-6 flex items-center justify-center space-x-1">
@@ -238,6 +247,27 @@ export default function RechargePage() {
             setLastFetchedPage(prev => prev + 1); // 강제로 useEffect 재실행
           }} 
         />
+      )}
+
+      {/* 카드 결제 모달 */}
+      {isCardModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-8 w-full max-w-md m-4">
+            <h2 className="text-xl font-semibold text-center text-gray-800 dark:text-white mb-6">카드 결제</h2>
+            <div className="text-center text-gray-600 dark:text-gray-300">
+              <p>카드 결제 기능은 현재 준비 중입니다.</p>
+              <p>빠른 시일 내에 찾아뵙겠습니다.</p>
+            </div>
+            <div className="mt-8 flex justify-end">
+              <button
+                onClick={() => setIsCardModalOpen(false)}
+                className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
+              >
+                닫기
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

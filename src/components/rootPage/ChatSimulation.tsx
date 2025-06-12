@@ -32,7 +32,7 @@ const ChatSimulation: React.FC = () => {
           }
           return [...prev, msg];
         });
-      }, index * 2000) // 애니메이션 간격을 2초로 늘려 자연스럽게
+      }, index * 500) // 애니메이션 간격을 1초로 줄여 속도 2배 증가
     );
 
     return () => {

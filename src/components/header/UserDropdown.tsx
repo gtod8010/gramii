@@ -2,6 +2,7 @@
 "use client";
 import Link from "next/link";
 import React, { useState, useEffect } from "react";
+import { toast } from "react-hot-toast";
 import { Dropdown } from "../ui/dropdown/Dropdown";
 import { DropdownItem } from "../ui/dropdown/DropdownItem";
 import { useUser } from "@/hooks/useUser";
@@ -40,15 +41,64 @@ export default function UserDropdown() {
 
   const handleCopyReferralCode = async () => {
     if (user && user.admin_referral_code) {
-      try {
-        await navigator.clipboard.writeText(user.admin_referral_code);
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
-      } catch (err) {
-        console.error("Failed to copy text: ", err);
+      const referralCode = user.admin_referral_code;
+      // 최신 Clipboard API 시도
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(referralCode)
+          .then(() => {
+            setCopied(true);
+            toast.success("추천인 코드가 복사되었습니다!");
+            setTimeout(() => setCopied(false), 2000);
+          })
+          .catch(err => {
+            console.error("Async: Could not copy text: ", err);
+            fallbackCopyTextToClipboard(referralCode);
+          });
+      } else {
+        // 대체 방법
+        fallbackCopyTextToClipboard(referralCode);
       }
     }
   };
+
+  // 구형 브라우저 또는 http 환경을 위한 대체 복사 함수
+  const fallbackCopyTextToClipboard = (text: string) => {
+    const textArea = document.createElement("textarea");
+    textArea.value = text;
+  
+    // 화면에서 보이지 않도록 스타일링
+    textArea.style.position = "fixed";
+    textArea.style.top = "0";
+    textArea.style.left = "0";
+    textArea.style.width = "2em";
+    textArea.style.height = "2em";
+    textArea.style.padding = "0";
+    textArea.style.border = "none";
+    textArea.style.outline = "none";
+    textArea.style.boxShadow = "none";
+    textArea.style.background = "transparent";
+  
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+  
+    try {
+      const successful = document.execCommand('copy');
+      if (successful) {
+        setCopied(true);
+        toast.success("추천인 코드가 복사되었습니다!");
+        setTimeout(() => setCopied(false), 2000);
+      } else {
+        toast.error("코드 복사에 실패했습니다.");
+        console.error("Fallback: Oops, unable to copy");
+      }
+    } catch (err) {
+      toast.error("코드 복사에 실패했습니다.");
+      console.error("Fallback: Oops, unable to copy", err);
+    }
+  
+    document.body.removeChild(textArea);
+  }
 
   if (isLoading) {
     return (

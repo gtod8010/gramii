@@ -208,7 +208,7 @@ const RootPage = () => {
             <Link href="/login" className="text-gray-600 hover:text-blue-600 transition-colors">
               로그인
             </Link>
-            <Link href="/signup" passHref legacyBehavior={false}>
+            <Link href="/register" passHref legacyBehavior={false}>
               <Button variant="primary" size="md" className="bg-blue-500 hover:bg-blue-600 text-white">
                 회원가입
               </Button>
@@ -321,13 +321,14 @@ const RootPage = () => {
                 <br />
                 통해 빠르게 해결할 수 있습니다.
               </p>
-              <Button
-                variant="outline"
-                size="md"
-                className="border-gray-400 text-gray-800 hover:bg-gray-200 px-10 py-4 text-lg font-semibold"
+              <a
+                href="http://pf.kakao.com/_aIRrn"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-block bg-transparent border border-gray-400 text-gray-800 hover:bg-gray-200 px-10 py-4 text-lg font-semibold rounded-md"
               >
                 상담사 연결하기
-              </Button>
+              </a>
             </div>
 
             {/* 오른쪽 채팅 시뮬레이션 영역 */}
@@ -344,6 +345,18 @@ const RootPage = () => {
 
       <FaqSection />
 
+      {/* Floating KakaoTalk Button */}
+      <a
+        href="http://pf.kakao.com/_aIRrn"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="fixed bottom-8 right-8 z-50 bg-[#FEE500] w-16 h-16 rounded-full flex items-center justify-center shadow-lg hover:bg-[#FADA0A] transition-colors duration-300"
+        title="카카오톡 실시간 상담"
+      >
+        <svg className="w-8 h-8 text-[#3C1E1E]" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 2C6.486 2 2 5.589 2 10.007c0 2.434 1.371 4.59 3.445 5.924-.266 1.432-.93 4.22-1.195 5.253-.053.208.134.405.343.349 1.143-.304 3.988-1.42 4.96-1.895A9.972 9.972 0 0012 20c5.514 0 10-4.477 10-9.993C22 5.589 17.514 2 12 2z" />
+        </svg>
+      </a>
     </div>
   );
 };

@@ -4,7 +4,11 @@ import React from 'react';
 import Link from 'next/link';
 import { FaPlay } from 'react-icons/fa';
 
-const Footer: React.FC = () => {
+interface FooterProps {
+  onOpenTermsModal: () => void;
+}
+
+const Footer: React.FC<FooterProps> = ({ onOpenTermsModal }) => {
   return (
     <footer className="w-full bg-gray-900 text-gray-400">
       <div className="px-[40px] py-12">
@@ -32,8 +36,11 @@ const Footer: React.FC = () => {
           {/* 오른쪽 정책 링크 영역 */}
           <div className="mt-8 md:mt-0">
             <ul className="flex space-x-6 text-sm">
-              <li><Link href="/terms" className="hover:text-white">이용약관</Link></li>
-              <li><Link href="/privacy" className="hover:text-white">개인정보처리방침</Link></li>
+              <li>
+                <button onClick={onOpenTermsModal} className="hover:text-white">
+                  이용약관 및 개인정보처리방침
+                </button>
+              </li>
             </ul>
           </div>
 

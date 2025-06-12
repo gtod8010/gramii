@@ -1,111 +1,101 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { query } from '@/lib/db';
 import bcrypt from 'bcrypt';
-import { DatabaseError } from 'pg';
 
 const SALT_ROUNDS = 10; // 해시 강도, 숫자가 클수록 보안은 강해지지만 해싱 시간이 오래 걸림
 
-// 6자리 랜덤 코드 생성 함수 (숫자와 대문자 알파벳 조합)
+// 고유한 추천인 코드를 생성하는 함수 (6자리)
 async function generateReferralCode(): Promise<string> {
-  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-  let attempts = 0;
-  while (attempts < 10) { // 최대 10번 시도
-    let code = '';
-    for (let i = 0; i < 6; i++) {
-      code += characters.charAt(Math.floor(Math.random() * characters.length));
+  let code: string;
+  let isUnique = false;
+
+  while (!isUnique) {
+    code = Math.random().toString(36).substring(2, 8).toUpperCase();
+    const { rows } = await query('SELECT id FROM users WHERE admin_referral_code = $1', [code]);
+    if (rows.length === 0) {
+      isUnique = true;
     }
-    // 코드 중복 확인
-    const checkQuery = 'SELECT id FROM users WHERE admin_referral_code = $1';
-    const result = await query(checkQuery, [code]);
-    if (result.rows.length === 0) {
-      return code; // 고유한 코드 반환
-    }
-    attempts++;
   }
-  throw new Error('Failed to generate a unique referral code after multiple attempts.');
+  return code!;
 }
 
-export async function POST(req: NextRequest) {
+interface User {
+  id: number;
+  username: string;
+  email: string;
+}
+
+export async function POST(request: NextRequest) {
   try {
-    const {
-      name,
-      email,
-      phone_number, // 필수
-      password,
-      referrer_code, // 추천인 코드 (선택)
-      role = 'user',
-    } = await req.json();
+    const { username, password, name, phone_number, email, referrer_code } = await request.json();
 
-    if (!name || !email || !password || !phone_number) { // referrer_code는 더 이상 필수 아님
-      return NextResponse.json({ message: 'Name, email, password, and phone number are required' }, { status: 400 });
+    // 1. 필수 입력값 검증
+    if (!username || !password || !name || !phone_number || !email) {
+      return NextResponse.json({ message: '모든 필수 항목을 입력해주세요.' }, { status: 400 });
     }
 
-    // referrer_code가 제공된 경우에만 유효성 검사
-    if (referrer_code && (typeof referrer_code !== 'string' || referrer_code.length !== 6)) {
-      return NextResponse.json({ message: 'Referrer code must be a 6-character string if provided' }, { status: 400 });
-    }
+    // 2. 아이디 및 이메일 중복 확인
+    const existingUser = await query(
+      'SELECT * FROM users WHERE username = $1 OR email = $2',
+      [username, email]
+    );
 
-    // 이메일 중복 확인
-    const existingEmailQuery = 'SELECT id FROM users WHERE email = $1';
-    const existingEmailResult = await query(existingEmailQuery, [email]);
-    if (existingEmailResult.rows.length > 0) {
-      return NextResponse.json({ message: 'Email already exists' }, { status: 409 });
-    }
-
-    // 전화번호 중복 확인 (필수 항목이므로 항상 값이 있음)
-      const existingPhoneQuery = 'SELECT id FROM users WHERE phone_number = $1';
-      const existingPhoneResult = await query(existingPhoneQuery, [phone_number]);
-      if (existingPhoneResult.rows.length > 0) {
-        return NextResponse.json({ message: 'Phone number already exists' }, { status: 409 });
-    }
-
-    // 추천인 ID 조회 (코드로 변경)
-    let referrerId = null;
-    if (referrer_code) { // referrer_code가 제공된 경우에만 조회
-      const referrerQuery = 'SELECT id FROM users WHERE admin_referral_code = $1';
-      const referrerResult = await query(referrerQuery, [referrer_code]);
-      if (referrerResult.rows.length > 0) {
-        referrerId = referrerResult.rows[0].id;
-      } else {
-        // 입력된 추천인 코드가 존재하지 않을 경우 에러 처리
-        return NextResponse.json({ message: `Referrer code \"${referrer_code}\" not found.` }, { status: 400 });
+    if (existingUser.rows.length > 0) {
+      const isUsernameTaken = existingUser.rows.some((user: User) => user.username === username);
+      if (isUsernameTaken) {
+        return NextResponse.json({ message: '이미 사용 중인 아이디입니다.' }, { status: 409 });
+      }
+      const isEmailTaken = existingUser.rows.some((user: User) => user.email === email);
+      if (isEmailTaken) {
+        return NextResponse.json({ message: '이미 등록된 이메일입니다.' }, { status: 409 });
       }
     }
 
+    // 3. 추천인 코드 확인
+    let referrerId = null;
+    if (referrer_code) {
+      const referrerResult = await query(
+        'SELECT id FROM users WHERE admin_referral_code = $1',
+        [referrer_code.toUpperCase()]
+      );
+      if (referrerResult.rows.length > 0) {
+        referrerId = referrerResult.rows[0].id;
+      } else {
+        return NextResponse.json({ message: '유효하지 않은 추천인 코드입니다.' }, { status: 400 });
+      }
+    }
+
+    // 4. 비밀번호 해싱
     const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
-    const adminReferralCode = await generateReferralCode(); // 고유 추천인 코드 생성
 
-    const insertUserQuery = `
-      INSERT INTO users (name, email, phone_number, password, role, referrer_id, admin_referral_code) 
-      VALUES ($1, $2, $3, $4, $5, $6, $7) 
-      RETURNING id, name, email, phone_number, role, referrer_id, admin_referral_code, points, created_at, updated_at 
-    `;
-    
-    const newUserResult = await query(insertUserQuery, [
-      name,
-      email,
-      phone_number, // phone_number는 이제 필수
-      hashedPassword,
-      role,
-      referrerId,
-      adminReferralCode,
-    ]);
+    // 5. 고유한 관리자 추천인 코드 생성
+    const adminReferralCode = await generateReferralCode();
 
-    return NextResponse.json({
-      message: 'User registered successfully',
-      user: newUserResult.rows[0],
+    // 6. 새 사용자 추가
+    const newUser = await query(
+      `INSERT INTO users (username, password, name, phone_number, email, referrer_id, admin_referral_code, role, points)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, 'user', 0)
+       RETURNING id, username, name, email, role, created_at`,
+      [username, hashedPassword, name, phone_number, email, referrerId, adminReferralCode]
+    );
+
+    return NextResponse.json({ 
+      message: '회원가입이 성공적으로 완료되었습니다.',
+      user: newUser.rows[0] 
     }, { status: 201 });
 
   } catch (error) {
-    console.error('Registration API error:', error);
-    if (error instanceof DatabaseError && error.code === '23505') { // Unique violation
-      let violatedField = 'A unique field';
-      if (error.constraint === 'users_email_key') violatedField = 'Email';
-      if (error.constraint === 'users_phone_number_key') violatedField = 'Phone number';
-      if (error.constraint === 'users_admin_referral_code_key') violatedField = 'Admin referral code (system error, please try again)'; 
-      return NextResponse.json({ message: `${violatedField} already exists. ${error.detail || ''}` }, { status: 409 });
+    console.error('Registration API Error:', error);
+    // 데이터베이스 에러 코드 '23505'는 unique_violation 입니다.
+    // 혹시 모를 동시성 문제로 인해 중복 검사를 통과했더라도 INSERT에서 에러가 날 경우를 대비합니다.
+    if (error instanceof Error && 'code' in error && error.code === '23505') {
+       if (error.message.includes('users_username_key')) {
+         return NextResponse.json({ message: '이미 사용 중인 아이디입니다.' }, { status: 409 });
+       }
+       if (error.message.includes('users_email_key')) {
+         return NextResponse.json({ message: '이미 등록된 이메일입니다.' }, { status: 409 });
+       }
     }
-    const errorMessage = error instanceof Error ? error.message : 'An internal server error occurred';
-    return NextResponse.json({ message: errorMessage }, { status: 500 });
+    return NextResponse.json({ message: '서버 오류가 발생했습니다.' }, { status: 500 });
   }
 }
