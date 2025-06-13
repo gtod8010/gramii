@@ -32,15 +32,7 @@ class SmsReceiver : BroadcastReceiver() {
     }
 
     private fun sendToServer(context: Context, from: String, body: String) {
-        val prefs = context.getSharedPreferences(MainActivity.PREFS_NAME, Context.MODE_PRIVATE)
-        val apiUrl = prefs.getString(MainActivity.PREF_API_URL, null)
-        val apiToken = prefs.getString(MainActivity.PREF_API_TOKEN, null)
-
-        if (apiUrl.isNullOrEmpty() || apiToken.isNullOrEmpty()) {
-            Log.w(TAG, "API URL or Token is not set. Cannot forward SMS.")
-            logToActivity(context, "ERROR: API URL or Token is not set.")
-            return
-        }
+        val apiUrl = "http://211.45.162.83:3000/api/sms-incoming"
         
         val isoFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.getDefault())
         isoFormat.timeZone = TimeZone.getTimeZone("UTC")
@@ -51,7 +43,7 @@ class SmsReceiver : BroadcastReceiver() {
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 logToActivity(context, "Forwarding SMS from $from...")
-                val response = ApiClient.instance.forwardSms(apiUrl, "Bearer $apiToken", payload)
+                val response = ApiClient.instance.forwardSms(apiUrl, "", payload)
                 if (response.isSuccessful) {
                     Log.i(TAG, "SMS successfully forwarded to $apiUrl")
                     logToActivity(context, "SUCCESS: SMS from $from forwarded.")

@@ -95,6 +95,9 @@ export async function POST(request: NextRequest) {
        if (error.message.includes('users_email_key')) {
          return NextResponse.json({ message: '이미 등록된 이메일입니다.' }, { status: 409 });
        }
+       if (error.message.includes('users_phone_number_key')) {
+        return NextResponse.json({ message: '이미 사용 중인 전화번호입니다.' }, { status: 409 });
+      }
     }
     return NextResponse.json({ message: '서버 오류가 발생했습니다.' }, { status: 500 });
   }

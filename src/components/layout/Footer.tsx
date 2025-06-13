@@ -20,13 +20,13 @@ const Footer: React.FC<FooterProps> = ({ onOpenTermsModal }) => {
               <FaPlay />
               <span>GRAMII</span>
             </Link>
-            <p className="font-semibold text-white">(주)그래미</p>
+            <p className="font-semibold text-white">그래미</p>
             <div className="text-sm space-y-1">
-                <p>주소: 경기도 고양시 일산동구 백마로 195, SK엠시티타워 일반동 13층</p>
-                <p>사업자등록번호: 813-87-01236</p>
-                <p>통신판매: 제 2019-고양일산동-1344호</p>
-                <p>대표번호: 1877-3570</p>
-                <p>이메일: admin@gramii.co.kr</p>
+                <p>주소 : 서울특별시 강서구 공항대로 426</p>
+                <p>사업자등록번호 : 572-05-03128</p>
+                <p>통신판매 : 신청중</p>
+                <p>대표번호 : -</p>
+                <p>이메일 : gramii0505@gmail.com</p>
             </div>
             <p className="text-xs text-gray-500 pt-4">
               Copyright 2024. GRAMII. All rights reserved.

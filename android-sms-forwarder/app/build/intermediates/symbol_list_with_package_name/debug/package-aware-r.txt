@@ -3157,10 +3157,6 @@ id animateToEnd
 id animateToStart
 id antiClockwise
 id anticipate
-id apiTokenEditText
-id apiTokenLayout
-id apiUrlEditText
-id apiUrlLayout
 id arc
 id asConfigured
 id async
@@ -3525,6 +3521,7 @@ id tag_transition_group
 id tag_unhandled_key_event_manager
 id tag_unhandled_key_listeners
 id tag_window_insets_animation_callback
+id testSendButton
 id text
 id text2
 id textEnd

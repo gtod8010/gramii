@@ -20,6 +20,13 @@ export default function RechargeModal({ isOpen, onClose }: RechargeModalProps) {
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [amountError, setAmountError] = useState<string | null>(null);
 
+  // 입금 계좌 정보 (나중에 여러개가 될 수 있으므로 변수화)
+  const depositAccount = {
+    bank: 'KB 국민은행',
+    accountNumber: '444401-01-499150',
+    accountHolder: '김수민(그래미)',
+  };
+
   // 세금계산서 필드
   const [companyName, setCompanyName] = useState('');
   const [businessNumber, setBusinessNumber] = useState('');
@@ -51,11 +58,11 @@ export default function RechargeModal({ isOpen, onClose }: RechargeModalProps) {
   if (!isOpen) return null;
 
   const validateAmount = (value: string): boolean => {
-    const numValue = parseInt(value, 10);
-    if (isNaN(numValue) || numValue < 10000 || numValue % 1000 !== 0) {
-      setAmountError('최소 충전 금액은 10,000원이며, 1,000원 단위로 입력해야 합니다.');
-      return false;
-    }
+    // if (isNaN(parseInt(value, 10)) || parseInt(value, 10) < 1 || parseInt(value, 10) % 1000 !== 0) {
+    //   setAmountError('최소 충전 금액은 1원이며, 1,000원 단위로 입력해야 합니다.');
+    //   return false;
+    // }
+    console.log(value);
     setAmountError(null);
     return true;
   }
@@ -113,6 +120,7 @@ export default function RechargeModal({ isOpen, onClose }: RechargeModalProps) {
           amount: parseInt(amount, 10),
           depositorName: depositorName,
           userId: userId,
+          accountNumber: `${depositAccount.bank} ${depositAccount.accountNumber}`, // 계좌번호 정보 추가
         }),
       });
 
@@ -154,9 +162,9 @@ export default function RechargeModal({ isOpen, onClose }: RechargeModalProps) {
 
         <div className="mb-6 p-4 border border-blue-200 dark:border-blue-700 rounded-md bg-blue-50 dark:bg-blue-900/30">
           <h3 className="text-md font-semibold text-blue-700 dark:text-blue-300 mb-2">입금 계좌 안내</h3>
-          <p className="text-sm text-gray-700 dark:text-gray-300"><strong>은행:</strong> KB 국민은행</p>
-          <p className="text-sm text-gray-700 dark:text-gray-300"><strong>계좌번호:</strong> 444401-01-499150</p>
-          <p className="text-sm text-gray-700 dark:text-gray-300"><strong>예금주:</strong> 김수민(그래미)</p>
+          <p className="text-sm text-gray-700 dark:text-gray-300"><strong>은행:</strong> {depositAccount.bank}</p>
+          <p className="text-sm text-gray-700 dark:text-gray-300"><strong>계좌번호:</strong> {depositAccount.accountNumber}</p>
+          <p className="text-sm text-gray-700 dark:text-gray-300"><strong>예금주:</strong> {depositAccount.accountHolder}</p>
           <p className="mt-2 text-xs text-red-600 dark:text-red-400">※ 입금 시 입금자명과 신청서에 작성하신 입금자명이 반드시 동일해야 합니다.</p>
         </div>
 

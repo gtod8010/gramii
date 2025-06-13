@@ -11,6 +11,7 @@ interface RechargeHistoryItem {
   amount: number;
   status: string; // 'pending', 'completed', 'failed' 등
   depositDate: string; // requested_at (요청일시)
+  accountNumber?: string; // 계좌번호 필드 추가
   // depositorName?: string; // 필요하다면 추가 (API 응답에 포함되어야 함)
 }
 
@@ -38,8 +39,20 @@ export default function RechargePage() {
   const fetchRechargeHistory = useCallback(async (page: number) => {
     setIsLoading(true);
     setError(null);
+
+    const token = localStorage.getItem('jwtToken');
+    if (!token) {
+      setError('인증 토큰이 없습니다. 다시 로그인해주세요.');
+      setIsLoading(false);
+      return;
+    }
+
     try {
-      const response = await fetch(`/api/deposits?page=${page}&limit=${ITEMS_PER_PAGE}`);
+      const response = await fetch(`/api/deposits?page=${page}&limit=${ITEMS_PER_PAGE}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.message || '충전 내역을 불러오는데 실패했습니다.');
@@ -105,19 +118,20 @@ export default function RechargePage() {
                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">결제수단</th>
                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">요청금액</th>
                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">요청일자</th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">계좌번호</th>
                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">상태</th>
                   </tr>
                 </thead>
                 <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                   {isLoading ? (
                     <tr>
-                      <td colSpan={5} className="px-6 py-12 text-center text-sm text-gray-500 dark:text-gray-400">
+                      <td colSpan={6} className="px-6 py-12 text-center text-sm text-gray-500 dark:text-gray-400">
                         충전 요청 내역을 불러오는 중...
                       </td>
                     </tr>
                   ) : error ? (
                     <tr>
-                      <td colSpan={5} className="px-6 py-12 text-center text-sm text-red-500">
+                      <td colSpan={6} className="px-6 py-12 text-center text-sm text-red-500">
                         오류: {error}
                       </td>
                     </tr>
@@ -132,6 +146,7 @@ export default function RechargePage() {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{item.amount.toLocaleString()}</td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{formatDate(item.depositDate)}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{item.accountNumber || '-'}</td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm">
                           <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
                             ${item.status === 'completed' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 
@@ -144,7 +159,7 @@ export default function RechargePage() {
                     ))
                   ) : (
                     <tr>
-                      <td colSpan={5} className="px-6 py-12 text-center text-sm text-gray-500 dark:text-gray-400">
+                      <td colSpan={6} className="px-6 py-12 text-center text-sm text-gray-500 dark:text-gray-400">
                         충전 요청 내역이 없습니다.
                       </td>
                     </tr>

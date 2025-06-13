@@ -14,6 +14,9 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.gramii.smsforwarder.databinding.ActivityMainBinding
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
 
@@ -36,7 +39,6 @@ class MainActivity : AppCompatActivity() {
         prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
 
         setupUI()
-        loadSettings()
         checkAndRequestPermissions()
         
         val intentFilter = IntentFilter(ACTION_LOG_UPDATE)
@@ -53,25 +55,13 @@ class MainActivity : AppCompatActivity() {
         binding.permissionButton.setOnClickListener {
             checkAndRequestPermissions()
         }
+        binding.testSendButton.setOnClickListener {
+            sendTestSms()
+        }
     }
     
     override fun onPause() {
         super.onPause()
-        saveSettings()
-    }
-
-    private fun saveSettings() {
-        prefs.edit().apply {
-            putString(PREF_API_URL, binding.apiUrlEditText.text.toString())
-            putString(PREF_API_TOKEN, binding.apiTokenEditText.text.toString())
-            apply()
-        }
-        Toast.makeText(this, "Settings saved!", Toast.LENGTH_SHORT).show()
-    }
-
-    private fun loadSettings() {
-        binding.apiUrlEditText.setText(prefs.getString(PREF_API_URL, ""))
-        binding.apiTokenEditText.setText(prefs.getString(PREF_API_TOKEN, ""))
     }
 
     private fun checkAndRequestPermissions() {
@@ -107,11 +97,36 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun sendTestSms() {
+        val apiUrl = "http://192.168.45.40:3000/api/sms-incoming"
+        val from = "010-0000-0000"
+        val body = "[테스트] Gramii SMS Forwarder Test Message"
+        val isoFormat = java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", java.util.Locale.getDefault())
+        isoFormat.timeZone = java.util.TimeZone.getTimeZone("UTC")
+        val receivedAt = isoFormat.format(java.util.Date())
+        val payload = com.gramii.smsforwarder.network.SmsPayload(from, body, receivedAt)
+        kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch {
+            try {
+                runOnUiThread { binding.logTextView.append("[${getCurrentTimestamp()}] Sending test SMS...\n") }
+                val response = com.gramii.smsforwarder.network.ApiClient.instance.forwardSms(apiUrl, "", payload)
+                if (response.isSuccessful) {
+                    runOnUiThread { binding.logTextView.append("[${getCurrentTimestamp()}] SUCCESS: Test SMS sent.\n") }
+                } else {
+                    val errorBody = response.errorBody()?.string()
+                    runOnUiThread { binding.logTextView.append("[${getCurrentTimestamp()}] FAIL: Code ${response.code()} - $errorBody\n") }
+                }
+            } catch (e: Exception) {
+                runOnUiThread { binding.logTextView.append("[${getCurrentTimestamp()}] EXCEPTION: ${e.message}\n") }
+            }
+        }
+    }
+
+    private fun getCurrentTimestamp(): String {
+        return java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.getDefault()).format(java.util.Date())
+    }
+
     companion object {
         const val PREFS_NAME = "SmsForwarderPrefs"
-        const val PREF_API_URL = "ApiUrl"
-        const val PREF_API_TOKEN = "ApiToken"
-
         const val ACTION_LOG_UPDATE = "com.gramii.smsforwarder.LOG_UPDATE"
         const val EXTRA_LOG_MESSAGE = "log_message"
         

@@ -11,8 +11,6 @@ import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.viewbinding.ViewBinding;
 import androidx.viewbinding.ViewBindings;
-import com.google.android.material.textfield.TextInputEditText;
-import com.google.android.material.textfield.TextInputLayout;
 import com.gramii.smsforwarder.R;
 import java.lang.NullPointerException;
 import java.lang.Override;
@@ -21,18 +19,6 @@ import java.lang.String;
 public final class ActivityMainBinding implements ViewBinding {
   @NonNull
   private final ConstraintLayout rootView;
-
-  @NonNull
-  public final TextInputEditText apiTokenEditText;
-
-  @NonNull
-  public final TextInputLayout apiTokenLayout;
-
-  @NonNull
-  public final TextInputEditText apiUrlEditText;
-
-  @NonNull
-  public final TextInputLayout apiUrlLayout;
 
   @NonNull
   public final TextView logTextView;
@@ -44,21 +30,19 @@ public final class ActivityMainBinding implements ViewBinding {
   public final TextView statusTitleTextView;
 
   @NonNull
+  public final Button testSendButton;
+
+  @NonNull
   public final TextView titleTextView;
 
-  private ActivityMainBinding(@NonNull ConstraintLayout rootView,
-      @NonNull TextInputEditText apiTokenEditText, @NonNull TextInputLayout apiTokenLayout,
-      @NonNull TextInputEditText apiUrlEditText, @NonNull TextInputLayout apiUrlLayout,
-      @NonNull TextView logTextView, @NonNull Button permissionButton,
-      @NonNull TextView statusTitleTextView, @NonNull TextView titleTextView) {
+  private ActivityMainBinding(@NonNull ConstraintLayout rootView, @NonNull TextView logTextView,
+      @NonNull Button permissionButton, @NonNull TextView statusTitleTextView,
+      @NonNull Button testSendButton, @NonNull TextView titleTextView) {
     this.rootView = rootView;
-    this.apiTokenEditText = apiTokenEditText;
-    this.apiTokenLayout = apiTokenLayout;
-    this.apiUrlEditText = apiUrlEditText;
-    this.apiUrlLayout = apiUrlLayout;
     this.logTextView = logTextView;
     this.permissionButton = permissionButton;
     this.statusTitleTextView = statusTitleTextView;
+    this.testSendButton = testSendButton;
     this.titleTextView = titleTextView;
   }
 
@@ -89,30 +73,6 @@ public final class ActivityMainBinding implements ViewBinding {
     // This is done to optimize the compiled bytecode for size and performance.
     int id;
     missingId: {
-      id = R.id.apiTokenEditText;
-      TextInputEditText apiTokenEditText = ViewBindings.findChildViewById(rootView, id);
-      if (apiTokenEditText == null) {
-        break missingId;
-      }
-
-      id = R.id.apiTokenLayout;
-      TextInputLayout apiTokenLayout = ViewBindings.findChildViewById(rootView, id);
-      if (apiTokenLayout == null) {
-        break missingId;
-      }
-
-      id = R.id.apiUrlEditText;
-      TextInputEditText apiUrlEditText = ViewBindings.findChildViewById(rootView, id);
-      if (apiUrlEditText == null) {
-        break missingId;
-      }
-
-      id = R.id.apiUrlLayout;
-      TextInputLayout apiUrlLayout = ViewBindings.findChildViewById(rootView, id);
-      if (apiUrlLayout == null) {
-        break missingId;
-      }
-
       id = R.id.logTextView;
       TextView logTextView = ViewBindings.findChildViewById(rootView, id);
       if (logTextView == null) {
@@ -131,15 +91,20 @@ public final class ActivityMainBinding implements ViewBinding {
         break missingId;
       }
 
+      id = R.id.testSendButton;
+      Button testSendButton = ViewBindings.findChildViewById(rootView, id);
+      if (testSendButton == null) {
+        break missingId;
+      }
+
       id = R.id.titleTextView;
       TextView titleTextView = ViewBindings.findChildViewById(rootView, id);
       if (titleTextView == null) {
         break missingId;
       }
 
-      return new ActivityMainBinding((ConstraintLayout) rootView, apiTokenEditText, apiTokenLayout,
-          apiUrlEditText, apiUrlLayout, logTextView, permissionButton, statusTitleTextView,
-          titleTextView);
+      return new ActivityMainBinding((ConstraintLayout) rootView, logTextView, permissionButton,
+          statusTitleTextView, testSendButton, titleTextView);
     }
     String missingId = rootView.getResources().getResourceName(id);
     throw new NullPointerException("Missing required view with ID: ".concat(missingId));

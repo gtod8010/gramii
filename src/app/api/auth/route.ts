@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { query } from '@/lib/db'; // db.ts 파일 경로에 맞게 수정해주세요.
 import bcrypt from 'bcrypt'; // bcrypt 임포트
+import jwt from 'jsonwebtoken'; // jwt 임포트
 
 export async function POST(req: NextRequest) {
   try {
@@ -34,15 +35,20 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ message: '아이디 또는 비밀번호가 잘못되었습니다.' }, { status: 401 });
     }
 
-    // 로그인 성공
-    // 실제 애플리케이션에서는 여기서 JWT 같은 세션 토큰을 생성하여 반환해야 합니다.
-    // 현재는 사용자 정보 중 비밀번호를 제외하고 반환합니다.
+    // 로그인 성공: JWT 토큰 생성
+    const token = jwt.sign(
+      { userId: user.id, role: user.role },
+      process.env.JWT_SECRET || 'your-fallback-secret-key',
+      { expiresIn: '7d' } // 토큰 유효기간: 7일
+    );
+
     const userWithoutPassword = { ...user };
     delete (userWithoutPassword as { password?: string }).password;
 
     return NextResponse.json({
       message: '로그인 성공',
       user: userWithoutPassword,
+      token: token, // 응답에 토큰 추가
     }, { status: 200 });
 
   } catch (error) {

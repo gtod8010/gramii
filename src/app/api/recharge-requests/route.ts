@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { pool } from '@/lib/db';
 
 export async function POST(req: Request) {
-  const { amount, depositorName, userId } = await req.json();
+  const { amount, depositorName, userId, accountNumber } = await req.json();
 
   if (!userId) {
     return NextResponse.json({ error: 'Unauthorized: User ID is missing' }, { status: 401 });
@@ -17,10 +17,10 @@ export async function POST(req: Request) {
     await client.query('BEGIN');
 
     const result = await client.query(
-      `INSERT INTO deposit_requests (user_id, amount, depositor_name, status)
-       VALUES ($1, $2, $3, 'pending')
+      `INSERT INTO deposit_requests (user_id, amount, depositor_name, status, account_number)
+       VALUES ($1, $2, $3, 'pending', $4)
        RETURNING id`,
-      [userId, amount, depositorName]
+      [userId, amount, depositorName, accountNumber]
     );
 
     await client.query('COMMIT');

@@ -22,6 +22,7 @@ const reviewsData: Review[] = [
   { id: 4, avatar: '/images/user/user-04.jpg', name: 'revi**', service: '네이버 쇼핑', serviceIcon: SiNaver, rating: 5, text: '그래미를 통해 네이버 쇼핑 마케팅을 해봤는데, 확실히 조회수랑 클릭 수부터 다르더라고요. 이전에는 노출도 안 되던 제품이 상위권에 올라오면서 판매가 바로 일어났고, 일 매출이 3배 넘게 증가했어요. 쇼핑몰 운영하는 분들 진심 강추합니다.' },
   { id: 5, avatar: '/images/user/user-05.jpg', name: 'tedi**', service: '인스타', serviceIcon: FaInstagram, rating: 5, text: '혼자서 마케팅하려니 늘 막막했는데, 그래미는 필요한 기능만 딱딱 골라 쓸 수 있어서 좋았어요. 셀프 좋아요, 저장, 댓글 기능을 활용했더니 해시태그 타고 들어오는 유입이 많아졌고, 그 결과로 게시물 2개가 동시에 인기탭에 올라갔어요. SNS 운영에 자신감 생겼어요!' },
   { id: 6, avatar: '/images/user/user-06.jpg', name: 'jason**', service: '틱톡', serviceIcon: FaTiktok, rating: 5, text: '틱톡은 바이럴이 중요한데, 그래미로 조회수를 집중적으로 올렸더니 완전 다른 반응이 오더라고요. 평소엔 500~1000뷰 나오던 영상이 2만 뷰 이상 나오고, 팔로워도 하루 만에 300명 늘었어요. 수익화도 빠르게 열렸고 지금은 매 영상이 안정적으로 수익을 가져다줘요.'},
+  { id: 7, avatar: '/images/user/user-01.jpg', name: 'owner**', service: '네이버 플레이스', serviceIcon: SiNaver, rating: 5, text: '지역 소상공인이라 홍보가 늘 고민이었는데, 그래미의 플레이스 마케팅을 신청한 뒤로 매출 흐름이 달라졌어요.'},
 ];
 
 const StarRating: React.FC<{ rating: number }> = ({ rating }) => (
@@ -94,7 +95,7 @@ const ReviewsSection: React.FC = () => {
                     </h2>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    {reviewsData.slice(0, 5).map((review, index) => (
+                    {reviewsData.map((review, index) => (
                         <ReviewCard key={review.id} review={review} isVisible={isVisible} index={index} />
                     ))}
                 </div>

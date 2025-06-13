@@ -29,6 +29,9 @@ export default function LoginPage() {
         if (data.user) {
           localStorage.setItem('loggedInUser', JSON.stringify(data.user));
         }
+        if (data.token) {
+          localStorage.setItem('jwtToken', data.token);
+        }
         router.push('/dashboard');
 
       } else {

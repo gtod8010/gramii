@@ -3,13 +3,10 @@ local
 color ic_launcher_background
 drawable ic_launcher_background
 drawable ic_launcher_foreground
-id apiTokenEditText
-id apiTokenLayout
-id apiUrlEditText
-id apiUrlLayout
 id logTextView
 id permissionButton
 id statusTitleTextView
+id testSendButton
 id titleTextView
 layout activity_main
 mipmap ic_launcher

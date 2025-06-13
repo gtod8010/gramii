@@ -9,6 +9,7 @@ interface DepositRequestItem {
   amount: number;
   status: string; // deposit_requests.status
   depositDate: string; // deposit_requests.requested_at 또는 confirmed_at
+  accountNumber?: string; // 계좌번호 필드 추가
   // 필요에 따라 depositorName 등 추가 필드 포함 가능
 }
 
@@ -50,7 +51,8 @@ export async function GET(request: NextRequest) {
           amount, 
           status, 
           requested_at as "depositDate",
-          depositor_name as "depositorName" 
+          depositor_name as "depositorName",
+          account_number as "accountNumber"
         FROM deposit_requests 
         WHERE user_id = $1
         ORDER BY requested_at DESC
@@ -64,6 +66,7 @@ export async function GET(request: NextRequest) {
         amount: row.amount,
         status: row.status,
         depositDate: row.depositDate.toISOString(), // ISO 문자열로 변환
+        accountNumber: row.accountNumber, // 계좌번호 추가
         // depositorName: row.depositorName, // 필요시 추가
       }));
 

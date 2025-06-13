@@ -104,6 +104,20 @@ const RootPage = () => {
   const orbitContainerRef = useRef<HTMLDivElement>(null);
   const animationFrameIdRef = useRef<number | null>(null);
   const [cardStyles, setCardStyles] = useState<React.CSSProperties[]>([]);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    const token = localStorage.getItem('jwtToken');
+    setIsLoggedIn(!!token);
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem('jwtToken');
+    localStorage.removeItem('loggedInUser');
+    setIsLoggedIn(false);
+    // 필요하다면 router.push('/') 등을 사용하여 홈으로 이동하거나 페이지를 새로고침할 수 있습니다.
+    window.location.reload();
+  };
 
   useEffect(() => {
     const fetchMetrics = async () => {
@@ -205,14 +219,32 @@ const RootPage = () => {
             <Link href="/services" className="text-gray-600 hover:text-blue-600 transition-colors">
               둘러보기
             </Link>
-            <Link href="/login" className="text-gray-600 hover:text-blue-600 transition-colors">
-              로그인
-            </Link>
-            <Link href="/register" passHref legacyBehavior={false}>
-              <Button variant="primary" size="md" className="bg-blue-500 hover:bg-blue-600 text-white">
-                회원가입
-              </Button>
-            </Link>
+            {isLoggedIn ? (
+              <>
+                <Link href="/dashboard" className="text-gray-600 hover:text-blue-600 transition-colors">
+                  서비스
+                </Link>
+                <Button 
+                  variant="outline" 
+                  size="md"
+                  onClick={handleLogout}
+                  className="bg-gray-200 hover:bg-gray-300 text-gray-800"
+                >
+                  로그아웃
+                </Button>
+              </>
+            ) : (
+              <>
+                <Link href="/login" className="text-gray-600 hover:text-blue-600 transition-colors">
+                  로그인
+                </Link>
+                <Link href="/register" passHref legacyBehavior={false}>
+                  <Button variant="primary" size="md" className="bg-blue-500 hover:bg-blue-600 text-white">
+                    회원가입
+                  </Button>
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </nav>

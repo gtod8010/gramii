@@ -81,6 +81,7 @@ const ManageServicesPage = () => {
   const [collapsedCategories, setCollapsedCategories] = useState<Record<string, boolean>>({});
   const [collapsedServiceTypes, setCollapsedServiceTypes] = useState<Record<string, boolean>>({});
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc'); // 정렬 순서 상태 추가
+  const [isSyncing, setIsSyncing] = useState(false); // 동기화 로딩 상태 추가
 
   const toggleSortOrder = () => { // 정렬 순서 변경 함수
     setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc');
@@ -225,6 +226,37 @@ const ManageServicesPage = () => {
     fetchAllServicesAndGroup(); // 스페셜 변경 시 서비스 목록도 업데이트 (special_name 등)
   };
 
+  const handleSyncServices = async () => {
+    if (!window.confirm('Realsite.shop의 서비스 목록과 동기화를 시작하시겠습니까? API 응답에 따라 시간이 소요될 수 있습니다.')) {
+      return;
+    }
+    setIsSyncing(true);
+    try {
+      const response = await fetch('/api/realsite/sync-services', {
+        method: 'POST',
+      });
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || '알 수 없는 오류가 발생했습니다.');
+      }
+
+      console.log('Realsite Services:', data);
+      alert('서비스 목록을 성공적으로 불러왔습니다. 브라우저 개발자 도구(F12)의 콘솔에서 데이터를 확인하세요.');
+      // 여기에 나중에 DB 동기화 로직을 추가합니다.
+      
+    } catch (error) {
+      console.error('Failed to sync services from Realsite:', error);
+      if (error instanceof Error) {
+        alert(`동기화 실패: ${error.message}`);
+      } else {
+        alert('동기화 중 알 수 없는 오류가 발생했습니다.');
+      }
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
   const handleDeleteService = async (serviceId: number, serviceName: string) => {
     if (window.confirm(`'${serviceName}' 서비스를 정말로 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.`)) {
       setIsLoading(true); // 로딩 상태 시작
@@ -302,6 +334,9 @@ const ManageServicesPage = () => {
           </Button>
             <Button onClick={handleOpenSpecialManagementModal} variant="outline">
               스페셜 관리
+            </Button>
+            <Button onClick={handleSyncServices} variant="outline" disabled={isSyncing}>
+              {isSyncing ? '동기화 진행 중...' : 'Realsite 서비스 동기화'}
             </Button>
           </div>
         </div>
