@@ -27,8 +27,8 @@ export async function POST(request: Request) {
     try {
       await client.query('BEGIN');
 
-      // 1. 서비스 기본 정보 조회 (컬럼 이름 수정)
-      const serviceBaseInfoQuery = 'SELECT price_per_unit, name, min_order_quantity, max_order_quantity FROM services WHERE id = $1';
+      // 1. 서비스 기본 정보 조회 (external_id 추가)
+      const serviceBaseInfoQuery = 'SELECT price_per_unit, name, min_order_quantity, max_order_quantity, external_id FROM services WHERE id = $1';
       const serviceBaseInfoResult = await client.query(serviceBaseInfoQuery, [serviceId]);
 
       if (serviceBaseInfoResult.rows.length === 0) {
@@ -70,10 +70,50 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: 'Insufficient points' }, { status: 400 });
       }
 
-      // 6. 주문 생성
+      // Realsite API 연동 로직 추가
+      const externalId = serviceInfo.external_id;
+      let realsiteOrderId: number | null = null;
+
+      if (externalId) {
+        const apiKey = process.env.REALSITE_API_KEY;
+        const apiUrl = process.env.REALSITE_API_URL;
+
+        if (!apiKey || !apiUrl) {
+          throw new Error('Realsite API 환경 변수가 설정되지 않았습니다.');
+        }
+
+        const realsiteResponse = await fetch(apiUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            key: apiKey,
+            action: 'add',
+            service: externalId,
+            link: linkValue,
+            quantity: quantity,
+          }),
+        });
+
+        const realsiteData = await realsiteResponse.json();
+
+        if (!realsiteResponse.ok || realsiteData.error) {
+          const errorMessage = `Realsite API 주문 실패: ${realsiteData.error || '알 수 없는 오류'}`;
+          console.error(errorMessage);
+          // 트랜잭션을 롤백시키기 위해 에러를 throw합니다.
+          throw new Error('외부 서비스 주문 연동에 실패했습니다. 잠시 후 다시 시도해주세요.');
+        }
+
+        if (!realsiteData.order) {
+            console.error('Realsite API 응답에 order ID가 없습니다.', realsiteData);
+            throw new Error('외부 서비스로부터 유효하지 않은 응답을 받았습니다.');
+        }
+        realsiteOrderId = parseInt(realsiteData.order, 10);
+      }
+
+      // 6. 주문 생성 (realsite_order_id 컬럼 추가)
       const orderInsertQuery = `
-        INSERT INTO orders (user_id, service_id, quantity, total_price, link, order_status, processed_quantity)
-        VALUES ($1, $2, $3, $4, $5, 'pending', 0) 
+        INSERT INTO orders (user_id, service_id, quantity, total_price, link, order_status, processed_quantity, realsite_order_id)
+        VALUES ($1, $2, $3, $4, $5, 'pending', 0, $6)
         RETURNING *;
       `;
       const orderResult: QueryResult = await client.query(orderInsertQuery, [
@@ -82,6 +122,7 @@ export async function POST(request: Request) {
         quantity,
         calculatedTotalPrice,
         linkValue || null,
+        realsiteOrderId,
       ]);
       const newOrder = orderResult.rows[0];
 

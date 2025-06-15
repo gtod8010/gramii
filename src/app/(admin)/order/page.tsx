@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useUser } from '@/hooks/useUser';
+import { toast } from 'react-hot-toast';
 
 // 데이터 타입 정의 (기존 정의 유지 또는 API 응답에 맞게 조정)
 interface SubServiceItem {
@@ -62,7 +63,6 @@ export default function OrderPage() {
   const [serviceLink, setServiceLink] = useState<string>('');
   const [termsAgreement, setTermsAgreement] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitMessage, setSubmitMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   const fetchAndStructureServices = useCallback(async () => {
     setIsLoadingServices(true);
@@ -254,58 +254,59 @@ export default function OrderPage() {
   }, [selectedServiceDetails, orderQuantity]);
 
   const handleSubmit = async (event: React.MouseEvent<HTMLButtonElement>) => {
-    event.preventDefault(); 
-    setSubmitMessage(null);
-    if (userIsLoading) {
-      alert("사용자 정보를 불러오는 중입니다. 잠시 후 다시 시도해주세요.");
-      return;
-    }
-    if (!user) {
-      alert("로그인이 필요합니다.");
-      return;
-    }
-    if (!selectedSubServiceId || !selectedServiceDetails || !orderQuantity || totalCost <= 0 || !serviceLink || !termsAgreement) {
-      setSubmitMessage({ type: 'error', text: "모든 필수 항목을 입력하고 약관에 동의해주세요."});
+    event.preventDefault();
+    
+    if (!selectedSubServiceId || !orderQuantity || !serviceLink || !termsAgreement || !selectedServiceDetails) {
+      toast.error('모든 필수 항목을 입력하고 약관에 동의해주세요.');
       return;
     }
     const quantityNum = parseInt(orderQuantity, 10);
-    if (selectedServiceDetails && 
-        (quantityNum < selectedServiceDetails.minOrder || quantityNum > selectedServiceDetails.maxOrder)) {
-      setSubmitMessage({ type: 'error', text: `수량은 ${selectedServiceDetails.minOrder}에서 ${selectedServiceDetails.maxOrder} 사이로 입력해주세요.`});
+    if (isNaN(quantityNum) || quantityNum < selectedServiceDetails.minOrder || quantityNum > selectedServiceDetails.maxOrder) {
+      toast.error(`주문 수량은 ${selectedServiceDetails.minOrder}에서 ${selectedServiceDetails.maxOrder} 사이여야 합니다.`);
       return;
     }
-    const orderPayload = {
-      userId: user.id, 
-      serviceId: parseInt(selectedSubServiceId, 10),
-      quantity: quantityNum, 
-      totalPrice: totalCost, 
-      requestDetails: serviceLink,
-    };
+    if (!user) {
+      toast.error('로그인이 필요합니다.');
+      return;
+    }
+    if ((user.points || 0) < totalCost) {
+      toast.error('포인트가 부족합니다.');
+      return;
+    }
+
     setIsSubmitting(true);
+
     try {
+      const payload = {
+        userId: user.id,
+        serviceId: parseInt(selectedSubServiceId, 10),
+        quantity: quantityNum,
+        totalPrice: totalCost,
+        requestDetails: serviceLink,
+      };
+
       const response = await fetch('/api/orders', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(orderPayload),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
       });
+
       const result = await response.json();
+
       if (!response.ok) {
         throw new Error(result.error || '주문 생성에 실패했습니다.');
       }
-      setSubmitMessage({ type: 'success', text: `주문이 성공적으로 생성되었습니다! (주문 ID: ${result.order.id})` });
-      if (result.updatedUserPoints !== undefined && user) {
+      
+      toast.success('주문이 성공적으로 완료되었습니다!');
+      if (result.updatedUserPoints !== undefined) {
         updateUserInStorage({ ...user, points: result.updatedUserPoints });
       }
-      resetForm(); 
+      
+      resetForm();
+
     } catch (error) {
-      console.error("Order submission error:", error);
-      if (error instanceof Error) {
-        setSubmitMessage({ type: 'error', text: error.message || '주문 처리 중 오류가 발생했습니다.' });
-      } else {
-        setSubmitMessage({ type: 'error', text: '주문 처리 중 알 수 없는 오류가 발생했습니다.' });
-      }
+      console.error('Order submission error:', error);
+      toast.error(error instanceof Error ? error.message : '알 수 없는 오류가 발생했습니다.');
     } finally {
       setIsSubmitting(false);
     }
@@ -325,12 +326,6 @@ export default function OrderPage() {
         <div className="md:col-span-2 bg-white dark:bg-gray-800 shadow-lg rounded-lg p-6 space-y-6">
           <h2 className="text-xl font-semibold text-gray-700 dark:text-gray-200">새로운 주문</h2>
           
-          {submitMessage && (
-            <div className={`p-4 rounded-md ${submitMessage.type === 'success' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-              {submitMessage.text}
-            </div>
-          )}
-
           <div>
             <label htmlFor="category" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">카테고리를 먼저 선택해주세요.</label>
             <select id="category" name="category" value={selectedCategoryId} onChange={handleCategoryChange} className="mt-1 block w-full py-2 px-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:text-white">
@@ -384,7 +379,7 @@ export default function OrderPage() {
           <button 
             type="button"
             onClick={handleSubmit} 
-            disabled={isSubmitting || !termsAgreement || !selectedSubServiceId || orderQuantity === '' || serviceLink === ''}
+            disabled={isSubmitting || !termsAgreement || !selectedSubServiceId || orderQuantity === ''}
             className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-md focus:outline-none focus:shadow-outline disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isSubmitting ? '주문 처리 중...' : `${totalCost.toLocaleString()} P 결제하기`}
