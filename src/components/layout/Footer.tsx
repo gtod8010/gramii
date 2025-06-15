@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { FaPlay } from 'react-icons/fa';
+import Image from 'next/image';
 
 interface FooterProps {
   onOpenTermsModal: () => void;
@@ -16,16 +16,21 @@ const Footer: React.FC<FooterProps> = ({ onOpenTermsModal }) => {
           
           {/* 왼쪽 정보 영역 */}
           <div className="space-y-4">
-            <Link href="/" className="flex items-center space-x-2 text-2xl font-bold text-white mb-6">
-              <FaPlay />
-              <span>GRAMII</span>
+            <Link href="/" className="inline-block mb-6">
+              <div className="relative h-12 w-28">
+                <Image
+                  src="/images/gramii_logo.png"
+                  alt="GRAMII Logo"
+                  fill
+                  style={{ objectFit: 'contain' }}
+                />
+              </div>
             </Link>
             <p className="font-semibold text-white">그래미</p>
             <div className="text-sm space-y-1">
                 <p>주소 : 서울특별시 강서구 공항대로 426</p>
                 <p>사업자등록번호 : 572-05-03128</p>
                 <p>통신판매 : 신청중</p>
-                <p>대표번호 : -</p>
                 <p>이메일 : gramii0505@gmail.com</p>
             </div>
             <p className="text-xs text-gray-500 pt-4">

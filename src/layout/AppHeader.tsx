@@ -4,7 +4,6 @@ import UserDropdown from "@/components/header/UserDropdown";
 import { useSidebar } from "@/context/SidebarContext";
 import React from "react";
 import { usePathname } from 'next/navigation';
-import { useUser } from "@/hooks/useUser";
 
 // 페이지 경로에 따른 타이틀 매핑
 const pageTitles: { [key: string]: string } = {
@@ -22,15 +21,7 @@ const pageTitles: { [key: string]: string } = {
 const AppHeader: React.FC = () => {
   const { isMobileOpen, toggleSidebar, toggleMobileSidebar } = useSidebar();
   const pathname = usePathname();
-  const { user, isLoading } = useUser();
   const currentPageTitle = pageTitles[pathname] || '대시보드';
-
-  console.log("AppHeader User Debug:", { 
-    isLoading, 
-    user, 
-    role: user?.role, 
-    points: user?.points 
-  });
 
   const handleToggleSidebar = () => {
     if (window.innerWidth >= 1024) { // lg 브레이크포인트 기준

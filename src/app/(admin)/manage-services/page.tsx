@@ -241,9 +241,9 @@ const ManageServicesPage = () => {
         throw new Error(data.error || '알 수 없는 오류가 발생했습니다.');
       }
 
-      console.log('Realsite Services:', data);
-      alert('서비스 목록을 성공적으로 불러왔습니다. 브라우저 개발자 도구(F12)의 콘솔에서 데이터를 확인하세요.');
-      // 여기에 나중에 DB 동기화 로직을 추가합니다.
+      // API 응답에서 받은 상세 정보로 알림 메시지를 개선합니다.
+      const alertMessage = `${data.message}\n\n- API에서 받은 총 서비스 수: ${data.total_services_from_api}\n- DB에 처리된 서비스 수: ${data.processed_services}`;
+      alert(alertMessage);
       
     } catch (error) {
       console.error('Failed to sync services from Realsite:', error);
@@ -441,13 +441,12 @@ const ManageServicesPage = () => {
       <NewServiceModal
         isOpen={isNewServiceModalOpen}
         onClose={() => {
-            setIsNewServiceModalOpen(false); // closeNewServiceModal 함수 직접 호출 대신 상태 변경
+            setIsNewServiceModalOpen(false); 
             setEditingService(null); 
         }}
-        onServiceAdded={handleServiceUpdated} // onServiceUpdated를 onServiceAdded로 변경
-        categories={categories} // categories prop 전달
-        editingService={editingService} // serviceToEdit을 editingService로 변경
-        // specials={specials} // NewServiceModal이 카테고리만 사용하도록 완전히 수정되면 이 줄은 삭제합니다.
+        onServiceUpdated={handleServiceUpdated} // onServiceAdded를 onServiceUpdated로 변경
+        categories={categories} 
+        editingService={editingService} 
       />
 
       <SpecialManagementModal

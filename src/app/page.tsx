@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Button from '@/components/ui/button/Button';
 import Image from 'next/image';
@@ -10,7 +10,11 @@ import ServiceSection from '@/components/rootPage/ServiceSection';
 import ReviewsSection from '@/components/rootPage/ReviewsSection';
 import FaqSection from '@/components/rootPage/FaqSection';
 
-// Swiper 관련 임포트 모두 제거
+// Swiper 관련 임포트
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { Autoplay, EffectCoverflow } from 'swiper/modules';
+import 'swiper/css';
+import 'swiper/css/effect-coverflow';
 
 // React Icons (FaInstagram은 이제 직접 구현하므로 제거 가능)
 import {
@@ -58,7 +62,7 @@ const platformData: PlatformItem[] = [
 ];
 
 // 카드 렌더링 컴포넌트
-const PlatformCard: React.FC<{ item: PlatformItem, style?: React.CSSProperties }> = ({ item, style }) => {
+const PlatformCard: React.FC<{ item: PlatformItem }> = ({ item }) => {
   const iconBaseClassName = "w-12 h-12 md:w-16 md:h-16 mb-4";
   const iconProps: { className: string; style?: React.CSSProperties; fill?: string; } = {
     className: iconBaseClassName, 
@@ -75,8 +79,7 @@ const PlatformCard: React.FC<{ item: PlatformItem, style?: React.CSSProperties }
 
   return (
     <div 
-      className="bg-gray-50 p-6 rounded-full shadow-lg flex flex-col items-center justify-center w-[180px] h-[180px] md:w-[200px] md:h-[200px]"
-      style={style} 
+      className="bg-white p-6 rounded-3xl shadow-xl flex flex-col items-center justify-center w-full h-full hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 cursor-pointer"
     >
       <item.icon {...iconProps} /> 
       <h3 className="text-base md:text-lg font-semibold text-gray-800 mb-1">{item.name}</h3>
@@ -101,9 +104,6 @@ interface MainPageMetrics {
 const RootPage = () => {
   const [metrics, setMetrics] = useState<MainPageMetrics | null>(null);
   const [isLoadingMetrics, setIsLoadingMetrics] = useState(true);
-  const orbitContainerRef = useRef<HTMLDivElement>(null);
-  const animationFrameIdRef = useRef<number | null>(null);
-  const [cardStyles, setCardStyles] = useState<React.CSSProperties[]>([]);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
@@ -140,88 +140,29 @@ const RootPage = () => {
     fetchMetrics();
   }, []);
 
-  // 3D Orbit Card Styles Calculation useEffect
-  useEffect(() => {
-    const numCards = platformData.length;
-    if (numCards === 0) {
-      setCardStyles([]);
-      return;
-    }
-
-    const radius = 280; 
-    const angleStep = (2 * Math.PI) / numCards; 
-
-    const newCardStyles: React.CSSProperties[] = platformData.map((_, index) => {
-      const angle = index * angleStep;
-      const cardAngleDegrees = (angle * 180 / Math.PI);
-      
-      const transform = `translate(-50%, -50%) rotateY(${cardAngleDegrees}deg) translateZ(${radius}px)`;
-      
-      return {
-        position: 'absolute',
-        top: '50%',
-        left: '50%',
-        transformOrigin: '50% 50%',
-        transform: transform,
-      };
-    });
-    
-    setCardStyles(newCardStyles);
-
-  }, []);
-
-  // 3D Orbit Animation useEffect
-  useEffect(() => {
-    const orbitContainer = orbitContainerRef.current;
-    if (!orbitContainer || platformData.length === 0) {
-      // 애니메이션 중지 또는 초기화 로직 (필요한 경우)
-      if (animationFrameIdRef.current) {
-        cancelAnimationFrame(animationFrameIdRef.current);
-        animationFrameIdRef.current = null;
-      }
-      if (orbitContainer) { // 컨테이너가 있으면 초기 각도로 리셋
-        orbitContainer.style.transform = 'rotateY(0rad)';
-      }
-      return;
-    }
-
-    let currentAngle = 0;
-    const animate = () => {
-      currentAngle += 0.003; 
-      if (orbitContainer) {
-        orbitContainer.style.transform = `rotateY(${currentAngle}rad)`;
-      }
-      animationFrameIdRef.current = requestAnimationFrame(animate);
-    };
-
-    animate(); // platformData.length > 0이 보장되므로 바로 시작
-
-    return () => {
-      if (animationFrameIdRef.current) {
-        cancelAnimationFrame(animationFrameIdRef.current);
-      }
-      // 선택적: 컴포넌트 언마운트 시 컨테이너 회전 초기화
-      // if (orbitContainer) {
-      //   orbitContainer.style.transform = 'rotateY(0rad)';
-      // }
-    };
-  }, []); // platformData.length가 변경되면 애니메이션 재시작/중지
-
   return (
     <div className="min-h-screen bg-white text-gray-800 flex flex-col">
       {/* Navigation Bar */}
       <nav className="w-full py-4 px-6 md:px-10 shadow-sm bg-white">
         <div className="container mx-auto flex items-center justify-between">
-          <Link href="/" className="text-2xl font-bold text-blue-600">
-            GRAMII
+          <Link href="/" className="flex items-center">
+            <div className="relative h-12 w-28">
+              <Image
+                src="/images/gramii_logo.png"
+                alt="GRAMII Logo"
+                fill
+                style={{ objectFit: 'contain' }}
+                priority
+              />
+            </div>
           </Link>
           <div className="space-x-4 flex items-center">
-            <Link href="/services" className="text-gray-600 hover:text-blue-600 transition-colors">
+            <Link href="/services" className="text-gray-600 hover:text-[var(--color-pink-500)] transition-colors">
               둘러보기
             </Link>
             {isLoggedIn ? (
               <>
-                <Link href="/dashboard" className="text-gray-600 hover:text-blue-600 transition-colors">
+                <Link href="/dashboard" className="text-gray-600 hover:text-[var(--color-pink-500)] transition-colors">
                   서비스
                 </Link>
                 <Button 
@@ -235,11 +176,15 @@ const RootPage = () => {
               </>
             ) : (
               <>
-                <Link href="/login" className="text-gray-600 hover:text-blue-600 transition-colors">
+                <Link href="/login" className="text-gray-600 hover:text-[var(--color-pink-500)] transition-colors">
                   로그인
                 </Link>
                 <Link href="/register" passHref legacyBehavior={false}>
-                  <Button variant="primary" size="md" className="bg-blue-500 hover:bg-blue-600 text-white">
+                  <Button 
+                    variant="primary" 
+                    size="md" 
+                    className="text-white bg-gradient-to-r from-pink-500 to-orange-400 hover:from-pink-600 hover:to-orange-500 focus:ring-pink-500"
+                  >
                     회원가입
                   </Button>
                 </Link>
@@ -250,45 +195,55 @@ const RootPage = () => {
       </nav>
 
       {/* Hero Section */}
-      <main className="flex-grow container mx-auto px-6 md:px-10 py-12 md:py-20 flex items-center">
-        <div className="grid md:grid-cols-2 gap-8 items-center">
-          {/* Text Content */}
-          <div className="text-center md:text-left">
-            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6 leading-tight">
-              이건 트렌드가 아니라 변화다
-              <br />
-              <span className="text-blue-600">SNS</span>가 마케팅의 중심, 
-              <span className="text-blue-600"> GRAMII</span>
-            </h1>
-            <p className="text-lg text-gray-700 mb-8">
-                인플루언서도, 소상공인도, 마케팅 초보도 쉽게
-                좋아요, 팔로워, 댓글, 조회수까지 통합 관리.
-                이제 마케팅은 그래미 하나면 충분합니다.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
-              <Link href="/services" passHref legacyBehavior={false}>
-                <Button variant="primary" size="md" className="w-full sm:w-auto bg-blue-500 hover:bg-blue-600 text-white px-8 py-3 text-base">
-                  둘러보기
-                </Button>
-              </Link>
+      <main className="flex-grow bg-[radial-gradient(ellipse_at_top_right,_#2e1a47_20%,_#1a1033_50%,_#0a041a)] relative overflow-hidden">
+        {/* 우주 별빛 효과 */}
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.15)_1px,transparent_1px)] [background-size:80px_80px]"></div>
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.12)_1px,transparent_1px)] [background-size:160px_160px]"></div>
+        
+        <div className="container mx-auto px-6 md:px-10 py-24 md:py-36 flex items-center relative z-10">
+          <div className="grid md:grid-cols-2 gap-8 items-center">
+            {/* Text Content */}
+            <div className="text-center md:text-left">
+              <h1 className="text-4xl md:text-5xl font-bold text-white mb-6 leading-tight">
+                이건 트렌드가 아니라 변화다
+                <br />
+                <span className="bg-gradient-to-tr from-orange-400 via-red-500 to-pink-600 bg-clip-text text-transparent font-extrabold">SNS</span>가 마케팅의 중심, 
+                <span className="bg-gradient-to-tr from-orange-400 via-red-500 to-pink-600 bg-clip-text text-transparent font-extrabold"> GRAMII</span>
+              </h1>
+              <p className="text-lg text-gray-200 mb-8">
+                  인플루언서도, 소상공인도, 마케팅 초보도 쉽게
+                  좋아요, 팔로워, 댓글, 조회수까지 통합 관리.
+                  이제 마케팅은 그래미 하나면 충분합니다.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
+                <Link href="/services" passHref legacyBehavior={false}>
+                  <Button 
+                    variant="primary" 
+                    size="md" 
+                    className="w-full sm:w-auto bg-gradient-to-tr from-orange-400 via-red-500 to-pink-600 hover:from-orange-500 hover:via-red-600 hover:to-pink-700 text-white px-8 py-3 text-base border-0 shadow-lg hover:shadow-xl transition-all duration-300"
+                  >
+                    둘러보기
+                  </Button>
+                </Link>
+              </div>
             </div>
-          </div>
 
-          {/* Image Content */}
-          <div className="hidden md:flex justify-center items-center">
-            <Image 
-              src="/images/first_phone.png" 
-              alt="GRAMII 서비스 소개 이미지" 
-              width={400}
-              height={600}
-              className="object-contain"
-            />
+            {/* Image Content */}
+            <div className="hidden md:flex justify-center items-center">
+              <Image 
+                src="/images/section.png" 
+                alt="GRAMII 서비스 소개 이미지" 
+                width={500}
+                height={400}
+                className="object-contain drop-shadow-[0_20px_25px_rgba(0,0,0,0.2)]"
+              />
+            </div>
           </div>
         </div>
       </main>
 
       {/* Stats Section */}
-      <section className="bg-cyan-500 py-12 md:py-16">
+      <section className="bg-[var(--color-pink-500)] py-12 md:py-16">
         <div className="container mx-auto px-6 md:px-10">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center text-white">
             <div className="p-4">
@@ -316,22 +271,43 @@ const RootPage = () => {
       </section>
 
       {/* WHAT WE DO? */}
-      <section className="w-full bg-white py-16 md:py-24">
+      <section className="w-full bg-gray-100 py-16 md:py-24">
         <div className="container mx-auto text-center px-6 md:px-10">
-          <h2 className="text-sm font-bold uppercase text-blue-600 tracking-widest mb-4">
+          <h2 className="text-sm font-bold uppercase text-[var(--color-pink-500)] tracking-widest mb-4">
             What We Do?
           </h2>
           <p className="text-lg text-gray-600 mb-12">
             GRAMII의 쉽고 빠른 마케팅을 경험해보세요.
           </p>
 
-          {/* 3D Orbiting Platforms */}
-          <div className="relative w-full h-[400px] flex items-center justify-center perspective-1000">
-            <div ref={orbitContainerRef} className="w-full h-full transform-style-3d">
-              {cardStyles.map((style, index) => (
-                <PlatformCard key={platformData[index].name} item={platformData[index]} style={style} />
+          {/* Swiper Carousel */}
+          <div className="w-full">
+            <Swiper
+              effect={'coverflow'}
+              grabCursor={true}
+              centeredSlides={true}
+              loop={true}
+              slidesPerView={'auto'}
+              coverflowEffect={{
+                rotate: 0,
+                stretch: 80,
+                depth: 200,
+                modifier: 1,
+                slideShadows: false,
+              }}
+              autoplay={{
+                delay: 3000,
+                disableOnInteraction: false,
+              }}
+              modules={[EffectCoverflow, Autoplay]}
+              className="w-full py-20"
+            >
+              {platformData.map((item, index) => (
+                <SwiperSlide key={index} className="!w-[250px] !h-[250px] md:!w-[280px] md:!h-[280px]">
+                  <PlatformCard item={item} />
+                </SwiperSlide>
               ))}
-            </div>
+            </Swiper>
           </div>
         </div>
       </section>

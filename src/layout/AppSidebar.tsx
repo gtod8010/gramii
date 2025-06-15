@@ -269,16 +269,25 @@ const AppSidebar: React.FC = () => {
           !isExpanded && !isHovered && !isMobileOpen && "lg:px-3.5"
         } `}
       >
-        <Link href="/" className="flex items-center gap-2">
-          <Image
-            width={32}
-            height={32}
-            src={"/images/logo/logo-icon.svg"}
-            alt="Logo"
-            className="h-8 w-8"
-          />
-          {(isExpanded || isHovered || isMobileOpen) && (
-            <span className="text-xl font-semibold">GRAMII</span>
+        <Link href="/" className="flex items-center">
+          {(isExpanded || isHovered || isMobileOpen) ? (
+            <div className="relative h-12 w-28">
+              <Image
+                src="/images/gramii_logo.png"
+                alt="GRAMII Logo"
+                fill
+                style={{ objectFit: 'contain' }}
+                priority
+              />
+            </div>
+          ) : (
+            <Image
+              width={32}
+              height={32}
+              src={"/images/logo/logo-icon.svg"}
+              alt="Logo Icon"
+              className="h-8 w-8"
+            />
           )}
         </Link>
         {(isExpanded || isHovered || isMobileOpen) && (

@@ -65,5 +65,25 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
   } finally {
     client.release();
   }
+}
+
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const userId = parseInt(id, 10);
+
+  if (isNaN(userId)) {
+    return NextResponse.json({ message: '유효하지 않은 사용자 ID입니다.' }, { status: 400 });
+  }
+
+  try {
+    const result = await pool.query('SELECT points FROM users WHERE id = $1', [userId]);
+    if (result.rows.length === 0) {
+      return NextResponse.json({ message: '해당 사용자를 찾을 수 없습니다.' }, { status: 404 });
+    }
+    return NextResponse.json({ points: result.rows[0].points });
+  } catch (error) {
+    console.error(`Error fetching points for user ${userId}:`, error);
+    return NextResponse.json({ message: '포인트 조회 중 오류가 발생했습니다.', error: (error as Error).message }, { status: 500 });
+  }
 } 
  

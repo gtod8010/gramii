@@ -96,64 +96,49 @@ export async function GET(request: NextRequest) {
 export async function POST(req: Request) {
   try {
     const {
-      category_id: categoryId,
-      new_category_name: newCategoryName,
-      service_type_id: serviceTypeId,
-      new_service_type_name: newServiceTypeName,
-      service_name: serviceName,
-      min_order_quantity: minOrderQuantity,
-      max_order_quantity: maxOrderQuantity,
-      price_per_unit: pricePerUnit,
+      service_type_id,
+      service_name,
+      min_order_quantity,
+      max_order_quantity,
+      price_per_unit,
       description,
+      external_id,
     } = await req.json();
 
     // 입력값 유효성 검사
     if (
-      (categoryId === undefined && !newCategoryName) ||
-      (serviceTypeId === undefined && !newServiceTypeName) ||
-      !serviceName ||
-      minOrderQuantity === undefined ||
-      maxOrderQuantity === undefined ||
-      pricePerUnit === undefined
+      service_type_id === undefined ||
+      !service_name ||
+      min_order_quantity === undefined ||
+      max_order_quantity === undefined ||
+      price_per_unit === undefined
     ) {
       return NextResponse.json(
-        { message: '필수 입력값을 모두 제공해야 합니다. (카테고리 정보, 서비스 타입 정보, 서비스명, 수량, 가격)' },
+        { message: '필수 입력값을 모두 제공해야 합니다. (서비스 타입, 서비스명, 수량, 가격)' },
         { status: 400 }
       );
-    }
-
-    if (newCategoryName && typeof newCategoryName !== 'string') {
-        return NextResponse.json( { message: '새 카테고리 이름은 문자열이어야 합니다.' },{ status: 400 });
-    }
-    if (!newCategoryName && categoryId !== undefined && typeof categoryId !== 'number') {
-        return NextResponse.json( { message: '카테고리 ID는 숫자여야 합니다.' }, { status: 400 });
-    }
-    if (!newServiceTypeName && serviceTypeId !== undefined && typeof serviceTypeId !== 'number') {
-        return NextResponse.json( { message: '서비스 타입 ID는 숫자여야 합니다.' }, { status: 400 });
-    }
-    if (newServiceTypeName && typeof newServiceTypeName !== 'string') {
-        return NextResponse.json( { message: '새 서비스 타입 이름은 문자열이어야 합니다.' },{ status: 400 });
     }
     
     if (
-      typeof minOrderQuantity !== 'number' ||
-      typeof maxOrderQuantity !== 'number' ||
-      typeof pricePerUnit !== 'number'
+      typeof service_type_id !== 'number' ||
+      typeof min_order_quantity !== 'number' ||
+      typeof max_order_quantity !== 'number' ||
+      typeof price_per_unit !== 'number'
     ) {
       return NextResponse.json(
-        { message: '수량과 가격은 숫자여야 합니다.' },
+        { message: 'ID, 수량, 가격은 숫자여야 합니다.' },
         { status: 400 }
       );
     }
 
-    if (minOrderQuantity < 0 || maxOrderQuantity < 0 || pricePerUnit < 0) {
+    if (min_order_quantity < 0 || max_order_quantity < 0 || price_per_unit < 0) {
         return NextResponse.json(
             { message: '수량과 가격은 0 이상이어야 합니다.' },
             { status: 400 }
         );
     }
 
-    if (minOrderQuantity > maxOrderQuantity) {
+    if (min_order_quantity > max_order_quantity) {
       return NextResponse.json(
         { message: '최소 주문 수량은 최대 주문 수량보다 클 수 없습니다.' },
         { status: 400 }
@@ -163,133 +148,142 @@ export async function POST(req: Request) {
     const client = await pool.connect();
     try {
       await client.query('BEGIN');
-
-      let currentCategoryId: number;
-      let createdCategoryInfo: { id: number, name: string } | null = null;
-
-      if (newCategoryName) {
-        // 새 카테고리 이름이 제공된 경우
-        const existingCategoryResult = await client.query(
-          'SELECT id FROM service_categories WHERE name = $1',
-          [newCategoryName]
-        );
-        if (existingCategoryResult.rows.length > 0) {
-          currentCategoryId = existingCategoryResult.rows[0].id;
-           createdCategoryInfo = { id: currentCategoryId, name: newCategoryName };
-        } else {
-          const newCategoryInsertResult = await client.query(
-            'INSERT INTO service_categories (name) VALUES ($1) RETURNING id, name',
-            [newCategoryName]
-          );
-          currentCategoryId = newCategoryInsertResult.rows[0].id;
-          createdCategoryInfo = newCategoryInsertResult.rows[0];
-        }
-      } else if (categoryId !== undefined) {
-        // 기존 카테고리 ID가 제공된 경우
-        const categoryExistsResult = await client.query(
-          'SELECT id, name FROM service_categories WHERE id = $1',
-          [categoryId]
-        );
-        if (categoryExistsResult.rows.length === 0) {
-          await client.query('ROLLBACK');
-          return NextResponse.json(
-            { message: '존재하지 않는 카테고리 ID입니다.' },
-            { status: 400 }
-          );
-        }
-        currentCategoryId = categoryExistsResult.rows[0].id;
-        createdCategoryInfo = categoryExistsResult.rows[0];
-      } else {
-        // 이 경우는 앞선 유효성 검사에서 걸러져야 함
-        await client.query('ROLLBACK');
-        return NextResponse.json({ message: '카테고리 정보가 누락되었습니다.' }, { status: 400 });
-      }
-
-      // 2. 서비스 타입 확인 또는 생성 (결정된 currentCategoryId 참조)
-      let typeResult;
-      let typeId: number;
-
-      if (newServiceTypeName) {
-        // 새 서비스 타입 이름이 제공된 경우
-        const existingTypeResult = await client.query(
-          'SELECT id FROM service_types WHERE name = $1 AND category_id = $2',
-          [newServiceTypeName, currentCategoryId]
-        );
-        if (existingTypeResult.rows.length > 0) {
-          typeId = existingTypeResult.rows[0].id;
-        } else {
-          typeResult = await client.query(
-            'INSERT INTO service_types (name, category_id) VALUES ($1, $2) RETURNING id',
-            [newServiceTypeName, currentCategoryId]
-          );
-          typeId = typeResult.rows[0].id;
-        }
-      } else if (serviceTypeId !== undefined) {
-        // 기존 서비스 타입 ID가 제공된 경우
-        const typeExistsResult = await client.query(
-          'SELECT id FROM service_types WHERE id = $1 AND category_id = $2',
-          [serviceTypeId, currentCategoryId]
-        );
-        if (typeExistsResult.rows.length === 0) {
-          await client.query('ROLLBACK');
-          return NextResponse.json(
-            { message: '존재하지 않거나 해당 카테고리에 속하지 않는 서비스 타입 ID입니다.' },
-            { status: 400 }
-          );
-        }
-        typeId = typeExistsResult.rows[0].id;
-      } else {
-        // 이 경우는 앞선 유효성 검사에서 걸러져야 함
-        await client.query('ROLLBACK');
-        return NextResponse.json({ message: '서비스 타입 정보가 누락되었습니다.' }, { status: 400 });
-      }
       
-      // 기존 코드에서 typeName을 사용하던 부분을 newServiceTypeName 또는 조회된 타입 이름으로 대체해야 함 (응답 데이터 구성 시)
-      const finalTypeName = newServiceTypeName ? newServiceTypeName.trim() :
-                            (await client.query('SELECT name FROM service_types WHERE id = $1', [typeId])).rows[0]?.name;
+      // 서비스 타입 존재 여부 확인
+      const serviceTypeExists = await client.query('SELECT id FROM service_types WHERE id = $1', [service_type_id]);
+      if (serviceTypeExists.rows.length === 0) {
+        await client.query('ROLLBACK');
+        return NextResponse.json({ message: '존재하지 않는 서비스 타입입니다.' }, { status: 400 });
+      }
 
-      // 3. 세부 서비스 생성
-      const serviceResult = await client.query(
+      const newServiceResult = await client.query(
         `INSERT INTO services 
-          (service_type_id, name, description, min_order_quantity, max_order_quantity, price_per_unit) 
-         VALUES ($1, $2, $3, $4, $5, $6) 
-         RETURNING id, name, description, min_order_quantity, max_order_quantity, price_per_unit, created_at`,
+          (service_type_id, name, description, price_per_unit, min_order_quantity, max_order_quantity, external_id) 
+         VALUES ($1, $2, $3, $4, $5, $6, $7) 
+         RETURNING *`,
         [
-          typeId,
-          serviceName,
+          service_type_id,
+          service_name,
           description,
-          minOrderQuantity,
-          maxOrderQuantity,
-          pricePerUnit,
+          price_per_unit,
+          min_order_quantity,
+          max_order_quantity,
+          external_id,
         ]
       );
 
       await client.query('COMMIT');
+      
+      return NextResponse.json(newServiceResult.rows[0], { status: 201 });
 
-      return NextResponse.json(
-        {
-          message: '서비스가 성공적으로 등록되었습니다.',
-          service: serviceResult.rows[0],
-          category: createdCategoryInfo,
-          type: { id: typeId, name: finalTypeName, category_id: currentCategoryId }
-        },
-        { status: 201 }
-      );
     } catch (error) {
       await client.query('ROLLBACK');
-      console.error('Service registration error:', error);
-      return NextResponse.json(
-        { message: '서비스 등록 중 오류가 발생했습니다.', error: (error as Error).message },
-        { status: 500 }
-      );
+      console.error('Service creation error:', error);
+      return NextResponse.json({ message: '서비스 생성 중 서버 오류가 발생했습니다.' }, { status: 500 });
     } finally {
       client.release();
     }
+
   } catch (error) {
     console.error('Invalid request body:', error);
-    return NextResponse.json(
-      { message: '요청 처리 중 오류가 발생했습니다.', error: (error as Error).message },
-      { status: 400 }
-    );
+    return NextResponse.json({ message: '잘못된 요청 형식입니다.' }, { status: 400 });
   }
-} 
+}
+
+export async function PUT(req: Request) {
+  try {
+    const url = new URL(req.url);
+    const id = url.pathname.split('/').pop();
+
+    if (!id || isNaN(parseInt(id, 10))) {
+        return NextResponse.json({ message: '유효한 서비스 ID가 필요합니다.' }, { status: 400 });
+    }
+    const serviceId = parseInt(id, 10);
+    
+    const {
+      service_type_id: serviceTypeId,
+      name: serviceName,
+      description,
+      price_per_unit: pricePerUnit,
+      min_order_quantity: minOrderQuantity,
+      max_order_quantity: maxOrderQuantity,
+      is_active: isActive,
+      special_id: specialId,
+      external_id: externalId,
+    } = await req.json();
+
+    // 입력값 유효성 검사 (필수값 확인)
+    if (
+      serviceTypeId === undefined ||
+      !serviceName ||
+      minOrderQuantity === undefined ||
+      maxOrderQuantity === undefined ||
+      pricePerUnit === undefined ||
+      isActive === undefined
+    ) {
+      return NextResponse.json({ message: '필수 필드를 모두 제공해야 합니다.' }, { status: 400 });
+    }
+
+    // 최소/최대 주문 수량 검사
+    if (minOrderQuantity > maxOrderQuantity) {
+      return NextResponse.json(
+        { message: '최소 주문 수량은 최대 주문 수량보다 클 수 없습니다.' },
+        { status: 400 }
+      );
+    }
+    
+    const client = await pool.connect();
+    try {
+        await client.query('BEGIN');
+        
+        const updateResult = await client.query(
+            `UPDATE services 
+             SET 
+               service_type_id = $1, 
+               name = $2, 
+               description = $3, 
+               price_per_unit = $4, 
+               min_order_quantity = $5, 
+               max_order_quantity = $6, 
+               is_active = $7,
+               special_id = $8,
+               external_id = $9,
+               updated_at = NOW()
+             WHERE id = $10
+             RETURNING *`,
+            [
+                serviceTypeId,
+                serviceName,
+                description,
+                pricePerUnit,
+                minOrderQuantity,
+                maxOrderQuantity,
+                isActive,
+                specialId,
+                externalId,
+                serviceId
+            ]
+        );
+
+        if (updateResult.rowCount === 0) {
+            await client.query('ROLLBACK');
+            return NextResponse.json({ message: '서비스를 찾을 수 없습니다.' }, { status: 404 });
+        }
+
+        await client.query('COMMIT');
+        
+        return NextResponse.json(updateResult.rows[0]);
+
+    } catch (error) {
+        await client.query('ROLLBACK');
+        console.error('Service update error:', error);
+        return NextResponse.json({ message: '서비스 업데이트 중 서버 오류가 발생했습니다.' }, { status: 500 });
+    } finally {
+        client.release();
+    }
+
+  } catch (error) {
+    console.error('Invalid request body for PUT:', error);
+    return NextResponse.json({ message: '잘못된 요청 형식입니다.' }, { status: 400 });
+  }
+}

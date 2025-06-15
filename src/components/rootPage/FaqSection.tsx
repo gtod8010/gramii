@@ -24,7 +24,7 @@ const FaqItemComponent: React.FC<{ item: FaqItem; isOpen: boolean; onClick: () =
       className="w-full flex justify-between items-center text-left text-lg font-medium text-gray-800 focus:outline-none"
     >
       <span>{item.question}</span>
-      {isOpen ? <FaChevronUp className="text-blue-600" /> : <FaChevronDown className="text-gray-500" />}
+      {isOpen ? <FaChevronUp className="text-[var(--color-pink-500)]" /> : <FaChevronDown className="text-gray-500" />}
     </button>
     <div
       className={`overflow-hidden transition-all duration-500 ease-in-out ${isOpen ? 'max-h-96 mt-4' : 'max-h-0'}`}
@@ -56,7 +56,7 @@ const FaqSection: React.FC = () => {
           <h2 className="text-4xl md:text-5xl font-bold text-gray-900">
             GRAMII에 대해
             <br />
-            <span className="text-blue-600">궁금한 점이 있으신가요?</span>
+            <span className="bg-gradient-to-tr from-orange-400 via-red-500 to-pink-600 bg-clip-text text-transparent">궁금한 점이 있으신가요?</span>
           </h2>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
