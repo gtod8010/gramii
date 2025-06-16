@@ -70,17 +70,25 @@ const RecentOrderStatusChart: React.FC<RecentOrderStatusChartProps> = ({ chartDa
   };
 
   // 2. 원그래프 데이터 및 옵션 (주문 상태 비율)
-  const pieChartLabels = Object.keys(orderStatusSummary)
-    .map(statusKey => statusDisplayNames[statusKey] || statusKey)
-    .filter(label => (orderStatusSummary[Object.keys(statusDisplayNames).find(key => statusDisplayNames[key] === label) || ''] || 0) > 0); // 건수가 0인 항목은 제외
   
-  const pieChartSeries = Object.keys(orderStatusSummary)
-    .map(statusKey => orderStatusSummary[statusKey] || 0)
-    .filter((count, index) => (orderStatusSummary[Object.keys(orderStatusSummary)[index]] || 0) > 0); // 건수가 0인 항목은 시리즈에서도 제외
+  // 데이터가 있는(0건 초과) 상태만 필터링합니다.
+  const activeStatusEntries = Object.entries(orderStatusSummary)
+    .filter(([, count]) => count > 0);
+  
+  // status key를 PascalCase로 변환하는 헬퍼 함수 (예: 'pending' -> 'Pending')
+  // statusDisplayNames와 statusColors 객체의 키가 PascalCase일 가능성이 높기 때문입니다.
+  const toPascalCase = (s: string) => s ? s.charAt(0).toUpperCase() + s.slice(1) : '';
 
-  const pieChartColors = Object.keys(orderStatusSummary)
-    .filter(statusKey => (orderStatusSummary[statusKey] || 0) > 0)
-    .map(statusKey => chartStatusColors[statusKey] || '#000000');
+  // 필터링된 데이터를 기반으로 라벨, 시리즈, 색상을 생성합니다.
+  const pieChartLabels = activeStatusEntries.map(([statusKey, ]) =>
+    statusDisplayNames[toPascalCase(statusKey)] || statusKey
+  );
+  
+  const pieChartSeries = activeStatusEntries.map(([, count]) => count);
+
+  const pieChartColors = activeStatusEntries.map(([statusKey, ]) =>
+    chartStatusColors[toPascalCase(statusKey)] || '#888888'
+  );
 
   const pieChartOptions: ApexOptions = {
     chart: {
@@ -93,11 +101,11 @@ const RecentOrderStatusChart: React.FC<RecentOrderStatusChartProps> = ({ chartDa
     legend: { position: 'bottom', horizontalAlign: 'center', offsetY: 5, labels: { colors: '#6b7280' }, itemMargin: { horizontal: 10, vertical: 5 } },
     dataLabels: {
       enabled: true,
+      // 포매터 로직을 더 간단하게 수정합니다.
       formatter: function (val, opts) {
         const seriesName = opts.w.globals.labels[opts.seriesIndex];
-        const actualStatusKey = Object.keys(statusDisplayNames).find(key => statusDisplayNames[key] === seriesName);
-        const count = actualStatusKey ? orderStatusSummary[actualStatusKey] : '' ;
-        return `${seriesName}: ${count}건 (${Number(val).toFixed(1)}%)`;
+        const count = opts.w.globals.series[opts.seriesIndex];
+        return `${seriesName}: ${count}건`;
       },
     },
     tooltip: {

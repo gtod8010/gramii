@@ -42,10 +42,9 @@ export async function GET(request: NextRequest) {
     const orderStatusSummary = orderStatusSummaryResult.rows.reduce((acc, row) => {
       acc[row.order_status] = parseInt(row.count, 10);
       return acc;
-    }, {});
+    }, {} as Record<string, number>);
 
-    // 5. 최근 7일간 일자별 주문 상태 변화 (차트용 데이터)
-    // DB 종류에 따라 날짜 함수 및 구문이 다를 수 있습니다. PostgreSQL 기준.
+    // 5. 최근 7일간 일자별 주문 상태 변화 (차트용 데이터) - 쿼리 수정
     const chartDataQuery = `
       WITH date_series AS (
         SELECT generate_series(
@@ -53,56 +52,50 @@ export async function GET(request: NextRequest) {
           current_date, 
           '1 day'::interval
         )::date AS order_date
-      ),
-      daily_orders AS (
-        SELECT 
-          DATE(created_at) AS order_date,
-          order_status,
-          COUNT(*) AS count
-        FROM orders
-        WHERE user_id = $1 AND created_at >= current_date - interval '6 days'
-        GROUP BY DATE(created_at), order_status
       )
       SELECT 
-        d.order_date,
-        COALESCE(do_pending.count, 0) AS "Pending",
-        COALESCE(do_processing.count, 0) AS "Processing",
-        COALESCE(do_completed.count, 0) AS "Completed",
-        COALESCE(do_partial.count, 0) AS "Partial", 
-        COALESCE(do_cancelled.count, 0) AS "Cancelled"
+        to_char(d.order_date, 'MM-DD') as date,
+        COALESCE(SUM(CASE WHEN o.order_status = 'pending' THEN 1 ELSE 0 END), 0) AS pending,
+        COALESCE(SUM(CASE WHEN o.order_status = 'processing' THEN 1 ELSE 0 END), 0) AS processing,
+        COALESCE(SUM(CASE WHEN o.order_status = 'completed' THEN 1 ELSE 0 END), 0) AS completed,
+        COALESCE(SUM(CASE WHEN o.order_status = 'partial' THEN 1 ELSE 0 END), 0) AS partial,
+        COALESCE(SUM(CASE WHEN o.order_status = 'canceled' THEN 1 ELSE 0 END), 0) AS canceled,
+        COALESCE(SUM(CASE WHEN o.order_status = 'refunded' THEN 1 ELSE 0 END), 0) AS refunded
       FROM date_series d
-      LEFT JOIN daily_orders do_pending ON d.order_date = do_pending.order_date AND do_pending.order_status = 'Pending'
-      LEFT JOIN daily_orders do_processing ON d.order_date = do_processing.order_date AND do_processing.order_status = 'Processing'
-      LEFT JOIN daily_orders do_completed ON d.order_date = do_completed.order_date AND do_completed.order_status = 'Completed'
-      LEFT JOIN daily_orders do_partial ON d.order_date = do_partial.order_date AND do_partial.order_status = 'Partial'
-      LEFT JOIN daily_orders do_cancelled ON d.order_date = do_cancelled.order_date AND do_cancelled.order_status = 'Cancelled'
+      LEFT JOIN orders o ON DATE(o.created_at) = d.order_date AND o.user_id = $1
+      GROUP BY d.order_date
       ORDER BY d.order_date ASC;
     `;
     const chartDataResult: QueryResult = await client.query(chartDataQuery, [userId]);
     
-    // 최종 recentOrderStatusChartData는 ChartDataPoint[] 형태가 되어야 함.
-    const finalChartData = chartDataResult.rows.map(r => {
-      const date = new Date(r.order_date).toLocaleDateString('ko-KR', { month: '2-digit', day: '2-digit' });
-      // API 결과의 컬럼 이름은 대문자로 시작 (e.g., r.Pending).
-      // 프론트엔드 컴포넌트에서 소문자 필드를 기대한다고 가정하고 변환합니다.
-      return {
-        date: date,
-        pending: r.Pending || 0,
-        processing: r.Processing || 0,
-        completed: r.Completed || 0,
-        partial: r.Partial || 0, // Partial 상태 추가
-        cancelled: r.Cancelled || 0, // API는 Cancelled, 프론트엔드는 canceled -> cancelled로 통일
-        // 'refunded'는 현재 쿼리에 없으므로 0으로 설정. 필요시 쿼리 수정.
-        refunded: 0, 
-      };
-    });
+    // 쿼리에서 이미 원하는 형태로 데이터를 가공했으므로, JS에서의 추가 변환 작업이 거의 필요 없습니다.
+    // 숫자형으로 변환해주는 정도만 처리합니다.
+    const recentOrderStatusChartData = chartDataResult.rows.map(row => ({
+      date: row.date,
+      pending: parseInt(row.pending, 10),
+      processing: parseInt(row.processing, 10),
+      completed: parseInt(row.completed, 10),
+      partial: parseInt(row.partial, 10),
+      canceled: parseInt(row.canceled, 10),
+      refunded: parseInt(row.refunded, 10),
+    }));
+
+    // API 응답에서 키 이름을 'canceled'로 통일 (기존: cancelled)
+    const sanitizedOrderStatusSummary: Record<string, number> = {};
+    for (const key in orderStatusSummary) {
+        if (key === 'cancelled') {
+             sanitizedOrderStatusSummary['canceled'] = orderStatusSummary[key];
+        } else {
+             sanitizedOrderStatusSummary[key] = orderStatusSummary[key];
+        }
+    }
 
     return NextResponse.json({
-      currentPoints,
-      totalSpent,
-      totalOrders,
-      orderStatusSummary,
-      recentOrderStatusChartData: finalChartData, // 수정된 데이터로 교체
+      currentPoints: parseFloat(currentPoints),
+      totalSpent: parseFloat(totalSpent),
+      totalOrders: parseInt(totalOrders, 10),
+      orderStatusSummary: sanitizedOrderStatusSummary, // 수정된 summary 전달
+      recentOrderStatusChartData, // 수정된 데이터 전달
     });
   } catch (error) {
     console.error('Error fetching dashboard summary:', error);
