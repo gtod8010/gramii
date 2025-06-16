@@ -29,7 +29,7 @@ const baseNavItems: NavItem[] = [
   {
     icon: <GridIcon />,
     name: "대시보드",
-    path: "/",
+    path: "/dashboard",
   },
   {
     icon: <ListIcon />,
@@ -269,7 +269,7 @@ const AppSidebar: React.FC = () => {
           !isExpanded && !isHovered && !isMobileOpen && "lg:px-3.5"
         } `}
       >
-        <Link href="/" className="flex items-center">
+        <Link href="/dashboard" className="flex items-center">
           {(isExpanded || isHovered || isMobileOpen) ? (
             <div className="relative h-12 w-28">
               <Image

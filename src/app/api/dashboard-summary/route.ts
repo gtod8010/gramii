@@ -56,6 +56,7 @@ export async function GET(request: NextRequest) {
       SELECT 
         to_char(d.order_date, 'MM-DD') as date,
         COALESCE(SUM(CASE WHEN o.order_status = 'pending' THEN 1 ELSE 0 END), 0) AS pending,
+        COALESCE(SUM(CASE WHEN o.order_status = 'in_progress' THEN 1 ELSE 0 END), 0) AS in_progress,
         COALESCE(SUM(CASE WHEN o.order_status = 'processing' THEN 1 ELSE 0 END), 0) AS processing,
         COALESCE(SUM(CASE WHEN o.order_status = 'completed' THEN 1 ELSE 0 END), 0) AS completed,
         COALESCE(SUM(CASE WHEN o.order_status = 'partial' THEN 1 ELSE 0 END), 0) AS partial,
@@ -73,6 +74,7 @@ export async function GET(request: NextRequest) {
     const recentOrderStatusChartData = chartDataResult.rows.map(row => ({
       date: row.date,
       pending: parseInt(row.pending, 10),
+      in_progress: parseInt(row.in_progress, 10),
       processing: parseInt(row.processing, 10),
       completed: parseInt(row.completed, 10),
       partial: parseInt(row.partial, 10),

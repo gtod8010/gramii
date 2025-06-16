@@ -11,6 +11,7 @@ import { useUser } from '@/hooks/useUser';
 interface ChartDataPoint {
   date: string;
   pending: number;
+  in_progress: number;
   processing: number;
   completed: number;
   partial: number;

@@ -16,8 +16,8 @@ interface Review {
 }
 
 const reviewsData: Review[] = [
-  { id: 1, avatar: '/images/user/user-01.jpg', name: 'lulu**', service: '인스타', serviceIcon: FaInstagram, rating: 5, text: '그래미를 통해 인스타그램 셀프 마케팅을 처음 해봤는데, 생각보다 훨씬 쉬웠고 효과도 빨랐어요. 좋아요와 저장 수가 확 올라가더니, 며칠 안 돼서 인기 게시물에 노출되었고 피드 방문자 수가 급증했어요. 그전엔 그냥 올리기만 했는데, 그래미 덕분에 피드가 진짜 \'완성\'이 되더라고요.' },
-  { id: 2, avatar: '/images/user/user-02.jpg', name: 'hisn**', service: '네이버 플레이스', serviceIcon: SiNaver, rating: 5, text: '그래미에서 네이버 플레이스 마케팅 서비스를 이용했는데, 진짜 효과가 좋았어요. 업체명, 키워드 등록 후 한 달도 안 돼서 네이버 지도 검색 시 1페이지 상단 노출이 되었고, 자연 유입 방문자 수가 크게 늘었습니다. 리뷰도 꾸준히 늘어나고 있어요. 매장 마케팅은 이제 그래미로 정착했어요.' },
+  { id: 1, avatar: '/images/user/user-01.jpg', name: 'lulu**', service: '인스타', serviceIcon: FaInstagram, rating: 5, text: '그래미를 통해 인스타그램 셀프 마케팅을 처음 해봤는데, 생각보다 훨씬 쉬웠고 효과도 빨랐어요. 좋아요와 저장 수가 확 올라가더니, 몇일 안되어서 인기 게시물에 노출되었고 피드 방문자 수가 급증했어요. 그전엔 그냥 올리기만 했는데, 그래미 덕분에 피드가 진짜 \'완성\'이 되더라고요.' },
+  { id: 2, avatar: '/images/user/user-02.jpg', name: 'hisn**', service: '네이버 플레이스', serviceIcon: SiNaver, rating: 5, text: '그래미에서 네이버 플레이스 마케팅 서비스를 이용했는데, 진짜 효과가 좋았어요. 업체명, 키워드 등록 후 한 달도 안되어서 네이버 지도 검색 시 1페이지 상단 노출이 되었고, 자연 유입 방문자 수가 크게 늘었습니다. 리뷰도 꾸준히 늘어나고 있어요. 매장 마케팅은 이제 그래미로 정착했어요.' },
   { id: 3, avatar: '/images/user/user-03.jpg', name: 'seoy**', service: '유튜브', serviceIcon: FaYoutube, rating: 5, text: '그래미를 이용해서 유튜브 셀프 마케팅을 했더니 구독자 수가 눈에 띄게 늘었어요. 특히 영상 업로드 직후 조회수와 좋아요 수를 집중적으로 끌어올렸더니, 알고리즘에 반응이 왔는지 추천 영상에 노출되었고, 짧은 시간 안에 구독자가 300명 넘게 늘었습니다.' },
   { id: 4, avatar: '/images/user/user-04.jpg', name: 'revi**', service: '네이버 쇼핑', serviceIcon: SiNaver, rating: 5, text: '그래미를 통해 네이버 쇼핑 마케팅을 해봤는데, 확실히 조회수랑 클릭 수부터 다르더라고요. 이전에는 노출도 안 되던 제품이 상위권에 올라오면서 판매가 바로 일어났고, 일 매출이 3배 넘게 증가했어요. 쇼핑몰 운영하는 분들 진심 강추합니다.' },
   { id: 5, avatar: '/images/user/user-05.jpg', name: 'tedi**', service: '인스타', serviceIcon: FaInstagram, rating: 5, text: '혼자서 마케팅하려니 늘 막막했는데, 그래미는 필요한 기능만 딱딱 골라 쓸 수 있어서 좋았어요. 셀프 좋아요, 저장, 댓글 기능을 활용했더니 해시태그 타고 들어오는 유입이 많아졌고, 그 결과로 게시물 2개가 동시에 인기탭에 올라갔어요. SNS 운영에 자신감 생겼어요!' },
