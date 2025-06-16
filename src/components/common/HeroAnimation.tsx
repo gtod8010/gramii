@@ -37,8 +37,6 @@ const containerVariants: Variants = {
   visible: {},
 };
 
-const spread = 200; // 로고가 얼마나 멀리서부터 날아올지 결정하는 값
-
 const logoVariants: Variants = {
   hidden: (logo: Logo) => ({
     x: logo.x,

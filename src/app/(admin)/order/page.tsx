@@ -84,7 +84,7 @@ export default function OrderPage() {
       const structuredData: ServiceCategory[] = [];
       const categoryMap = new Map<string, ServiceCategory>();
 
-      activeServices.forEach((service, index) => {
+      activeServices.forEach(service => {
 
         // category_id를 기준으로 다시 처리 (백엔드에서 category_id를 보내주므로)
         const categoryIdStr = String(service.category_id); 
