@@ -18,6 +18,7 @@ export async function GET(request: NextRequest) {
     const selectClauses = [
       's.*',
       'st.name as service_type_name',
+      'st.category_id',
       'sc.name as category_name',
       's.special_id',
       'sp.name as special_name'
