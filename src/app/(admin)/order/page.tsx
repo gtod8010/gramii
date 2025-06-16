@@ -67,7 +67,6 @@ export default function OrderPage() {
   const fetchAndStructureServices = useCallback(async () => {
     setIsLoadingServices(true);
     setErrorServices(null);
-    console.log('[OrderPage] Fetching services...');
     try {
       // API 요청 시 X-Test-User-Id 헤더를 설정해야 custom_price가 제대로 반환될 수 있습니다.
       // 예시: const headers = { 'X-Test-User-Id': '1' }; // 사용자 ID 1로 테스트
@@ -76,29 +75,16 @@ export default function OrderPage() {
       
       if (!response.ok) {
         const errorData = await response.json();
-        console.error('[OrderPage] Failed to fetch services:', errorData);
         throw new Error(errorData.message || '서비스 목록을 불러오는데 실패했습니다.');
       }
       const apiServices: ApiService[] = await response.json();
-      // --- API 응답 데이터 확인 로그 추가 ---
-      console.log('[OrderPage] Raw API Services received (immediately after fetch):', JSON.parse(JSON.stringify(apiServices)));
-      // 각 서비스의 custom_price 값 확인
-      if (apiServices.length > 0) {
-        console.log('[OrderPage] Checking custom_price in first few services:');
-        apiServices.slice(0, 5).forEach(s => {
-          console.log(`  Service ID: ${s.id}, Name: ${s.name}, Base Price: ${s.price_per_unit}, Custom Price: ${s.custom_price}`);
-        });
-      }
-      // --- 로그 추가 완료 ---
 
       const activeServices = apiServices.filter(service => service.is_active);
-      console.log('[OrderPage] Active Services (filtered):', JSON.parse(JSON.stringify(activeServices)));
 
       const structuredData: ServiceCategory[] = [];
       const categoryMap = new Map<string, ServiceCategory>();
 
       activeServices.forEach((service, index) => {
-        console.log(`[OrderPage] Processing service ${index + 1}/${activeServices.length}:`, JSON.parse(JSON.stringify(service)));
 
         // category_id를 기준으로 다시 처리 (백엔드에서 category_id를 보내주므로)
         const categoryIdStr = String(service.category_id); 
@@ -107,11 +93,7 @@ export default function OrderPage() {
         const serviceTypeIdStr = String(service.service_type_id);
         const serviceTypeName = service.service_type_name || '기타 타입';
 
-        console.log(`[OrderPage] Service ${index + 1} -> Category ID: ${categoryIdStr}, Name: ${categoryName}`);
-        console.log(`[OrderPage] Service ${index + 1} -> Service Type ID: ${serviceTypeIdStr}, Name: ${serviceTypeName}`);
-
         if (!categoryMap.has(categoryIdStr)) {
-          console.log(`[OrderPage] Creating new category in map. ID: ${categoryIdStr}, Name: ${categoryName}`);
           const newCategory: ServiceCategory = {
             id: categoryIdStr, // ServiceCategory의 id를 categoryIdStr로 설정
             name: categoryName,
@@ -119,32 +101,21 @@ export default function OrderPage() {
           };
           categoryMap.set(categoryIdStr, newCategory);
           structuredData.push(newCategory);
-          console.log(`[OrderPage] Added new category to structuredData:`, JSON.parse(JSON.stringify(newCategory)));
         }
         
         const currentCategory = categoryMap.get(categoryIdStr)!;
         if (!currentCategory) {
-            console.error(`[OrderPage] CRITICAL: Could not find category ${categoryIdStr} in map! This should not happen. Skipping service:`, service);
             return; 
         }
-        console.log(`[OrderPage] Service ${index + 1} - Current Category from map: ID ${currentCategory.id}, Name: ${currentCategory.name}`);
 
         let currentServiceType = currentCategory.serviceTypes.find(st => st.id === serviceTypeIdStr);
         if (!currentServiceType) {
-          console.log(`[OrderPage] Creating new service type for ID ${serviceTypeIdStr} (Name: ${serviceTypeName}) under category '${currentCategory.name}'`);
           currentServiceType = {
             id: serviceTypeIdStr,
             name: serviceTypeName,
             subServices: [],
           };
           currentCategory.serviceTypes.push(currentServiceType);
-        } else {
-          console.log(`[OrderPage] Found existing service type for ID ${serviceTypeIdStr} (Name: ${serviceTypeName}) under category '${currentCategory.name}'`);
-        }
-
-        // service.custom_price가 여기에서도 유효한지 확인
-        if (index < 5) { // 처음 5개 서비스에 대해서만 로그 출력 (과도한 로그 방지)
-            console.log(`[OrderPage] Structuring service ${service.id} - custom_price: ${service.custom_price}`);
         }
 
         currentServiceType.subServices.push({
@@ -158,10 +129,8 @@ export default function OrderPage() {
         });
       });
       
-      console.log('[OrderPage] Final structuredData to be set to state (sample):', JSON.parse(JSON.stringify(structuredData.slice(0,1))));
       setServiceCategories(structuredData);
     } catch (err) {
-      console.error('[OrderPage] Error in fetchAndStructureServices:', err);
       if (err instanceof Error) {
         setErrorServices(err.message);
       } else {
@@ -170,7 +139,6 @@ export default function OrderPage() {
       setServiceCategories([]);
     } finally {
       setIsLoadingServices(false);
-      console.log('[OrderPage] Finished fetching and structuring services.');
     }
   }, []);
 
@@ -305,7 +273,6 @@ export default function OrderPage() {
       resetForm();
 
     } catch (error) {
-      console.error('Order submission error:', error);
       toast.error(error instanceof Error ? error.message : '알 수 없는 오류가 발생했습니다.');
     } finally {
       setIsSubmitting(false);

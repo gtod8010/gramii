@@ -80,9 +80,9 @@ const ServiceSection: React.FC = () => {
           {/* 오른쪽 이미지 영역 */}
           <div className="hidden md:flex justify-center items-center">
               <Image 
-                src="/images/service_phone.png" 
+                src="/images/gramii_phone2.png" 
                 alt="GRAMII 서비스 소개 이미지" 
-                width={380}
+                width={600}
                 height={750}
                 className="object-contain"
               />

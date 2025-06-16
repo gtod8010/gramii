@@ -59,12 +59,6 @@ export default function LoginPage() {
         <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-white">
           로그인
         </h2>
-        <p className="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
-          또는{' '}
-          <Link href="/register" className="font-medium text-pink-600 hover:text-pink-500 dark:text-pink-400 dark:hover:text-pink-300">
-            계정이 없으신가요? 회원가입
-          </Link>
-        </p>
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
@@ -150,25 +144,12 @@ export default function LoginPage() {
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-gray-300 dark:border-gray-600" />
               </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400">
-                  소셜 로그인
-                </span>
-              </div>
             </div>
 
-            <div className="mt-6 grid grid-cols-1 gap-3">
-              <div>
-                <a
-                  href="#"
-                  className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-sm font-medium text-gray-500 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600"
-                >
-                  <span className="sr-only">Google 계정으로 로그인</span>
-                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
-                    <path fillRule="evenodd" d="M10 0C4.477 0 0 4.477 0 10s4.477 10 10 10c2.234 0 4.302-.868 5.91-2.302l-2.052-1.58C13.04 16.677 11.582 17.5 10 17.5c-2.958 0-5.43-2.078-6.246-4.893H.324v1.56C1.61 17.073 4.295 19.5 7.5 19.5c1.904 0 3.633-.727 4.964-1.926L17.143 16A9.937 9.937 0 0020 10c0-.78-.093-1.537-.268-2.262H10v4.008h5.31c-.225 1.282-.883 2.366-1.803 3.095l1.56 1.204A7.476 7.476 0 0017.5 10c0-2.234-.968-4.244-2.523-5.658L13.48 2.845C14.867 1.137 17.016 0 19.522 0 16.53 0 13.816 1.527 11.997 3.865 11.34 3.36 10.693 3.053 10 3.053c-2.958 0-5.43-2.078-6.246 4.893H.324V6.385C1.61 3.427 4.295 1 7.5 1c1.904 0 3.633-.727 4.964 1.926L17.143 1A9.937 9.937 0 0010 0z" clipRule="evenodd" />
-                  </svg>
-                </a>
-              </div>
+            <div className="mt-6">
+              <Link href="/register" className={buttonClass}>
+                회원가입
+              </Link>
             </div>
           </div>
         </div>

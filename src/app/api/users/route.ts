@@ -8,6 +8,7 @@ export async function GET() {
       SELECT 
         u.id,
         u.name,
+        u.username,
         u.email,
         u.phone_number,
         u.role,

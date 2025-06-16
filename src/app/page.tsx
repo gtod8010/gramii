@@ -9,6 +9,7 @@ import ChatSimulation from '@/components/rootPage/ChatSimulation';
 import ServiceSection from '@/components/rootPage/ServiceSection';
 import ReviewsSection from '@/components/rootPage/ReviewsSection';
 import FaqSection from '@/components/rootPage/FaqSection';
+import HeroAnimation from '@/components/common/HeroAnimation';
 
 // Swiper 관련 임포트
 import { Swiper, SwiperSlide } from 'swiper/react';
@@ -151,6 +152,7 @@ const RootPage = () => {
                 src="/images/gramii_logo.png"
                 alt="GRAMII Logo"
                 fill
+                sizes="112px"
                 style={{ objectFit: 'contain' }}
                 priority
               />
@@ -212,7 +214,7 @@ const RootPage = () => {
               </h1>
               <p className="text-lg text-gray-200 mb-8">
                   인플루언서도, 소상공인도, 마케팅 초보도 쉽게
-                  좋아요, 팔로워, 댓글, 조회수까지 통합 관리.
+                  좋아요, 팔로워, 댓글, 조회수까지 통합 관리. <br />
                   이제 마케팅은 그래미 하나면 충분합니다.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
@@ -229,14 +231,9 @@ const RootPage = () => {
             </div>
 
             {/* Image Content */}
-            <div className="hidden md:flex justify-center items-center">
-              <Image 
-                src="/images/section.png" 
-                alt="GRAMII 서비스 소개 이미지" 
-                width={500}
-                height={400}
-                className="object-contain drop-shadow-[0_20px_25px_rgba(0,0,0,0.2)]"
-              />
+            <div className="md:w-1/2 flex items-center justify-center">
+              {/* 기존 이미지 태그를 새로운 애니메이션 컴포넌트로 교체 */}
+              <HeroAnimation />
             </div>
           </div>
         </div>

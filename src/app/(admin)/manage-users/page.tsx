@@ -10,6 +10,7 @@ import { statusDisplayNames } from '@/lib/constants';
 interface ManagedUser {
   id: number;
   name: string;
+  username: string | null;
   email: string;
   phone_number?: string | null;
   role: 'user' | 'admin';
@@ -488,6 +489,7 @@ const ManageUsersPage = () => {
                 <tr>
                   <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">ID</th>
                   <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">이름</th>
+                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">아이디</th>
                   <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">이메일</th>
                   <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">전화번호</th>
                   <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">역할</th>
@@ -503,6 +505,7 @@ const ManageUsersPage = () => {
                   <tr key={u.id} className="hover:bg-gray-50 dark:hover:bg-gray-800 align-middle">
                     <td className="px-4 py-2 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">{u.id}</td>
                     <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{u.name}</td>
+                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{u.username || '-'}</td>
                     <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{u.email}</td>
                     <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{u.phone_number || '-'}</td>
                     <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{u.role}</td>
