@@ -22,7 +22,7 @@ const logos: Logo[] = [
   { id: 'naver', src: '/images/logos/naver_logo.png', x: -600, y: 140, size: 90 },
   { id: 'instagram', src: '/images/logos/instagram_logo.png', x: -350, y: 220, size: 110 },
   { id: 'facebook', src: '/images/logos/facebook_logo.png', x: -45, y: 190, size: 90 },
-  { id: 'kakaotalk', src: '/images/logos/kakaotalk_logo.png', x: 320, y: 130, size: 110 },
+  { id: 'kakaotalk', src: '/images/logos/kakaotalk_logo.png', x: 220, y: 130, size: 110 },
 ];
 
 const mainLogo = {
