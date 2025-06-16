@@ -5,12 +5,14 @@ import { useRouter } from 'next/navigation';
 
 interface User {
   id: number;
+  username: string;
   name: string;
   email: string;
   phone_number?: string;
   role: 'user' | 'admin';
   points?: number; // points 필드 추가 (옵셔널)
   admin_referral_code?: string; // 추천인 코드 필드 추가
+  created_at?: string; // 가입일자 필드 추가
   // DB에 있는 다른 필드들도 필요에 따라 추가 가능
 }
 
@@ -45,7 +47,7 @@ export const useUser = () => {
       console.error("Failed to fetch and update user:", error);
       // 여기서 에러 처리를 할 수 있습니다 (예: toast 메시지)
     }
-  }, [user?.id]); // user.id가 변경될 때만 함수가 재생성되도록 최적화
+  }, [user]); // user.id가 변경될 때만 함수가 재생성되도록 최적화
 
   useEffect(() => {
     try {

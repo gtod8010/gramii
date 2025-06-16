@@ -21,6 +21,9 @@ export const query = async (text: string, params?: (string | number | boolean | 
   }
 };
 
+// oneOrNone, none 등 pg-promise와 유사한 인터페이스를 위해 db 객체로 pool을 export
+export const db = pool;
+
 // 단일 클라이언트 연결이 필요한 경우 (예: 트랜잭션)
 export const getClient = async () => {
   const client = await pool.connect();

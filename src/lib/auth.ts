@@ -10,6 +10,11 @@ interface JwtPayload {
   // 토큰에 다른 정보가 있다면 여기에 추가
 }
 
+interface DecodedPayload extends jwt.JwtPayload {
+  id?: number;
+  userId?: number;
+}
+
 export async function getUserIdFromRequest(request: NextRequest): Promise<number | null> {
   const authHeader = request.headers.get('authorization');
   if (!authHeader) {
@@ -50,5 +55,21 @@ export async function getUserRoleFromRequest(request: NextRequest): Promise<stri
     console.error('[Auth] Invalid token:', error);
     return null;
   }
-} 
+}
+
+export const verifyToken = (token: string): Promise<DecodedPayload | undefined> => {
+  return new Promise((resolve, reject) => {
+    jwt.verify(token, process.env.JWT_SECRET || 'your-fallback-secret-key', (err, decoded) => {
+      if (err) {
+        return reject(err);
+      }
+      // decoded.userId를 decoded.id로 매핑하여 반환
+      const payload = decoded as DecodedPayload;
+      if (payload && payload.userId) {
+        payload.id = payload.userId;
+      }
+      resolve(payload);
+    });
+  });
+}; 
  
