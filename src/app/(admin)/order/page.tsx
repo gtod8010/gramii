@@ -47,7 +47,7 @@ interface ApiService {
 // const serviceCategoriesData: ServiceCategory[] = [...];
 
 export default function OrderPage() {
-  const { user, isLoading: userIsLoading, updateUserInStorage } = useUser();
+  const { user, isLoading: userIsLoading, fetchAndUpdateUser } = useUser();
   const [serviceCategories, setServiceCategories] = useState<ServiceCategory[]>([]);
   const [isLoadingServices, setIsLoadingServices] = useState(true);
   const [errorServices, setErrorServices] = useState<string | null>(null);
@@ -266,9 +266,7 @@ export default function OrderPage() {
       }
       
       toast.success('주문이 성공적으로 완료되었습니다!');
-      if (result.updatedUserPoints !== undefined) {
-        updateUserInStorage({ ...user, points: result.updatedUserPoints });
-      }
+      fetchAndUpdateUser();
       
       resetForm();
 

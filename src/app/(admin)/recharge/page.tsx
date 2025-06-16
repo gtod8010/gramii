@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { ChevronLeftIcon, ArrowRightIcon } from '@/icons';
 import RechargeModal from '@/components/recharge/RechargeModal';
+import { useUser } from '@/hooks/useUser';
 
 // deposit_requests 테이블의 구조에 맞게 인터페이스 수정
 interface RechargeHistoryItem {
@@ -29,6 +30,7 @@ export default function RechargePage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [isRechargeModalOpen, setIsRechargeModalOpen] = useState(false);
   const [isCardModalOpen, setIsCardModalOpen] = useState(false); // 카드 결제 모달 상태
+  const { fetchAndUpdateUser } = useUser();
 
   const [rechargeHistory, setRechargeHistory] = useState<RechargeHistoryItem[]>([]);
   const [totalPages, setTotalPages] = useState(0);
@@ -258,8 +260,9 @@ export default function RechargePage() {
           isOpen={isRechargeModalOpen} 
           onClose={() => {
             setIsRechargeModalOpen(false);
-            // 모달이 닫힐 때 충전 내역 새로고침
-            setLastFetchedPage(prev => prev + 1); // 강제로 useEffect 재실행
+            // 모달이 닫힐 때 충전 내역과 사용자 정보를 모두 새로고침
+            setLastFetchedPage(prev => prev + 1);
+            fetchAndUpdateUser(); 
           }} 
         />
       )}

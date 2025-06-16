@@ -1,6 +1,6 @@
 "use client"; // 이 훅은 클라이언트 측에서만 실행됩니다.
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 
 interface User {
@@ -18,6 +18,34 @@ export const useUser = () => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true); // 초기 로딩 상태
   const router = useRouter();
+
+  const fetchAndUpdateUser = useCallback(async () => {
+    const token = localStorage.getItem('jwtToken');
+    if (!token || !user?.id) return; // 토큰이나 사용자 ID가 없으면 중단
+
+    try {
+      // '/api/user-profile' 과 같은 엔드포인트가 있다고 가정합니다.
+      // 이 엔드포인트는 토큰을 기반으로 최신 유저 정보를 반환해야 합니다.
+      const response = await fetch(`/api/users/${user.id}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch latest user data');
+      }
+      
+      const latestUser = await response.json();
+      
+      // 기존 정보를 유지하면서 업데이트
+      const updatedUser = { ...user, ...latestUser };
+      localStorage.setItem('loggedInUser', JSON.stringify(updatedUser));
+      setUser(updatedUser);
+
+    } catch (error) {
+      console.error("Failed to fetch and update user:", error);
+      // 여기서 에러 처리를 할 수 있습니다 (예: toast 메시지)
+    }
+  }, [user?.id]); // user.id가 변경될 때만 함수가 재생성되도록 최적화
 
   useEffect(() => {
     try {
@@ -67,5 +95,5 @@ export const useUser = () => {
     }
   };
 
-  return { user, isLoading, logout, updateUserInStorage };
+  return { user, isLoading, logout, updateUserInStorage, fetchAndUpdateUser };
 };
