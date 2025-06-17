@@ -352,7 +352,7 @@ export default function OrderPage() {
         </div>
 
         {/* 오른쪽 패널 (선택한 서비스 정보 표시) */}
-        <div className="md:col-span-1 bg-white dark:bg-gray-800 shadow-lg rounded-lg p-6 space-y-4">
+        <div className="md:col-span-1 bg-white dark:bg-gray-800 shadow-lg rounded-lg p-6 flex flex-col space-y-4">
           <h2 className="text-xl font-semibold text-gray-700 dark:text-gray-200">선택한 서비스 정보</h2>
           <div>
             <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">서비스 이름</h3>
@@ -390,10 +390,10 @@ export default function OrderPage() {
               )}
             </div>
           </div>
-          <div>
+          <div className="flex flex-col flex-grow">
             <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">서비스 설명</h3>
             <p 
-              className="mt-1 text-sm text-gray-900 dark:text-gray-100 h-60 overflow-y-auto border dark:border-gray-700 p-2 rounded-md whitespace-pre-wrap"
+              className="mt-1 text-sm text-gray-900 dark:text-gray-100 h-0 flex-grow overflow-y-auto border dark:border-gray-700 p-2 rounded-md whitespace-pre-wrap"
               id="service-description-display"
             >
               {selectedServiceDetails?.description || '서비스를 선택하면 여기에 설명이 표시됩니다.'}

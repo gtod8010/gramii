@@ -97,8 +97,9 @@ export async function GET(request: NextRequest) {
 export async function POST(req: Request) {
   try {
     const {
+      category_id,
       service_type_id,
-      service_name,
+      name,
       min_order_quantity,
       max_order_quantity,
       price_per_unit,
@@ -108,19 +109,21 @@ export async function POST(req: Request) {
 
     // 입력값 유효성 검사
     if (
+      category_id === undefined ||
       service_type_id === undefined ||
-      !service_name ||
+      !name ||
       min_order_quantity === undefined ||
       max_order_quantity === undefined ||
       price_per_unit === undefined
     ) {
       return NextResponse.json(
-        { message: '필수 입력값을 모두 제공해야 합니다. (서비스 타입, 서비스명, 수량, 가격)' },
+        { message: '필수 입력값을 모두 제공해야 합니다. (카테고리, 서비스 타입, 서비스명, 수량, 가격)' },
         { status: 400 }
       );
     }
     
     if (
+      typeof category_id !== 'number' ||
       typeof service_type_id !== 'number' ||
       typeof min_order_quantity !== 'number' ||
       typeof max_order_quantity !== 'number' ||
@@ -146,6 +149,9 @@ export async function POST(req: Request) {
       );
     }
 
+    // external_id가 빈 문자열일 경우 null로 처리
+    const finalExternalId = external_id || null;
+
     const client = await pool.connect();
     try {
       await client.query('BEGIN');
@@ -164,12 +170,12 @@ export async function POST(req: Request) {
          RETURNING *`,
         [
           service_type_id,
-          service_name,
+          name,
           description,
           price_per_unit,
           min_order_quantity,
           max_order_quantity,
-          external_id,
+          finalExternalId,
         ]
       );
 

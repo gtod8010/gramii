@@ -1,12 +1,14 @@
 "use client";
-import React, { useState } from "react";
-import ComponentCard from "../../common/ComponentCard";
-import Label from "../Label";
-import Select from "../Select";
-import MultiSelect from "../MultiSelect";
-import { ChevronDownIcon } from "@/icons";
+import React, { useState } from 'react';
+import ComponentCard from '../../common/ComponentCard';
+import Label from '../Label';
+import Select from '../Select';
+import MultiSelect from '../MultiSelect';
+import { ChevronDownIcon } from '@/icons';
 
 export default function SelectInputs() {
+  const [selectedOption, setSelectedOption] = useState('');
+  const [selectedOption2, setSelectedOption2] = useState('');
   const options = [
     { value: "marketing", label: "Marketing" },
     { value: "template", label: "Template" },
@@ -16,6 +18,12 @@ export default function SelectInputs() {
   const [selectedValues, setSelectedValues] = useState<string[]>([]);
 
   const handleSelectChange = (value: string) => {
+    setSelectedOption(value);
+    console.log("Selected value:", value);
+  };
+
+  const handleSelectChange2 = (value: string) => {
+    setSelectedOption2(value);
     console.log("Selected value:", value);
   };
 
@@ -34,12 +42,28 @@ export default function SelectInputs() {
           <Label>Select Input</Label>
          <div className="relative">
            <Select
+            value={selectedOption}
             options={options}
             placeholder="Select Option"
             onChange={handleSelectChange}
             className="dark:bg-dark-900"
           />
-          <span className="absolute text-gray-500 -translate-y-1/2 pointer-events-none right-3 top-1/2 dark:text-gray-400">
+           <span className="absolute text-gray-500 -translate-y-1/2 pointer-events-none right-3 top-1/2 dark:text-gray-400">
+              <ChevronDownIcon/>
+            </span>
+         </div>
+        </div>
+        <div>
+          <Label>Select Input</Label>
+           <div className="relative">
+           <Select
+            value={selectedOption2}
+            options={options}
+            placeholder="Select Option"
+            onChange={handleSelectChange2}
+            className="bg-white dark:bg-dark-800"
+          />
+            <span className="absolute text-gray-500 -translate-y-1/2 pointer-events-none right-3 top-1/2 dark:text-gray-400">
               <ChevronDownIcon/>
             </span>
          </div>

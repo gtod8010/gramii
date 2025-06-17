@@ -66,6 +66,11 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     }
 
     const updateData = parsedData.data;
+    
+    // external_id가 빈 문자열 '' 로 들어올 경우 null로 변환
+    if (updateData.external_id === '') {
+      updateData.external_id = null;
+    }
 
     if (Object.keys(updateData).length === 0) {
       return NextResponse.json({ message: '수정할 내용을 입력해주세요.' }, { status: 400 });

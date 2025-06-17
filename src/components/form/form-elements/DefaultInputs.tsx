@@ -9,12 +9,14 @@ import DatePicker from '@/components/form/date-picker';
 
 export default function DefaultInputs() {
   const [showPassword, setShowPassword] = useState(false);
+  const [selectedValue, setSelectedValue] = useState('');
   const options = [
     { value: "marketing", label: "Marketing" },
     { value: "template", label: "Template" },
     { value: "development", label: "Development" },
   ];
   const handleSelectChange = (value: string) => {
+    setSelectedValue(value);
     console.log("Selected value:", value);
   };
   return (
@@ -32,6 +34,7 @@ export default function DefaultInputs() {
           <Label>Select Input</Label>
           <div className="relative">
             <Select
+            value={selectedValue}
             options={options}
             placeholder="Select an option"
             onChange={handleSelectChange}

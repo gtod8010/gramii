@@ -8,14 +8,7 @@ export async function GET(request: Request) {
 
   const client = await getClient();
   try {
-    // 이미 gramii의 'services' 테이블에 등록된 realsite_service_id 목록을 가져옵니다.
-    // external_id 컬럼에 realsite_service_id가 저장되어 있다고 가정합니다.
-    const registeredServicesResult = await client.query(
-      `SELECT external_id FROM services WHERE external_id IS NOT NULL`
-    );
-    const registeredIds = registeredServicesResult.rows.map(row => parseInt(row.external_id, 10));
-
-    // realsite_services 테이블에서 아직 등록되지 않은 서비스들을 검색합니다.
+    // realsite_services 테이블에서 서비스들을 검색합니다.
     // 검색어가 있으면 name 또는 realsite_service_id로 검색합니다.
     let fetchQuery = `
       SELECT 
@@ -28,13 +21,8 @@ export async function GET(request: Request) {
       FROM realsite_services
     `;
 
-    const params: (string | number | number[])[] = [];
+    const params: (string | number)[] = [];
     const whereClauses: string[] = [];
-
-    // 이미 등록된 서비스 제외
-    if (registeredIds.length > 0) {
-      whereClauses.push(`realsite_service_id NOT IN (${registeredIds.join(',')})`);
-    }
 
     // 검색어 처리
     if (query) {
@@ -51,7 +39,7 @@ export async function GET(request: Request) {
       fetchQuery += ` WHERE ${whereClauses.join(' AND ')}`;
     }
     
-    fetchQuery += ` ORDER BY category, name LIMIT 50;`; // 너무 많은 결과를 방지하기 위해 50개로 제한
+    fetchQuery += ` ORDER BY category, name LIMIT 50;`;
 
     const availableServicesResult = await client.query(fetchQuery, params);
 

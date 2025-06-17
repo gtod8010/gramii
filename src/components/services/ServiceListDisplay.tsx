@@ -4,6 +4,11 @@ import React, { useState, useEffect, useCallback } from 'react';
 import ServiceDescriptionModal from '@/components/services/ServiceDescriptionModal';
 import { ChevronUpIcon, ChevronDownIcon } from '@heroicons/react/24/solid'; // Chevron 아이콘 임포트
 
+interface Category {
+  id: number;
+  name: string;
+}
+
 // DisplayServiceItem 인터페이스 수정
 interface DisplayServiceItem {
   id: string | number;
@@ -126,6 +131,7 @@ const ServiceListDisplay = () => {
   const [collapsedSpecials, setCollapsedSpecials] = useState<Record<number, boolean>>({});
 
   const [groupedServices, setGroupedServices] = useState<GroupedServices>({});
+  const [categories, setCategories] = useState<Category[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -150,9 +156,10 @@ const ServiceListDisplay = () => {
     try {
       // API 요청 시 X-Test-User-Id 헤더를 설정해야 custom_price가 제대로 반환될 수 있습니다. (src/lib/auth.ts 에서 하드코딩됨)
       // const response = await fetch('/api/services'); 
-      const [servicesResponse, specialsResponse] = await Promise.all([
+      const [servicesResponse, specialsResponse, categoriesResponse] = await Promise.all([
         fetch('/api/services'), // 기존 서비스 API 호출
-        fetch('/api/specials')  // 스페셜 API 호출 추가
+        fetch('/api/specials'),  // 스페셜 API 호출 추가
+        fetch('/api/categories') // 카테고리 API 호출 추가
       ]);
 
       if (!servicesResponse.ok) {
@@ -167,6 +174,13 @@ const ServiceListDisplay = () => {
         throw new Error(errorData.message || '스페셜 목록을 불러오는데 실패했습니다.');
       }
       const specialsData: Special[] = await specialsResponse.json();
+
+      if (!categoriesResponse.ok) {
+        const errorData = await categoriesResponse.json();
+        throw new Error(errorData.message || '카테고리 목록을 불러오는데 실패했습니다.');
+      }
+      const categoriesData: Category[] = await categoriesResponse.json();
+      setCategories(categoriesData);
       
       const activeServices = services.filter(service => service.is_active);
 
@@ -290,21 +304,30 @@ const ServiceListDisplay = () => {
       )}
 
       {/* 기존 카테고리 기반 서비스 목록 */}
-      {Object.entries(groupedServices).map(([categoryName, typesByServiceType]) => (
-        <div key={categoryName} className="p-6 md:p-8 rounded-lg border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800">
-          <h2 className="text-2xl font-semibold text-gray-800 dark:text-white mb-6">
-            {categoryName}
-          </h2>
-          {Object.entries(typesByServiceType).map(([typeName, services]) => (
-            <ServiceSection 
-              key={typeName} 
-              title={typeName} 
-              services={services} 
-              onViewDetails={handleViewDetails} 
-            />
-          ))}
-        </div>
-      ))}
+      {categories.map((category) => {
+        const categoryName = category.name;
+        const typesByServiceType = groupedServices[categoryName];
+
+        if (!typesByServiceType || Object.keys(typesByServiceType).length === 0) {
+          return null;
+        }
+
+        return (
+          <div key={categoryName} className="p-6 md:p-8 rounded-lg border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800">
+            <h2 className="text-2xl font-semibold text-gray-800 dark:text-white mb-6">
+              {categoryName}
+            </h2>
+            {Object.entries(typesByServiceType).map(([typeName, services]) => (
+              <ServiceSection 
+                key={typeName} 
+                title={typeName} 
+                services={services} 
+                onViewDetails={handleViewDetails} 
+              />
+            ))}
+          </div>
+        );
+      })}
 
       <ServiceDescriptionModal 
         isOpen={isModalOpen} 

@@ -27,7 +27,7 @@ const Footer: React.FC<FooterProps> = ({ onOpenTermsModal }) => {
               </div>
             </Link>
             <p className="font-semibold text-white">그래미</p>
-            <div className="text-sm space-y-1">
+            <div className="text-sm flex flex-wrap gap-x-4 gap-y-1">
                 <p>주소 : 서울특별시 강서구 공항대로 426</p>
                 <p>사업자등록번호 : 572-05-03128</p>
                 <p>통신판매 : 신청중</p>

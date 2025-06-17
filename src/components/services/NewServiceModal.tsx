@@ -130,7 +130,6 @@ const NewServiceModal: React.FC<NewServiceModalProps> = ({
     control,
     reset,
     setValue,
-    watch,
     formState: { errors, isSubmitting },
   } = useForm<ServiceFormData>({
     resolver: zodResolver(serviceSchema),
@@ -146,9 +145,6 @@ const NewServiceModal: React.FC<NewServiceModalProps> = ({
     },
   });
   
-  // 6. 폼 값 감시 (Watch form value)
-  const watchedCategoryId = watch('category_id');
-
   // 7. 핸들러 및 이펙트 훅 (Handlers and Effect hooks)
   
   // Realsite 서비스 검색
@@ -208,38 +204,48 @@ const NewServiceModal: React.FC<NewServiceModalProps> = ({
     }
   }, []);
 
-  useEffect(() => {
-    if (watchedCategoryId) {
-      fetchServiceTypes(watchedCategoryId);
-    }
-  }, [watchedCategoryId, fetchServiceTypes]);
-
   // 모달 오픈 시 (수정/새 서비스) 폼 상태 설정
   useEffect(() => {
-    if (editingService) {
-      setValue('category_id', ''); 
-      setValue('service_type_id', String(editingService.service_type_id));
-      setValue('service_name', editingService.name);
-      setValue('price_per_unit', editingService.price_per_unit || 0);
-      setValue('min_order_quantity', editingService.min_order_quantity || 0);
-      setValue('max_order_quantity', editingService.max_order_quantity || 0);
-      setValue('description', editingService.description || '');
-      setValue('external_id', editingService.external_id || '');
-    } else {
-      reset();
-      setSelectedRealSiteService(null);
+    if (isOpen) {
+      if (editingService) {
+        // 수정 모드: editingService의 값으로 폼을 리셋합니다.
+        const { description, external_id, ...restOfService } = editingService;
+        reset({
+          ...restOfService,
+          service_name: editingService.name,
+          category_id: String(editingService.category_id || ''),
+          service_type_id: String(editingService.service_type_id || ''),
+          description: description || '',
+          external_id: external_id || '',
+        });
+
+        // 카테고리에 맞는 서비스 타입 목록을 불러옵니다.
+        if (editingService.category_id) {
+          fetchServiceTypes(String(editingService.category_id));
+        }
+
+      } else {
+        // 새 서비스 모드: 폼을 기본값으로 리셋합니다.
+        reset();
+        setSelectedRealSiteService(null);
+        setServiceTypes([]);
+      }
     }
-  }, [editingService, reset, setValue]);
+  }, [editingService, isOpen, reset, fetchServiceTypes]);
 
   // 폼 제출 핸들러
   const onSubmit: SubmitHandler<ServiceFormData> = async (data) => {
     const apiEndpoint = editingService ? `/api/services/${editingService.id}` : '/api/services';
     const method = editingService ? 'PUT' : 'POST';
 
+    // API가 기대하는 데이터 구조에 맞게 전송할 body를 재구성합니다.
+    const { service_name, ...restData } = data;
+
     const body = {
-      ...data,
-      category_id: parseInt(data.category_id),
-      service_type_id: parseInt(data.service_type_id),
+      ...restData,
+      name: service_name,
+      service_type_id: parseInt(data.service_type_id, 10),
+      category_id: parseInt(data.category_id, 10),
     };
 
     try {
@@ -333,7 +339,11 @@ const NewServiceModal: React.FC<NewServiceModalProps> = ({
                 {...field}
                 options={categoryOptions}
                 placeholder="카테고리 선택"
-                onChange={(value) => field.onChange(value)}
+                onChange={(value) => {
+                  field.onChange(value); // react-hook-form에 변경사항 알림
+                  setValue('service_type_id', ''); // 서비스 타입 필드 초기화
+                  fetchServiceTypes(value); // 새 카테고리에 맞는 서비스 타입 목록 불러오기
+                }}
               />
             )}
           />

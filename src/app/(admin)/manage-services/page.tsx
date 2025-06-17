@@ -12,7 +12,10 @@ import PageBreadCrumb from '@/components/common/PageBreadCrumb';
 // import CategoryModal from '@/components/services/CategoryModal'; // 스페셜 관리 모달로 변경 예정
 import SpecialManagementModal from '@/components/services/SpecialManagementModal'; 
 import ServiceDescriptionModal from '@/components/services/ServiceDescriptionModal'; // 상세 보기 모달 추가
+import CategoryManagementModal from '@/components/services/CategoryManagementModal';
+import ServiceTypeManagementModal from '@/components/services/ServiceTypeManagementModal';
 import { ChevronUpIcon, ChevronDownIcon, TrashIcon } from '@heroicons/react/24/solid';
+import toast from 'react-hot-toast';
 
 interface Category { // Category 인터페이스 추가
   id: number;
@@ -31,6 +34,7 @@ interface Service { // RawService 역할도 겸할 수 있도록 created_at, spe
   id: number;
   name: string;
   service_type_id: number;
+  category_id: number;
   description?: string | null;
   price_per_unit?: number | undefined;
   min_order_quantity?: number | undefined;
@@ -77,6 +81,10 @@ const ManageServicesPage = () => {
 
   const [isDescriptionModalOpen, setIsDescriptionModalOpen] = useState(false);
   const [selectedServiceForDescription, setSelectedServiceForDescription] = useState<DisplayServiceItem | null>(null);
+
+  // 모달 상태 추가
+  const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
+  const [isServiceTypeModalOpen, setIsServiceTypeModalOpen] = useState(false);
 
   const [collapsedCategories, setCollapsedCategories] = useState<Record<string, boolean>>({});
   const [collapsedServiceTypes, setCollapsedServiceTypes] = useState<Record<string, boolean>>({});
@@ -199,6 +207,9 @@ const ManageServicesPage = () => {
   // 그러나 명시적으로 두어 user/role 변경 시 초기 로드를 위함이라면 유지
   }, [user, userLoading, router, fetchCategories, fetchSpecials, fetchAllServicesAndGroup]); 
 
+  const handleOpenCategoryModal = () => setIsCategoryModalOpen(true);
+  const handleOpenServiceTypeModal = () => setIsServiceTypeModalOpen(true);
+
   const handleNewService = () => { // 이름 변경: handleNewServiceClicked 등 -> handleNewService
     setEditingService(null);
     setIsNewServiceModalOpen(true);
@@ -221,9 +232,55 @@ const ManageServicesPage = () => {
     // fetchSpecials(); // 스페셜은 서비스 추가/수정 시 직접적인 영향 없으므로 선택적
   };
 
+  const onCategoryManagementUpdated = () => {
+    fetchAllServicesAndGroup();
+    fetchCategories();
+  }
+
+  const onServiceTypeManagementUpdated = () => {
+    fetchAllServicesAndGroup();
+    fetchCategories();
+  }
+
   const onSpecialManagementUpdated = () => {
     fetchSpecials();
     fetchAllServicesAndGroup(); // 스페셜 변경 시 서비스 목록도 업데이트 (special_name 등)
+  };
+
+  // 서비스 활성/비활성 상태 토글 핸들러
+  const handleToggleServiceStatus = async (service: Service) => {
+    const newStatus = !service.is_active;
+    const toastId = toast.loading(`${service.name} 서비스의 상태를 ${newStatus ? '활성' : '비활성'}으로 변경 중...`);
+
+    try {
+      const response = await fetch(`/api/services/${service.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ is_active: newStatus }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || '상태 변경에 실패했습니다.');
+      }
+
+      toast.success('서비스 상태가 성공적으로 변경되었습니다.', { id: toastId });
+      
+      // 상태 변경 성공 시, 전체 목록을 다시 불러오는 대신
+      // 로컬 상태(allRawServices)를 직접 업데이트하여 더 빠른 UX를 제공
+      setAllRawServices(prevServices => 
+        prevServices.map(s => s.id === service.id ? { ...s, is_active: newStatus } : s)
+      );
+      // 변경된 로컬 상태를 기반으로 그룹 다시 생성
+      fetchAllServicesAndGroup();
+
+    } catch (error) {
+      console.error('Failed to toggle service status:', error);
+      const errorMessage = error instanceof Error ? error.message : '알 수 없는 오류가 발생했습니다.';
+      toast.error(errorMessage, { id: toastId });
+    }
   };
 
   const handleSyncServices = async () => {
@@ -324,23 +381,18 @@ const ManageServicesPage = () => {
   return (
     <>
       <PageBreadCrumb pageTitle="서비스 관리" />
-
-      <div className="space-y-6">
-        <div className="flex justify-between items-center mb-6">
-          <div> {/* 필요한 경우 제목 추가 */} </div>
-          <div className="flex space-x-3">
-            <Button onClick={handleNewService} variant="primary"> {/* 새 서비스 추가 버튼 */}
-            + 새 서비스 추가
-          </Button>
-            <Button onClick={handleOpenSpecialManagementModal} variant="outline">
-              스페셜 관리
-            </Button>
-            <Button onClick={handleSyncServices} variant="outline" disabled={isSyncing}>
-              {isSyncing ? '동기화 진행 중...' : 'Realsite 서비스 동기화'}
-            </Button>
-          </div>
+      <div className="mt-4 flex items-center justify-between">
+        <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100">서비스 관리</h1>
+        <div className="flex items-center space-x-2">
+          <Button variant="outline" onClick={handleOpenCategoryModal}>카테고리 관리</Button>
+          <Button variant="outline" onClick={handleOpenServiceTypeModal}>서비스 타입 관리</Button>
+          <Button onClick={handleNewService}>+ 새 서비스 추가</Button>
+          <Button variant="outline" onClick={handleOpenSpecialManagementModal}>스페셜 관리</Button>
+          <Button variant="outline" isLoading={isSyncing} onClick={handleSyncServices}>Realsite 서비스 동기화</Button>
         </div>
+      </div>
 
+      <div className="mt-6">
         <div className="flex justify-end mb-4">
             <Button onClick={toggleSortOrder} variant="outline" size="sm">
               등록일시 정렬 {sortOrder === 'asc' ? <ChevronUpIcon className="h-4 w-4 ml-1" /> : <ChevronDownIcon className="h-4 w-4 ml-1" />}
@@ -352,7 +404,16 @@ const ManageServicesPage = () => {
           <p className="text-center text-gray-500 dark:text-gray-400 py-8">등록된 서비스가 없습니다.</p>
           )}
 
-          {Object.entries(groupedServices).map(([categoryName, types]) => (
+          {categories.map((category) => {
+            const categoryName = category.name;
+            const types = groupedServices[categoryName];
+            
+            // 해당 카테고리에 서비스가 없으면 렌더링하지 않음
+            if (!types || Object.keys(types).length === 0) {
+              return null;
+            }
+
+            return (
             <div key={categoryName} className="mb-8">
               <div 
               className="flex items-center justify-between text-lg font-semibold text-gray-800 dark:text-white mb-3 p-2 bg-gray-50 dark:bg-gray-700 rounded-md"
@@ -399,43 +460,58 @@ const ManageServicesPage = () => {
                       )}
                     </div>
                     {!collapsedServiceTypes[serviceTypeKey] && (
-                  <div className="overflow-x-auto">
-                        <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                          <thead className="bg-gray-50 dark:bg-gray-700">
-                        <tr>
-                              <th scope="col" className="px-4 py-2.5 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-300">ID</th>
-                              <th scope="col" className="px-4 py-2.5 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-300">서비스명</th>
-                              <th scope="col" className="px-4 py-2.5 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-300">가격</th>
-                              <th scope="col" className="px-4 py-2.5 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-300">수량(최소/최대)</th>
-                              <th scope="col" className="px-4 py-2.5 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-300">설명</th>
-                              <th scope="col" className="px-4 py-2.5 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-300">관리</th>
-                        </tr>
-                      </thead>
-                          <tbody className="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-800">
-                      {serviceItems.map((item) => ( // DisplayServiceItem 사용
-                            <tr key={item.id}>
-                              <td className="whitespace-nowrap px-4 py-3 text-sm text-gray-500 dark:text-gray-400">{item.id}</td>
-                              <td className="whitespace-nowrap px-4 py-3 text-sm font-medium text-gray-900 dark:text-white">{item.name}</td>
-                              <td className="whitespace-nowrap px-4 py-3 text-sm text-gray-500 dark:text-gray-400">{item.price}</td>
-                              <td className="whitespace-nowrap px-4 py-3 text-sm text-gray-500 dark:text-gray-400">{item.quantity}</td>
-                                <td className="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">
-                                <Button variant="outline" size="sm" onClick={() => handleViewDescription(item)}>보기</Button>
-                            </td>
-                                <td className="whitespace-nowrap px-4 py-3 text-sm space-x-2">
-                            <Button variant="outline" size="sm" onClick={() => handleEditService(item.originalService)}>수정</Button>
-                            <Button variant="danger" size="sm" onClick={() => handleDeleteService(Number(item.originalService.id), item.originalService.name)}>삭제</Button>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
+                  <div className="overflow-x-auto rounded-lg border border-slate-200 dark:border-slate-700">
+                        <table className="min-w-full divide-y divide-slate-200 dark:divide-slate-700">
+                          <thead className="bg-slate-100 dark:bg-slate-800">
+                            <tr>
+                              <th className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-300">서비스명</th>
+                              <th className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-300">외부 코드</th>
+                              <th className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-300">가격</th>
+                              <th className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-300">주문(최소/최대)</th>
+                              <th className="px-5 py-3 text-center text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-300">상태</th>
+                              <th className="px-5 py-3 text-center text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-300">작업</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-slate-200 bg-white dark:divide-slate-700 dark:bg-slate-900">
+                            {serviceItems.map((item) => (
+                              <tr key={item.id} className="hover:bg-slate-50 dark:hover:bg-slate-800">
+                                <td className="whitespace-nowrap px-5 py-4 text-sm font-medium text-slate-800 dark:text-slate-200">
+                                  {item.name}
+                                  <div className="text-xs text-slate-500">{item.originalService.special_name || ''}</div>
+                                </td>
+                                <td className="whitespace-nowrap px-5 py-4 text-sm text-slate-500">{item.originalService.external_id || '-'}</td>
+                                <td className="whitespace-nowrap px-5 py-4 text-sm text-slate-500">{item.price}</td>
+                                <td className="whitespace-nowrap px-5 py-4 text-sm text-slate-500">{item.quantity}</td>
+                                <td className="whitespace-nowrap px-5 py-4 text-center text-sm">
+                                  <span 
+                                    onClick={() => handleToggleServiceStatus(item.originalService)}
+                                    className={`cursor-pointer inline-flex rounded-full px-2.5 py-1 text-xs font-semibold leading-5 ${
+                                      item.originalService.is_active 
+                                      ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400' 
+                                      : 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400'
+                                    }`}>
+                                    {item.originalService.is_active ? '활성' : '비활성'}
+                                  </span>
+                                </td>
+                                <td className="whitespace-nowrap px-5 py-4 text-center text-sm font-medium">
+                                  <div className="flex items-center justify-center space-x-2">
+                                    <Button variant="outline" size="sm" onClick={() => handleViewDescription(item)}>보기</Button>
+                                    <Button variant="outline" size="sm" onClick={() => handleEditService(item.originalService)}>수정</Button>
+                                    <Button variant="danger" size="sm" onClick={() => handleDeleteService(Number(item.originalService.id), item.originalService.name)}>삭제</Button>
+                                  </div>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
                     )}
                 </div>
                 );
               })}
             </div>
-          ))}
+            );
+          })}
       </div>
 
       <NewServiceModal
@@ -455,6 +531,19 @@ const ManageServicesPage = () => {
         onSpecialManagementUpdated={onSpecialManagementUpdated}
         allServices={allRawServices} 
         existingSpecials={specials} 
+      />
+
+      <CategoryManagementModal 
+        isOpen={isCategoryModalOpen} 
+        onClose={() => setIsCategoryModalOpen(false)} 
+        onCategoryUpdated={onCategoryManagementUpdated}
+      />
+
+      <ServiceTypeManagementModal 
+        isOpen={isServiceTypeModalOpen} 
+        onClose={() => setIsServiceTypeModalOpen(false)} 
+        categories={categories}
+        onServiceTypeUpdated={onServiceTypeManagementUpdated}
       />
 
       {selectedServiceForDescription && (
