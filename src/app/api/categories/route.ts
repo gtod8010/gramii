@@ -27,9 +27,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ message: '이미 존재하는 카테고리 이름입니다.' }, { status: 409 }); // 409 Conflict
     }
 
+    // display_order 자동 계산
+    const { rows: maxOrderRows } = await pool.query(
+      'SELECT COALESCE(MAX(display_order), 0) + 1 AS next_order FROM service_categories',
+    );
+    const nextOrder = maxOrderRows[0].next_order;
+
     const result = await pool.query(
-      'INSERT INTO service_categories (name, description) VALUES ($1, $2) RETURNING *',
-      [name, description || null]
+      'INSERT INTO service_categories (name, description, display_order) VALUES ($1, $2, $3) RETURNING *',
+      [name, description || null, nextOrder],
     );
 
     return NextResponse.json(result.rows[0], { status: 201 });
