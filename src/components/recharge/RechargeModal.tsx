@@ -89,6 +89,13 @@ export default function RechargeModal({ isOpen, onClose }: RechargeModalProps) {
     if (!validateAmount(amount)) {
       return;
     }
+    
+    if (receiptType === 'tax_invoice') {
+      if (!companyName || !businessNumber || !ceoName || !contactNumber || !email) {
+          toast.error('세금계산서 발급에 필요한 정보를 모두 입력해주세요.');
+          return;
+      }
+    }
 
     setIsSubmitting(true);
     setSubmitError(null);
@@ -111,17 +118,30 @@ export default function RechargeModal({ isOpen, onClose }: RechargeModalProps) {
     }
 
     try {
+      const amountToCharge = parseInt(amount, 10);
+      const finalAmount = receiptType === 'tax_invoice' ? Math.floor(amountToCharge * 1.1) : amountToCharge;
+
+      const payload = {
+        amount: finalAmount,
+        depositorName: depositorName,
+        userId: userId,
+        accountNumber: `${depositAccount.bank} ${depositAccount.accountNumber}`, // 계좌번호 정보 추가
+        receiptType: receiptType,
+        receiptInfo: receiptType === 'tax_invoice' ? {
+            companyName,
+            businessNumber,
+            ceoName,
+            contactNumber,
+            email,
+        } : null
+      };
+
       const response = await fetch('/api/recharge-requests', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          amount: parseInt(amount, 10),
-          depositorName: depositorName,
-          userId: userId,
-          accountNumber: `${depositAccount.bank} ${depositAccount.accountNumber}`, // 계좌번호 정보 추가
-        }),
+        body: JSON.stringify(payload),
       });
 
       if (!response.ok) {
@@ -150,7 +170,7 @@ export default function RechargeModal({ isOpen, onClose }: RechargeModalProps) {
 
   return (
     <div className="fixed inset-0 bg-gray-600 bg-opacity-75 overflow-y-auto h-full w-full flex justify-center items-center z-50 p-4">
-      <div className="relative bg-white dark:bg-gray-800 p-6 sm:p-8 rounded-lg shadow-xl w-full max-w-md mx-auto">
+      <div className="relative bg-white dark:bg-gray-800 p-6 sm:p-8 rounded-lg shadow-xl w-full max-w-md mx-auto max-h-[90vh] overflow-y-auto">
         <div className="flex justify-center mb-6">
           <div className="inline-flex items-center justify-center bg-pink-100 dark:bg-pink-700 p-3 rounded-md">
             <span className="text-2xl font-bold text-pink-600 dark:text-pink-300">M</span> 
@@ -173,6 +193,11 @@ export default function RechargeModal({ isOpen, onClose }: RechargeModalProps) {
             <label htmlFor="amount" className={labelClass}>충전 금액을 입력해주세요.</label>
             <input type="number" id="amount" value={amount} onChange={handleAmountChange} className={inputClass} placeholder="10000" disabled={isSubmitting} />
             {amountError && <p className="mt-1 text-xs text-red-500">{amountError}</p>}
+            {receiptType === 'tax_invoice' && amount && parseInt(amount, 10) > 0 && (
+                <p className="mt-2 text-sm text-gray-800 dark:text-gray-200">
+                    VAT 10% 포함하여 <strong className="text-blue-600 dark:text-blue-400">{Math.floor(parseInt(amount, 10) * 1.1).toLocaleString()}</strong> 원을 입금해주세요.
+                </p>
+            )}
           </div>
           <div>
             <label htmlFor="depositorName" className={labelClass}>입금자명을 입력해주세요.</label>
@@ -190,10 +215,10 @@ export default function RechargeModal({ isOpen, onClose }: RechargeModalProps) {
                     type="radio"
                     checked={receiptType === type}
                     onChange={() => setReceiptType(type)}
-                    disabled={type !== 'none' || isSubmitting}
-                    className={`focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:focus:ring-indigo-600 ${(type !== 'none' || isSubmitting) ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    disabled={type === 'cash_receipt' || isSubmitting}
+                    className={`focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:focus:ring-indigo-600 ${(type === 'cash_receipt' || isSubmitting) ? 'opacity-50 cursor-not-allowed' : ''}`}
                   />
-                  <label htmlFor={type} className={`ml-2 block text-sm text-gray-700 dark:text-gray-300 ${(type !== 'none' || isSubmitting) ? 'opacity-50' : ''}`}>
+                  <label htmlFor={type} className={`ml-2 block text-sm text-gray-700 dark:text-gray-300 ${(type === 'cash_receipt' || isSubmitting) ? 'opacity-50' : ''}`}>
                     {type === 'none' ? '선택안함' : type === 'tax_invoice' ? '세금계산서' : '현금영수증'}
                   </label>
                 </div>
@@ -204,6 +229,10 @@ export default function RechargeModal({ isOpen, onClose }: RechargeModalProps) {
           {receiptType === 'tax_invoice' && (
             <div className="mt-4 p-4 border border-gray-200 dark:border-gray-700 rounded-md space-y-4">
               <h3 className="text-md font-semibold text-gray-700 dark:text-gray-200">세금계산서 정보</h3>
+              <div className="p-3 text-xs text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 rounded-md">
+                  <p className="font-bold">* 충전시 부가세(VAT) 10% 별도입니다.</p>
+                  <p> ex) 10,000원 충전시 11,000원 입금</p>
+              </div>
               <div>
                 <label htmlFor="companyName" className={labelClass}>회사명</label>
                 <input type="text" id="companyName" value={companyName} onChange={(e) => setCompanyName(e.target.value)} className={inputClass} />

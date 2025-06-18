@@ -6,7 +6,7 @@ import Button from '@/components/ui/button/Button';
 import Input from '@/components/form/input/InputField';
 import Select from '@/components/form/Select'; // 카테고리 선택을 위해 Select 컴포넌트 사용
 import toast from 'react-hot-toast';
-import { PencilIcon, TrashIcon, CheckIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { PencilIcon, TrashIcon, CheckIcon, XMarkIcon, ArrowUpIcon, ArrowDownIcon } from '@heroicons/react/24/outline';
 
 // 부모 컴포넌트에서 내려주는 카테고리 타입
 interface Category {
@@ -19,6 +19,7 @@ interface ServiceType {
   id: number;
   name: string;
   category_id: number;
+  display_order: number;
 }
 
 interface ServiceTypeManagementModalProps {
@@ -68,6 +69,39 @@ const ServiceTypeManagementModal: React.FC<ServiceTypeManagementModalProps> = ({
   useEffect(() => {
     fetchServiceTypes(selectedCategoryId);
   }, [selectedCategoryId, fetchServiceTypes]);
+
+  const handleSwapOrder = async (index1: number, index2: number) => {
+    if (index1 < 0 || index1 >= serviceTypes.length || index2 < 0 || index2 >= serviceTypes.length) {
+      return;
+    }
+    const serviceType1 = serviceTypes[index1];
+    const serviceType2 = serviceTypes[index2];
+
+    // Optimistic UI Update
+    const newServiceTypes = [...serviceTypes];
+    newServiceTypes[index1] = serviceType2;
+    newServiceTypes[index2] = serviceType1;
+    setServiceTypes(newServiceTypes);
+
+    try {
+      const response = await fetch('/api/service-types/swap-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ serviceType1, serviceType2 }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.message || '순서 변경에 실패했습니다.');
+      }
+      toast.success('순서가 변경되었습니다.');
+      // Re-fetch to confirm order from server
+      await fetchServiceTypes(selectedCategoryId);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : '알 수 없는 오류가 발생했습니다.');
+      // Rollback UI on error
+      await fetchServiceTypes(selectedCategoryId);
+    }
+  };
 
   const handleAddServiceType = async () => {
     if (!newServiceTypeName.trim() || !selectedCategoryId) return;
@@ -172,7 +206,7 @@ const ServiceTypeManagementModal: React.FC<ServiceTypeManagementModalProps> = ({
               {isLoading ? (
                 <p className="text-sm text-center text-slate-500 py-4">서비스 타입 목록을 불러오는 중...</p>
               ) : serviceTypes.length > 0 ? (
-                serviceTypes.map((st) => (
+                serviceTypes.map((st, index) => (
                   <div key={st.id} className="flex items-center justify-between p-2 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800">
                     {editingServiceTypeId === st.id ? (
                       <>
@@ -194,6 +228,12 @@ const ServiceTypeManagementModal: React.FC<ServiceTypeManagementModalProps> = ({
                       <>
                         <span className="text-sm text-slate-700 dark:text-slate-200">{st.name}</span>
                         <div className="flex items-center space-x-2">
+                          <Button size="sm" variant="outline" onClick={() => handleSwapOrder(index, index - 1)} disabled={index === 0}>
+                            <ArrowUpIcon className="h-4 w-4" />
+                          </Button>
+                          <Button size="sm" variant="outline" onClick={() => handleSwapOrder(index, index + 1)} disabled={index === serviceTypes.length - 1}>
+                            <ArrowDownIcon className="h-4 w-4" />
+                          </Button>
                           <Button size="sm" variant="outline" onClick={() => startEditing(st)}>
                             <PencilIcon className="h-4 w-4" />
                           </Button>

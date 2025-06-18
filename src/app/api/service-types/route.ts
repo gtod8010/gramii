@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { pool } from '@/lib/db';
+import { NextRequest } from 'next/server';
 
 // 서비스 타입 생성을 위한 스키마
 const serviceTypeSchema = z.object({
@@ -9,17 +10,17 @@ const serviceTypeSchema = z.object({
 });
 
 // 서비스 타입 조회 (GET)
-export async function GET(req: Request) {
-  const { searchParams } = new URL(req.url);
+export async function GET(request: NextRequest) {
+  const searchParams = request.nextUrl.searchParams;
   const categoryId = searchParams.get('categoryId');
 
   try {
     if (categoryId) {
-      const query = 'SELECT * FROM service_types WHERE category_id = $1 ORDER BY name ASC';
+      const query = 'SELECT * FROM service_types WHERE category_id = $1 ORDER BY display_order ASC';
       const result = await pool.query(query, [categoryId]);
       return NextResponse.json(result.rows);
     } else {
-      const result = await pool.query('SELECT * FROM service_types ORDER BY id');
+      const result = await pool.query('SELECT * FROM service_types ORDER BY display_order ASC');
       return NextResponse.json(result.rows);
     }
   } catch (error) {
@@ -40,9 +41,16 @@ export async function POST(req: Request) {
 
     const { name, category_id } = parsed.data;
 
+    // display_order 자동 계산 (같은 카테고리 내에서)
+    const { rows: maxOrderRows } = await pool.query(
+      'SELECT COALESCE(MAX(display_order), 0) + 1 AS next_order FROM service_types WHERE category_id = $1',
+      [category_id]
+    );
+    const nextOrder = maxOrderRows[0].next_order;
+
     const result = await pool.query(
-      'INSERT INTO service_types (name, category_id) VALUES ($1, $2) RETURNING *',
-      [name, category_id]
+      'INSERT INTO service_types (name, category_id, display_order) VALUES ($1, $2, $3) RETURNING *',
+      [name, category_id, nextOrder]
     );
 
     return NextResponse.json(result.rows[0], { status: 201 });

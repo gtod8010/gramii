@@ -30,7 +30,7 @@ const Footer: React.FC<FooterProps> = ({ onOpenTermsModal }) => {
             <div className="text-sm flex flex-wrap gap-x-4 gap-y-1">
                 <p>주소 : 서울특별시 강서구 공항대로 426</p>
                 <p>사업자등록번호 : 572-05-03128</p>
-                <p>통신판매 : 신청중</p>
+                <p>통신판매 : 제2025-서울강서-1815호</p>
                 <p>이메일 : gramii0505@gmail.com</p>
             </div>
             <p className="text-xs text-gray-500 pt-4">

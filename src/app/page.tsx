@@ -197,15 +197,15 @@ const RootPage = () => {
       </nav>
 
       {/* Hero Section */}
-      <main className="flex-grow bg-[radial-gradient(ellipse_at_top_right,_#2e1a47_20%,_#1a1033_50%,_#0a041a)] relative overflow-hidden">
+      <main className="flex-grow bg-[radial-gradient(ellipse_at_top_right,_#2e1a47_20%,_#1a1033_50%,_#0a041a)] relative">
         {/* 우주 별빛 효과 */}
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.15)_1px,transparent_1px)] [background-size:80px_80px]"></div>
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.12)_1px,transparent_1px)] [background-size:160px_160px]"></div>
         
         <div className="container mx-auto px-6 md:px-10 py-24 md:py-36 flex items-center relative z-10">
-          <div className="grid md:grid-cols-2 gap-8 items-center">
+          <div className="grid lg:grid-cols-2 gap-8 items-center">
             {/* Text Content */}
-            <div className="text-center md:text-left">
+            <div className="text-center lg:text-left z-10">
               <h1 className="text-4xl md:text-5xl font-bold text-white mb-6 leading-tight">
                 이건 트렌드가 아니라 변화다
                 <br />
@@ -231,7 +231,7 @@ const RootPage = () => {
             </div>
 
             {/* Image Content */}
-            <div className="md:w-1/2 flex items-center justify-center">
+            <div className="hidden lg:flex items-center justify-center lg:col-start-2 xl:row-start-1">
               {/* 기존 이미지 태그를 새로운 애니메이션 컴포넌트로 교체 */}
               <HeroAnimation />
             </div>
@@ -355,12 +355,16 @@ const RootPage = () => {
         href="http://pf.kakao.com/_aIRrn"
         target="_blank"
         rel="noopener noreferrer"
-        className="fixed bottom-8 right-8 z-50 bg-[#FEE500] w-16 h-16 rounded-full flex items-center justify-center shadow-lg hover:bg-[#FADA0A] transition-colors duration-300"
+        className="fixed bottom-8 right-8 z-50 transition-transform duration-300 hover:scale-110"
         title="카카오톡 실시간 상담"
       >
-        <svg className="w-8 h-8 text-[#3C1E1E]" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M12 2C6.486 2 2 5.589 2 10.007c0 2.434 1.371 4.59 3.445 5.924-.266 1.432-.93 4.22-1.195 5.253-.053.208.134.405.343.349 1.143-.304 3.988-1.42 4.96-1.895A9.972 9.972 0 0012 20c5.514 0 10-4.477 10-9.993C22 5.589 17.514 2 12 2z" />
-        </svg>
+        <Image 
+            src="/images/logos/kakaotalk_logo2.png"
+            alt="카카오톡 실시간 상담"
+            width={48}
+            height={48}
+            className="rounded-xl shadow-lg"
+        />
       </a>
     </div>
   );

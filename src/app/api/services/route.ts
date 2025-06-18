@@ -59,9 +59,9 @@ export async function GET(request: NextRequest) {
 
     // ORDER BY 절 구성
     if (serviceTypeId) {
-      query += ` ORDER BY s.id ASC`;
+      query += ` ORDER BY s.display_order ASC`;
     } else {
-      query += ` ORDER BY sc.name ASC, st.name ASC, s.id ASC`;
+      query += ` ORDER BY sc.display_order ASC, st.display_order ASC, s.display_order ASC`;
     }
 
     if (limit) {
@@ -163,10 +163,17 @@ export async function POST(req: Request) {
         return NextResponse.json({ message: '존재하지 않는 서비스 타입입니다.' }, { status: 400 });
       }
 
+      // display_order 자동 계산 (같은 서비스 타입 내에서)
+      const { rows: maxOrderRows } = await client.query(
+        'SELECT COALESCE(MAX(display_order), 0) + 1 AS next_order FROM services WHERE service_type_id = $1',
+        [service_type_id]
+      );
+      const nextOrder = maxOrderRows[0].next_order;
+
       const newServiceResult = await client.query(
         `INSERT INTO services 
-          (service_type_id, name, description, price_per_unit, min_order_quantity, max_order_quantity, external_id) 
-         VALUES ($1, $2, $3, $4, $5, $6, $7) 
+          (service_type_id, name, description, price_per_unit, min_order_quantity, max_order_quantity, external_id, display_order) 
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8) 
          RETURNING *`,
         [
           service_type_id,
@@ -176,6 +183,7 @@ export async function POST(req: Request) {
           min_order_quantity,
           max_order_quantity,
           finalExternalId,
+          nextOrder
         ]
       );
 
