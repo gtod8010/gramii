@@ -243,18 +243,6 @@ export default function RechargePage() {
         </div>
       </div>
 
-      {/* 톡상담 버튼 */}
-      <button
-        className="fixed bottom-6 right-6 bg-yellow-400 hover:bg-yellow-500 text-gray-800 font-semibold py-3 px-5 rounded-full shadow-lg flex items-center"
-        onClick={() => alert("톡상담 기능 구현 예정")}
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-          <path fillRule="evenodd" d="M18 10c0 3.866-3.582 7-8 7a8.832 8.832 0 01-4.33-1.223L3.418 17.46A1 1 0 012.53 16.53l1.222-2.254A6.983 6.983 0 013 10c0-3.866 3.582-7 8-7s8 3.134 8 7zm-2.828-2.828A6.002 6.002 0 005.172 7.172 6.002 6.002 0 0010 15.002a6.002 6.002 0 007.172-7.828A6.002 6.002 0 0015.172 7.172z" clipRule="evenodd" />
-          <path d="M6 9a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h2a1 1 0 100-2H7z" />
-        </svg>
-        톡상담
-      </button>
-
       {isRechargeModalOpen && (
         <RechargeModal 
           isOpen={isRechargeModalOpen} 
