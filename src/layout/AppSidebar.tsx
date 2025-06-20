@@ -15,6 +15,7 @@ import {
   PlugInIcon,
   TableIcon,
   UserCircleIcon,
+  DollarLineIcon,
 } from "../icons/index";
 
 type NavItem = {
@@ -61,6 +62,12 @@ const baseNavItems: NavItem[] = [
     icon: <UserCircleIcon />,
     name: "회원 관리",
     path: "/manage-users",
+    adminOnly: true,
+  },
+  {
+    icon: <DollarLineIcon />,
+    name: "충전 관리",
+    path: "/recharge-management",
     adminOnly: true,
   },
 ];

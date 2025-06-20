@@ -5,10 +5,12 @@ import { ChevronLeftIcon, ArrowRightIcon } from '@/icons';
 import RechargeModal from '@/components/recharge/RechargeModal';
 import { useUser } from '@/hooks/useUser';
 
+type ReceiptType = 'tax_invoice' | 'cash_receipt' | 'none';
+
 // deposit_requests 테이블의 구조에 맞게 인터페이스 수정
 interface RechargeHistoryItem {
   id: number;
-  paymentMethod: string; // API에서 '무통장입금'으로 고정 또는 다른 값
+  receipt_type: ReceiptType; // string -> ReceiptType
   amount: number;
   status: string; // 'pending', 'completed', 'failed' 등
   depositDate: string; // requested_at (요청일시)
@@ -25,6 +27,12 @@ interface DepositsApiResponse {
 }
 
 const ITEMS_PER_PAGE = 5; // API 요청 시 limit으로 사용될 값 (필요시 API와 동기화)
+
+const receiptTypeDisplayNames: Record<ReceiptType, string> = {
+  tax_invoice: '세금계산서',
+  cash_receipt: '현금영수증',
+  none: '무통장입금',
+};
 
 export default function RechargePage() {
   const [currentPage, setCurrentPage] = useState(1);
@@ -143,7 +151,7 @@ export default function RechargePage() {
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{item.id}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm">
                         <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
-                            {item.paymentMethod}
+                            {receiptTypeDisplayNames[item.receipt_type] || '무통장입금'}
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{item.amount.toLocaleString()}</td>

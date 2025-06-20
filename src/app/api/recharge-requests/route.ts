@@ -21,7 +21,7 @@ export async function POST(req: Request) {
     await client.query('BEGIN');
 
     const query = `
-      INSERT INTO deposit_requests (user_id, amount, depositor_name, status, account_number, receipt_type, matched_tran_info)
+      INSERT INTO deposit_requests (user_id, amount, depositor_name, status, account_number, receipt_type, receipt_info)
       VALUES ($1, $2, $3, 'pending', $4, $5, $6)
       RETURNING id
     `;

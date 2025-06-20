@@ -12,29 +12,36 @@ export async function POST(request: NextRequest) {
   // 인증 로직 제거
   try {
     const payload: SmsWebhookPayload = await request.json();
-    const { from, body } = payload;
-
-    // 1. 줄 단위로 파싱 (실제 KB국민은행 알림톡 포맷 대응)
-    const lines = body.split('\n').map(line => line.trim()).filter(Boolean);
-    let depositorName = '';
-    let amount = NaN;
-    if (lines.length >= 6) {
-      depositorName = lines[3];
-      const amountStr = lines[5].replace(/,/g, '');
-      amount = parseInt(amountStr, 10);
-    }
-
-    if (!depositorName || isNaN(amount)) {
-      console.log(`SMS from ${from} did not match the expected format. Body: "${body}"`);
-      return NextResponse.json({ message: 'SMS format not supported.' });
-    }
-
-    // 3. DB에서 일치하는 충전 요청 검색
+    const { from, body, receivedAt } = payload;
+    
     const client = await pool.connect();
     let updatedRequest = null;
 
     try {
-      // 최근 3일 내의 'pending' 상태 요청 중에서 입금액과 입금자명이 일치하는 건을 찾음
+      // 1. 모든 수신 SMS를 sms_logs 테이블에 기록
+      const logSmsQuery = `
+        INSERT INTO sms_logs (sender, body, received_at_app)
+        VALUES ($1, $2, $3);
+      `;
+      await client.query(logSmsQuery, [from, body, receivedAt]);
+
+      // 2. 줄 단위로 파싱 (실제 KB국민은행 알림톡 포맷 대응)
+      const lines = body.split('\n').map(line => line.trim()).filter(Boolean);
+      let depositorName = '';
+      let amount = NaN;
+      if (lines.length >= 6) {
+        depositorName = lines[3];
+        const amountStr = lines[5].replace(/,/g, '');
+        amount = parseInt(amountStr, 10);
+      }
+
+      if (!depositorName || isNaN(amount)) {
+        console.log(`SMS from ${from} did not match the expected format. Body: "${body}"`);
+        // 파싱 실패 시에도 로그는 남았으므로, 여기서 처리를 중단하고 응답합니다.
+        return NextResponse.json({ message: 'SMS format not supported.' });
+      }
+
+      // 3. DB에서 일치하는 충전 요청 검색
       const findRequestQuery = `
         SELECT id, user_id, amount, status
         FROM deposit_requests
@@ -47,37 +54,35 @@ export async function POST(request: NextRequest) {
       `;
       const requestResult = await client.query(findRequestQuery, [amount, depositorName]);
 
-      if (requestResult.rows.length === 0) {
-        console.log(`No matching pending deposit request found for amount: ${amount}, name: ${depositorName}`);
-        return NextResponse.json({ message: 'No matching request found.' });
+      if (requestResult.rows.length > 0) {
+        const requestToProcess = requestResult.rows[0];
+        const { id: requestId, user_id: userId } = requestToProcess;
+
+        // 4. 트랜잭션으로 DB 업데이트
+        await client.query('BEGIN');
+        
+        // 4-1. deposit_requests 상태를 'completed'로 변경
+        const updateRequestQuery = `
+          UPDATE deposit_requests
+          SET status = 'completed', confirmed_at = NOW(), matched_tran_info = $1
+          WHERE id = $2
+          RETURNING *;
+        `;
+        const updateResult = await client.query(updateRequestQuery, [
+          JSON.stringify(payload), // SMS 전체 내용을 저장
+          requestId
+        ]);
+        updatedRequest = updateResult.rows[0];
+
+        // 4-2. users 테이블의 포인트(잔액) 증가
+        const updateUserQuery = 'UPDATE users SET points = points + $1 WHERE id = $2';
+        await client.query(updateUserQuery, [amount, userId]);
+
+        await client.query('COMMIT');
+        console.log(`Successfully processed deposit request ID: ${requestId} for user ID: ${userId}. Amount: ${amount}`);
+      } else {
+         console.log(`No matching pending deposit request found for amount: ${amount}, name: ${depositorName}`);
       }
-
-      const requestToProcess = requestResult.rows[0];
-      const { id: requestId, user_id: userId } = requestToProcess;
-
-      // 4. 트랜잭션으로 DB 업데이트
-      await client.query('BEGIN');
-      
-      // 4-1. deposit_requests 상태를 'completed'로 변경
-      const updateRequestQuery = `
-        UPDATE deposit_requests
-        SET status = 'completed', confirmed_at = NOW(), matched_tran_info = $1
-        WHERE id = $2
-        RETURNING *;
-      `;
-      const updateResult = await client.query(updateRequestQuery, [
-        JSON.stringify(payload), // SMS 전체 내용을 저장
-        requestId
-      ]);
-      updatedRequest = updateResult.rows[0];
-
-      // 4-2. users 테이블의 포인트(잔액) 증가
-      const updateUserQuery = 'UPDATE users SET points = points + $1 WHERE id = $2';
-      await client.query(updateUserQuery, [amount, userId]);
-
-      await client.query('COMMIT');
-
-      console.log(`Successfully processed deposit request ID: ${requestId} for user ID: ${userId}. Amount: ${amount}`);
 
     } catch (dbError) {
       await client.query('ROLLBACK');
@@ -87,10 +92,14 @@ export async function POST(request: NextRequest) {
       client.release();
     }
     
-    return NextResponse.json({ 
-      message: 'Recharge processed successfully.',
-      processedRequest: updatedRequest 
-    }, { status: 200 });
+    if (updatedRequest) {
+      return NextResponse.json({ 
+        message: 'Recharge processed successfully.',
+        processedRequest: updatedRequest 
+      }, { status: 200 });
+    } else {
+      return NextResponse.json({ message: 'SMS logged, but no matching deposit request found.' });
+    }
 
   } catch (error) {
     console.error('Error processing SMS webhook:', error);

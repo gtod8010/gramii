@@ -32,7 +32,7 @@ class SmsReceiver : BroadcastReceiver() {
     }
 
     private fun sendToServer(context: Context, from: String, body: String) {
-        val apiUrl = "http://211.45.162.83:3000/api/sms-incoming"
+        val apiUrl = "https://211.45.162.83:3000/api/sms-incoming"
         
         val isoFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.getDefault())
         isoFormat.timeZone = TimeZone.getTimeZone("UTC")
@@ -46,11 +46,11 @@ class SmsReceiver : BroadcastReceiver() {
                 val response = ApiClient.instance.forwardSms(apiUrl, "", payload)
                 if (response.isSuccessful) {
                     Log.i(TAG, "SMS successfully forwarded to $apiUrl")
-                    logToActivity(context, "SUCCESS: SMS from $from forwarded.")
+                    logToActivity(context, "SUCCESS (${response.code()}): SMS from $from forwarded.")
                 } else {
                     val errorBody = response.errorBody()?.string()
                     Log.e(TAG, "Failed to forward SMS. Code: ${response.code()}, Body: $errorBody")
-                    logToActivity(context, "FAIL: Code ${response.code()} - $errorBody")
+                    logToActivity(context, "FAIL (${response.code()}): $errorBody")
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "Exception while forwarding SMS", e)

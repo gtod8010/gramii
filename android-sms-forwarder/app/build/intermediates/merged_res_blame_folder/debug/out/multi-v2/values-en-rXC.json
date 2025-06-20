@@ -1,7 +1,7 @@
 {
     "logs": [
         {
-            "outputFile": "com.gramii.smsforwarder.app-mergeDebugResources-29:/values-en-rXC/values-en-rXC.xml",
+            "outputFile": "com.gramii.smsforwarder.app-mergeDebugResources-26:/values-en-rXC/values-en-rXC.xml",
             "map": [
                 {
                     "source": "/Users/dwight.k/.gradle/caches/8.12/transforms/96bfd91bf2a39377ced47a1036eeab2d/transformed/core-1.12.0/res/values-en-rXC/values-en-rXC.xml",

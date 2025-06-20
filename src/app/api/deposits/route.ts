@@ -5,7 +5,7 @@ import { getUserIdFromRequest } from '@/lib/auth'; // 사용자 ID를 가져오�
 // recharge/page.tsx의 RechargeHistoryItem 인터페이스와 유사하게 정의
 interface DepositRequestItem {
   id: number;
-  paymentMethod: string; // '무통장입금' 고정 또는 deposit_requests 테이블에 저장된 값
+  receipt_type: string; // paymentMethod -> receipt_type으로 변경
   amount: number;
   status: string; // deposit_requests.status
   depositDate: string; // deposit_requests.requested_at 또는 confirmed_at
@@ -52,7 +52,8 @@ export async function GET(request: NextRequest) {
           status, 
           requested_at as "depositDate",
           depositor_name as "depositorName",
-          account_number as "accountNumber"
+          account_number as "accountNumber",
+          receipt_type
         FROM deposit_requests 
         WHERE user_id = $1
         ORDER BY requested_at DESC
@@ -62,7 +63,7 @@ export async function GET(request: NextRequest) {
 
       const deposits: DepositRequestItem[] = dataResult.rows.map(row => ({
         id: row.id,
-        paymentMethod: '무통장입금', // 현재는 고정값
+        receipt_type: row.receipt_type, // '무통장입금' 고정값 대신 DB에서 읽은 값 사용
         amount: row.amount,
         status: row.status,
         depositDate: row.depositDate.toISOString(), // ISO 문자열로 변환

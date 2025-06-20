@@ -1,10 +1,10 @@
 [
     {
-        "merged": "com.gramii.smsforwarder.app-mergeDebugResources-30:/layout/activity_main.xml",
-        "source": "com.gramii.smsforwarder.app-main-33:/layout/activity_main.xml"
+        "merged": "com.gramii.smsforwarder.app-mergeDebugResources-27:/layout/activity_main.xml",
+        "source": "com.gramii.smsforwarder.app-main-30:/layout/activity_main.xml"
     },
     {
-        "merged": "/Users/dwight.k/.gradle/daemon/8.12/com.gramii.smsforwarder.app-mergeDebugResources-30:/layout/activity_main.xml",
-        "source": "/Users/dwight.k/.gradle/daemon/8.12/com.gramii.smsforwarder.app-main-33:/layout/activity_main.xml"
+        "merged": "/Users/dwight.k/.gradle/daemon/8.12/com.gramii.smsforwarder.app-mergeDebugResources-27:/layout/activity_main.xml",
+        "source": "/Users/dwight.k/.gradle/daemon/8.12/com.gramii.smsforwarder.app-main-30:/layout/activity_main.xml"
     }
 ]
