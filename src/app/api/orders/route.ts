@@ -8,12 +8,13 @@ interface OrderRequestBody {
   quantity: number;
   totalPrice: number;
   requestDetails?: string;
+  comments?: string;
 }
 
 export async function POST(request: Request) {
   try {
     const body: OrderRequestBody = await request.json();
-    const { userId, serviceId, quantity /* , totalPrice, requestDetails: linkValue */ } = body;
+    const { userId, serviceId, quantity, comments } = body;
     const linkValue = body.requestDetails; // requestDetails가 linkValue로 사용됨
 
     if (!userId || !serviceId || !quantity ) { // totalPrice는 서버에서 계산하므로 요청에서 제외 가능
@@ -54,8 +55,8 @@ export async function POST(request: Request) {
         finalPricePerUnit = userSpecificPriceResult.rows[0].custom_price; // 특별 단가 적용
       }
 
-      // 4. 최종 주문 가격 계산
-      const calculatedTotalPrice = finalPricePerUnit * quantity;
+      // 4. 최종 주문 가격 계산 및 정수로 변환
+      const calculatedTotalPrice = Math.floor(finalPricePerUnit * quantity);
 
       // 5. 사용자 포인트 확인 및 차감 (기존 로직과 유사하게 진행)
       const userResult: QueryResult = await client.query('SELECT points FROM users WHERE id = $1 FOR UPDATE', [userId]);
@@ -82,16 +83,29 @@ export async function POST(request: Request) {
           throw new Error('Realsite API 환경 변수가 설정되지 않았습니다.');
         }
 
+        const realsitePayload: {
+          key: string;
+          action: string;
+          service: number;
+          link: string | undefined;
+          quantity: number;
+          comments?: string;
+        } = {
+          key: apiKey,
+          action: 'add',
+          service: externalId,
+          link: linkValue,
+          quantity: quantity,
+        };
+
+        if (comments) {
+          realsitePayload.comments = comments;
+        }
+
         const realsiteResponse = await fetch(apiUrl, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            key: apiKey,
-            action: 'add',
-            service: externalId,
-            link: linkValue,
-            quantity: quantity,
-          }),
+          body: JSON.stringify(realsitePayload),
         });
 
         const realsiteData = await realsiteResponse.json();
@@ -140,7 +154,7 @@ export async function POST(request: Request) {
       await client.query(pointTransactionQuery, [
         userId,
         newOrder.id, 
-        -calculatedTotalPrice, 
+        -calculatedTotalPrice,
         'order_payment',
         finalBalanceAfterOrder,
       ]);

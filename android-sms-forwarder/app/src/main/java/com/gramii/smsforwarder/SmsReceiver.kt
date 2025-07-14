@@ -32,7 +32,7 @@ class SmsReceiver : BroadcastReceiver() {
     }
 
     private fun sendToServer(context: Context, from: String, body: String) {
-        val apiUrl = "https://211.45.162.83:3000/api/sms-incoming"
+        val apiUrl = "https://gramii.co.kr/api/sms-incoming"
         
         val isoFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.getDefault())
         isoFormat.timeZone = TimeZone.getTimeZone("UTC")

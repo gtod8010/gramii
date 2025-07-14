@@ -359,7 +359,7 @@ const RootPage = () => {
         title="카카오톡 실시간 상담"
       >
         <Image 
-            src="/images/logos/kakaotalk_logo2.png"
+            src="/images/logos/kakaotalk_logo3.png"
             alt="카카오톡 실시간 상담"
             width={48}
             height={48}

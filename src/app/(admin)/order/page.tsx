@@ -13,6 +13,7 @@ interface SubServiceItem {
   minOrder: number;
   maxOrder: number;
   description: string;
+  type: string; // 서비스 타입을 구분하기 위한 필드 추가 (예: 'Default', 'Custom Comments')
 }
 
 interface ServiceType {
@@ -31,23 +32,33 @@ interface ServiceCategory {
 interface ApiService {
   id: number;
   name: string;
-  service_type_id: number;
-  category_id: number; // 주문 페이지에서는 카테고리 ID도 필요
-  description?: string | null;
-  price_per_unit?: number | undefined;
-  custom_price?: number | null;
-  min_order_quantity?: number | undefined;
-  max_order_quantity?: number | undefined;
+  type: string; // 'Custom Comments' 등을 식별하기 위한 타입
+  price_per_unit: string; // API에서 문자열로 오므로 파싱 필요
+  min_order_quantity: number;
+  max_order_quantity: number;
+  description: string | null;
+  user_specific_price: string | null; // API에서 문자열로 오므로 파싱 필요
   is_active: boolean;
-  service_type_name?: string; 
-  category_name?: string; 
+  category_id: number;
+  service_type_id: number;
+  category_name: string;
+  service_type_name: string;
+}
+
+interface OrderPayload {
+  userId: number;
+  serviceId: number;
+  quantity: number;
+  totalPrice: number;
+  requestDetails: string;
+  comments?: string;
 }
 
 // 하드코딩된 serviceCategoriesData 제거
 // const serviceCategoriesData: ServiceCategory[] = [...];
 
 export default function OrderPage() {
-  const { user, isLoading: userIsLoading, fetchAndUpdateUser } = useUser();
+  const { user, isLoading: userIsLoading } = useUser();
   const [serviceCategories, setServiceCategories] = useState<ServiceCategory[]>([]);
   const [isLoadingServices, setIsLoadingServices] = useState(true);
   const [errorServices, setErrorServices] = useState<string | null>(null);
@@ -63,73 +74,65 @@ export default function OrderPage() {
   const [serviceLink, setServiceLink] = useState<string>('');
   const [termsAgreement, setTermsAgreement] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [comments, setComments] = useState<string[]>(['', '', '']);
 
   const fetchAndStructureServices = useCallback(async () => {
     setIsLoadingServices(true);
     setErrorServices(null);
     try {
-      // API 요청 시 X-Test-User-Id 헤더를 설정해야 custom_price가 제대로 반환될 수 있습니다.
-      // 예시: const headers = { 'X-Test-User-Id': '1' }; // 사용자 ID 1로 테스트
-      // const response = await fetch('/api/services', { headers });
-      const response = await fetch('/api/services'); // 현재는 헤더 없이 호출
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || '서비스 목록을 불러오는데 실패했습니다.');
-      }
-      const apiServices: ApiService[] = await response.json();
+      const token = localStorage.getItem('jwtToken');
+      if (!token) throw new Error('인증 토큰이 없습니다.');
 
-      const activeServices = apiServices.filter(service => service.is_active);
-
-      const structuredData: ServiceCategory[] = [];
-      const categoryMap = new Map<string, ServiceCategory>();
-
-      activeServices.forEach(service => {
-
-        // category_id를 기준으로 다시 처리 (백엔드에서 category_id를 보내주므로)
-        const categoryIdStr = String(service.category_id); 
-        const categoryName = service.category_name || '기타 카테고리'; // category_name은 여전히 사용 가능
-        
-        const serviceTypeIdStr = String(service.service_type_id);
-        const serviceTypeName = service.service_type_name || '기타 타입';
-
-        if (!categoryMap.has(categoryIdStr)) {
-          const newCategory: ServiceCategory = {
-            id: categoryIdStr, // ServiceCategory의 id를 categoryIdStr로 설정
-            name: categoryName,
-            serviceTypes: [],
-          };
-          categoryMap.set(categoryIdStr, newCategory);
-          structuredData.push(newCategory);
-        }
-        
-        const currentCategory = categoryMap.get(categoryIdStr)!;
-        if (!currentCategory) {
-            return; 
-        }
-
-        let currentServiceType = currentCategory.serviceTypes.find(st => st.id === serviceTypeIdStr);
-        if (!currentServiceType) {
-          currentServiceType = {
-            id: serviceTypeIdStr,
-            name: serviceTypeName,
-            subServices: [],
-          };
-          currentCategory.serviceTypes.push(currentServiceType);
-        }
-
-        currentServiceType.subServices.push({
-          id: String(service.id),
-          name: service.name,
-          pricePerUnit: service.price_per_unit || 0,
-          custom_price: service.custom_price, // custom_price 할당
-          minOrder: service.min_order_quantity || 1,
-          maxOrder: service.max_order_quantity || 10000,
-          description: service.description || '설명이 없습니다.',
-        });
+      const response = await fetch('/api/services', {
+        headers: { 'Authorization': `Bearer ${token}` },
       });
+      if (!response.ok) throw new Error('서비스 목록을 불러오는데 실패했습니다.');
       
-      setServiceCategories(structuredData);
+      const services: ApiService[] = await response.json();
+      
+      const activeServices = services.filter(s => s.is_active);
+
+      const structuredCategoriesMap = new Map<string, ServiceCategory>();
+
+      for (const service of activeServices) {
+        const categoryId = service.category_id.toString();
+        const categoryName = service.category_name;
+        
+        if (!structuredCategoriesMap.has(categoryId)) {
+          structuredCategoriesMap.set(categoryId, { id: categoryId, name: categoryName, serviceTypes: [] });
+        }
+        
+        const category = structuredCategoriesMap.get(categoryId)!;
+        
+        const serviceTypeId = service.service_type_id.toString();
+        const serviceTypeName = service.service_type_name;
+        
+        let serviceType = category.serviceTypes.find(st => st.id === serviceTypeId);
+        if (!serviceType) {
+          serviceType = { id: serviceTypeId, name: serviceTypeName, subServices: [] };
+          category.serviceTypes.push(serviceType);
+        }
+        
+        serviceType.subServices.push({
+          id: service.id.toString(),
+          name: service.name,
+          pricePerUnit: parseFloat(service.price_per_unit),
+          minOrder: service.min_order_quantity,
+          maxOrder: service.max_order_quantity,
+          description: service.description || '',
+          custom_price: service.user_specific_price ? parseFloat(service.user_specific_price) : null,
+          type: service.type,
+        });
+      }
+
+      const structuredCategories = Array.from(structuredCategoriesMap.values());
+      
+      // 카테고리 및 서비스 타입 정렬 (옵션)
+      structuredCategories.sort((a, b) => a.name.localeCompare(b.name));
+      structuredCategories.forEach(c => c.serviceTypes.sort((a, b) => a.name.localeCompare(b.name)));
+
+      setServiceCategories(structuredCategories);
+
     } catch (err) {
       if (err instanceof Error) {
         setErrorServices(err.message);
@@ -158,6 +161,7 @@ export default function OrderPage() {
     setTotalCost(0);
     setServiceLink('');
     setTermsAgreement(false);
+    setComments(['', '', '']);
   };
 
   const handleCategoryChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
@@ -169,6 +173,7 @@ export default function OrderPage() {
     setSelectedSubServiceId('');
     setSelectedServiceDetails(null);
     setOrderQuantity('');
+    setComments(['', '', '']);
   };
 
   const handleServiceTypeChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
@@ -178,17 +183,30 @@ export default function OrderPage() {
     setSelectedSubServiceId('');
     setSelectedServiceDetails(null);
     setOrderQuantity('');
+    setComments(['', '', '']);
   };
 
   const handleSubServiceChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const subServiceId = event.target.value;
     setSelectedSubServiceId(subServiceId);
-    setOrderQuantity('');
+    
     if (subServiceId) {
       const serviceDetail = availableSubServices.find(sub => sub.id === subServiceId);
       setSelectedServiceDetails(serviceDetail || null);
+      
+      // 댓글 서비스일 경우, 수량을 최소 주문 수량으로 초기화
+      if (serviceDetail && serviceDetail.type === 'Custom Comments') {
+        const minOrder = serviceDetail.minOrder;
+        setOrderQuantity(minOrder.toString());
+        setComments(Array(minOrder).fill(''));
+      } else {
+        setOrderQuantity('');
+        setComments([]);
+      }
     } else {
       setSelectedServiceDetails(null);
+      setOrderQuantity('');
+      setComments([]);
     }
   };
 
@@ -202,6 +220,34 @@ export default function OrderPage() {
 
   const handleTermsAgreementChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setTermsAgreement(event.target.checked);
+  };
+
+  const handleCommentChange = (index: number, value: string) => {
+    const newComments = [...comments];
+    newComments[index] = value;
+    setComments(newComments);
+  };
+
+  const handleQuantityChangeForComment = (change: number) => {
+    if (!selectedServiceDetails) return;
+  
+    const currentQuantity = parseInt(orderQuantity, 10) || 0;
+    const newQuantity = currentQuantity + change;
+  
+    if (newQuantity >= selectedServiceDetails.minOrder && newQuantity <= selectedServiceDetails.maxOrder) {
+      setOrderQuantity(newQuantity.toString());
+      const newComments = [...comments];
+      if (change > 0) {
+        // 수량 증가
+        newComments.push('');
+      } else {
+        // 수량 감소
+        newComments.pop();
+      }
+      setComments(newComments);
+    } else {
+      toast.error(`주문 수량은 ${selectedServiceDetails.minOrder}에서 ${selectedServiceDetails.maxOrder} 사이여야 합니다.`);
+    }
   };
 
   useEffect(() => {
@@ -229,6 +275,12 @@ export default function OrderPage() {
       return;
     }
     const quantityNum = parseInt(orderQuantity, 10);
+
+    if (selectedServiceDetails?.type === 'Custom Comments' && comments.slice(0, quantityNum).some(c => c.trim() === '')) {
+      toast.error('모든 댓글을 입력해주세요.');
+      return;
+    }
+    
     if (isNaN(quantityNum) || quantityNum < selectedServiceDetails.minOrder || quantityNum > selectedServiceDetails.maxOrder) {
       toast.error(`주문 수량은 ${selectedServiceDetails.minOrder}에서 ${selectedServiceDetails.maxOrder} 사이여야 합니다.`);
       return;
@@ -245,7 +297,7 @@ export default function OrderPage() {
     setIsSubmitting(true);
 
     try {
-      const payload = {
+      const formData: OrderPayload = {
         userId: user.id,
         serviceId: parseInt(selectedSubServiceId, 10),
         quantity: quantityNum,
@@ -253,10 +305,14 @@ export default function OrderPage() {
         requestDetails: serviceLink,
       };
 
+      if (selectedServiceDetails?.type === 'Custom Comments') {
+        formData.comments = comments.slice(0, quantityNum).join('\\n');
+      }
+
       const response = await fetch('/api/orders', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
+        body: JSON.stringify(formData),
       });
 
       const result = await response.json();
@@ -266,10 +322,11 @@ export default function OrderPage() {
       }
       
       toast.success('주문이 성공적으로 완료되었습니다!');
-      fetchAndUpdateUser();
+      
+      // Dispatch a global event to notify all components to update user info
+      document.dispatchEvent(new CustomEvent('forceUserUpdate'));
       
       resetForm();
-
     } catch (error) {
       toast.error(error instanceof Error ? error.message : '알 수 없는 오류가 발생했습니다.');
     } finally {
@@ -327,10 +384,52 @@ export default function OrderPage() {
             <input type="url" name="service-link" id="service-link" value={serviceLink} onChange={handleServiceLinkChange} className="mt-1 block w-full py-2 px-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:text-white" placeholder="https://" required />
           </div>
 
-          <div>
-            <label htmlFor="quantity" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">서비스 수량을 입력해주세요.</label>
-            <input type="number" name="quantity" id="quantity" value={orderQuantity} onChange={handleQuantityChange} className="mt-1 block w-full py-2 px-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:text-white" placeholder="수량 입력" min={selectedServiceDetails?.minOrder?.toString()} max={selectedServiceDetails?.maxOrder?.toString()} disabled={!selectedServiceDetails} required />
-          </div>
+          {selectedServiceDetails?.type === 'Custom Comments' ? (
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  댓글 목록 (총 {orderQuantity}개)
+                </label>
+                <div className="flex items-center gap-2 mb-2">
+                  <button 
+                    type="button" 
+                    onClick={() => handleQuantityChangeForComment(-1)}
+                    disabled={!selectedServiceDetails || parseInt(orderQuantity, 10) <= selectedServiceDetails.minOrder}
+                    className="px-3 py-1 bg-gray-200 dark:bg-gray-600 rounded-md disabled:opacity-50"
+                  >
+                    -
+                  </button>
+                  <span className="text-sm font-semibold">{orderQuantity}</span>
+                  <button 
+                    type="button" 
+                    onClick={() => handleQuantityChangeForComment(1)}
+                    disabled={!selectedServiceDetails || parseInt(orderQuantity, 10) >= selectedServiceDetails.maxOrder}
+                    className="px-3 py-1 bg-gray-200 dark:bg-gray-600 rounded-md disabled:opacity-50"
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                {comments.map((comment, index) => (
+                  <input
+                    key={index}
+                    type="text"
+                    value={comment}
+                    onChange={(e) => handleCommentChange(index, e.target.value)}
+                    className="mt-1 block w-full py-2 px-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:text-white"
+                    placeholder={`댓글 ${index + 1}`}
+                  />
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div>
+              <label htmlFor="quantity" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">서비스 수량을 입력해주세요.</label>
+              <input type="number" name="quantity" id="quantity" value={orderQuantity} onChange={handleQuantityChange} className="mt-1 block w-full py-2 px-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:text-white" placeholder="수량 입력" min={selectedServiceDetails?.minOrder?.toString()} max={selectedServiceDetails?.maxOrder?.toString()} disabled={!selectedServiceDetails} required />
+            </div>
+          )}
           
           <div className="text-lg font-semibold text-gray-800 dark:text-white">
             총 비용: <span className="text-indigo-600 dark:text-indigo-400">{totalCost.toLocaleString()} P</span>

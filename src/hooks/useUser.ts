@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import { toast } from 'react-hot-toast';
 
 interface User {
   id: number;
@@ -23,12 +24,14 @@ export const useUser = () => {
 
   const fetchAndUpdateUser = useCallback(async () => {
     const token = localStorage.getItem('jwtToken');
-    if (!token || !user?.id) return; // 토큰이나 사용자 ID가 없으면 중단
+    const storedUser = localStorage.getItem('loggedInUser');
+    if (!token || !storedUser) return;
+    
+    const userId = JSON.parse(storedUser).id;
+    if (!userId) return;
 
     try {
-      // '/api/user-profile' 과 같은 엔드포인트가 있다고 가정합니다.
-      // 이 엔드포인트는 토큰을 기반으로 최신 유저 정보를 반환해야 합니다.
-      const response = await fetch(`/api/users/${user.id}`, {
+      const response = await fetch(`/api/users/${userId}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
 
@@ -38,16 +41,56 @@ export const useUser = () => {
       
       const latestUser = await response.json();
       
-      // 기존 정보를 유지하면서 업데이트
-      const updatedUser = { ...user, ...latestUser };
-      localStorage.setItem('loggedInUser', JSON.stringify(updatedUser));
-      setUser(updatedUser);
+      localStorage.setItem('loggedInUser', JSON.stringify(latestUser));
+      setUser(latestUser);
 
     } catch (error) {
       console.error("Failed to fetch and update user:", error);
-      // 여기서 에러 처리를 할 수 있습니다 (예: toast 메시지)
     }
-  }, [user]); // user.id가 변경될 때만 함수가 재생성되도록 최적화
+  }, []); // Remove `user` from dependencies
+
+  // Add event listener to force update all components using this hook
+  useEffect(() => {
+    const handleForceUpdate = () => {
+      fetchAndUpdateUser();
+    };
+    
+    document.addEventListener('forceUserUpdate', handleForceUpdate);
+    
+    return () => {
+      document.removeEventListener('forceUserUpdate', handleForceUpdate);
+    };
+  }, [fetchAndUpdateUser]);
+
+  // Listen for real-time charge completion events from the server
+  useEffect(() => {
+    if (!user?.id) return; // Only listen when user is logged in.
+
+    const eventSource = new EventSource('/api/sms-events');
+
+    eventSource.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        // Check if the event is for the current user
+        if (data.type === 'charge_complete' && data.userId === user.id) {
+          toast.success(`${data.amount.toLocaleString()}P가 충전되었습니다!`);
+          fetchAndUpdateUser();
+        }
+      } catch (error) {
+        console.error("Error processing SSE message:", error);
+      }
+    };
+
+    eventSource.onerror = (error) => {
+      console.error("SSE connection error:", error);
+      eventSource.close();
+    };
+
+    // Cleanup listener on component unmount
+    return () => {
+      eventSource.close();
+    };
+  }, [user?.id, fetchAndUpdateUser]);
 
   useEffect(() => {
     try {

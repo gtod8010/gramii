@@ -20,6 +20,7 @@ export async function GET() {
           dr.receipt_info,
           dr.admin_memo,
           dr.account_number,
+          dr.is_tax_invoice_processed,
           EXISTS (
             SELECT 1
             FROM sms_logs sl

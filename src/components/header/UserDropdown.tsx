@@ -11,9 +11,40 @@ import ProfileModal from "../user-profile/ProfileModal";
 
 export default function UserDropdown() {
   const [isOpen, setIsOpen] = useState(false);
-  const { user, isLoading, logout } = useUser();
+  const { user, isLoading, logout, fetchAndUpdateUser } = useUser();
   const [copied, setCopied] = useState(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+
+  useEffect(() => {
+    // SMS 이벤트 수신 로직
+    if (user) { // 로그인한 사용자일 경우에만 SSE 연결
+      const eventSource = new EventSource('/api/sms-events');
+
+      eventSource.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          // 충전 완료 이벤트(예: 'charge_complete') 수신 시 사용자 정보 갱신
+          if (data.type === 'charge_complete') {
+            console.log('Charge complete event received, updating user data...');
+            toast.success(`${data.amount.toLocaleString()}P가 충전되었습니다.`);
+            fetchAndUpdateUser();
+          }
+        } catch (error) {
+          console.error("Error parsing SSE event data:", error);
+        }
+      };
+
+      eventSource.onerror = (err) => {
+        console.error('EventSource failed:', err);
+        eventSource.close();
+      };
+      
+      // 컴포넌트 언마운트 시 연결 종료
+      return () => {
+        eventSource.close();
+      };
+    }
+  }, [user, fetchAndUpdateUser]); // user, fetchAndUpdateUser 의존성 추가
 
   useEffect(() => {
     const handleClickOutside = () => {

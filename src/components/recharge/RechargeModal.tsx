@@ -20,12 +20,20 @@ export default function RechargeModal({ isOpen, onClose }: RechargeModalProps) {
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [amountError, setAmountError] = useState<string | null>(null);
 
-  // 입금 계좌 정보 (나중에 여러개가 될 수 있으므로 변수화)
-  const depositAccount = {
-    bank: 'KB 국민은행',
-    accountNumber: '444401-01-499150',
-    accountHolder: '김수민(그래미)',
+  const accountInfo = {
+    default: {
+      bank: '카카오뱅크',
+      accountNumber: '3333-09-7616546',
+      accountHolder: '김수민',
+    },
+    tax: {
+      bank: 'KB 국민은행',
+      accountNumber: '444401-01-499150',
+      accountHolder: '김수민(그래미)',
+    }
   };
+  
+  const depositAccount = receiptType === 'tax_invoice' ? accountInfo.tax : accountInfo.default;
 
   // 세금계산서 필드
   const [companyName, setCompanyName] = useState('');
@@ -33,6 +41,8 @@ export default function RechargeModal({ isOpen, onClose }: RechargeModalProps) {
   const [ceoName, setCeoName] = useState('');
   const [contactNumber, setContactNumber] = useState('');
   const [email, setEmail] = useState('');
+  const [businessType, setBusinessType] = useState('');
+  const [businessItem, setBusinessItem] = useState('');
 
   // 현금영수증 필드
   const [phoneNumber, setPhoneNumber] = useState('');
@@ -49,6 +59,8 @@ export default function RechargeModal({ isOpen, onClose }: RechargeModalProps) {
       setContactNumber('');
       setEmail('');
       setPhoneNumber('');
+      setBusinessType('');
+      setBusinessItem('');
       setIsSubmitting(false);
       setSubmitError(null);
       setAmountError(null);
@@ -91,7 +103,7 @@ export default function RechargeModal({ isOpen, onClose }: RechargeModalProps) {
     }
     
     if (receiptType === 'tax_invoice') {
-      if (!companyName || !businessNumber || !ceoName || !contactNumber || !email) {
+      if (!companyName || !businessNumber || !ceoName || !contactNumber || !email || !businessType || !businessItem) {
           toast.error('세금계산서 발급에 필요한 정보를 모두 입력해주세요.');
           return;
       }
@@ -133,6 +145,8 @@ export default function RechargeModal({ isOpen, onClose }: RechargeModalProps) {
             ceoName,
             contactNumber,
             email,
+            businessType,
+            businessItem,
         } : null
       };
 
@@ -219,7 +233,7 @@ export default function RechargeModal({ isOpen, onClose }: RechargeModalProps) {
                     className={`focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:focus:ring-indigo-600 ${(type === 'cash_receipt' || isSubmitting) ? 'opacity-50 cursor-not-allowed' : ''}`}
                   />
                   <label htmlFor={type} className={`ml-2 block text-sm text-gray-700 dark:text-gray-300 ${(type === 'cash_receipt' || isSubmitting) ? 'opacity-50' : ''}`}>
-                    {type === 'none' ? '선택안함' : type === 'tax_invoice' ? '세금계산서' : '현금영수증'}
+                    {type === 'none' ? '무통장입금' : type === 'tax_invoice' ? '세금계산서' : '현금영수증'}
                   </label>
                 </div>
               ))}
@@ -250,8 +264,16 @@ export default function RechargeModal({ isOpen, onClose }: RechargeModalProps) {
                 <input type="tel" id="contactNumber" value={contactNumber} onChange={(e) => setContactNumber(e.target.value)} className={inputClass} placeholder="'-' 없이 숫자만 입력" />
               </div>
               <div>
-                <label htmlFor="email" className={labelClass}>이메일 (세금계산서 수신)</label>
-                <input type="email" id="email" value={email} onChange={(e) => setEmail(e.target.value)} className={inputClass} placeholder="example@example.com" />
+                <label htmlFor="email" className={labelClass}>이메일</label>
+                <input type="email" id="email" value={email} onChange={(e) => setEmail(e.target.value)} className={inputClass} />
+              </div>
+              <div>
+                <label htmlFor="businessType" className={labelClass}>업태</label>
+                <input type="text" id="businessType" value={businessType} onChange={(e) => setBusinessType(e.target.value)} className={inputClass} />
+              </div>
+              <div>
+                <label htmlFor="businessItem" className={labelClass}>종목</label>
+                <input type="text" id="businessItem" value={businessItem} onChange={(e) => setBusinessItem(e.target.value)} className={inputClass} />
               </div>
             </div>
           )}

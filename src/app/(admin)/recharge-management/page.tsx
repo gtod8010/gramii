@@ -21,8 +21,11 @@ interface DepositRequest {
     companyName: string;
     contactNumber: string;
     businessNumber: string;
+    businessType?: string;
+    businessItem?: string;
   } | null;
   is_sms_received: boolean;
+  is_tax_invoice_processed: boolean;
 }
 
 const statusDisplayNames = {
@@ -88,37 +91,61 @@ const RechargeManagementPage = () => {
   const [requests, setRequests] = useState<DepositRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedReceipt, setSelectedReceipt] = useState<DepositRequest['receipt_info'] | null>(null);
+  const [selectedRequest, setSelectedRequest] = useState<DepositRequest | null>(null);
 
   const { user, isLoading: userLoading } = useUser();
   const router = useRouter();
 
+  const fetchDepositRequests = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch('/api/recharge-management');
+      if (!response.ok) {
+        throw new Error('Failed to fetch data');
+      }
+      const data = await response.json();
+      setRequests(data);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError('An unknown error occurred');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     if (!userLoading && user?.role === 'admin') {
-      const fetchDepositRequests = async () => {
-        try {
-          setLoading(true);
-          const response = await fetch('/api/recharge-management');
-          if (!response.ok) {
-            throw new Error('Failed to fetch data');
-          }
-          const data = await response.json();
-          setRequests(data);
-        } catch (err: unknown) {
-          if (err instanceof Error) {
-            setError(err.message);
-          } else {
-            setError('An unknown error occurred');
-          }
-        } finally {
-          setLoading(false);
-        }
-      };
       fetchDepositRequests();
     } else if (!userLoading && user?.role !== 'admin') {
       router.replace('/');
     }
   }, [user, userLoading, router]);
+
+  const handleProcessTaxInvoice = async (requestId: number) => {
+    try {
+      const token = localStorage.getItem('jwtToken');
+      const response = await fetch(`/api/recharge-management/${requestId}/process-tax-invoice`, {
+        method: 'PATCH',
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || '처리 실패');
+      }
+      
+      // 상태를 다시 불러오거나 로컬 상태를 업데이트
+      await fetchDepositRequests();
+      setSelectedRequest(null); // 모달 닫기
+
+    } catch (error) {
+      console.error('Failed to process tax invoice:', error);
+      alert(`오류: ${error instanceof Error ? error.message : '알 수 없는 오류'}`);
+    }
+  };
 
   return (
     <div className="mx-auto max-w-full">
@@ -159,12 +186,19 @@ const RechargeManagementPage = () => {
                         <td className="px-3 py-4 text-sm text-gray-500 dark:text-gray-400">{req.account_number || 'N/A'}</td>
                         <td className="px-3 py-4 text-sm text-gray-500 dark:text-gray-400">
                           {req.receipt_type === 'tax_invoice' ? (
-                            <button
-                              onClick={() => setSelectedReceipt(req.receipt_info)}
-                              className="text-blue-600 hover:underline"
-                            >
-                              세금계산서
-                            </button>
+                            <div className="flex items-center space-x-2">
+                              <button
+                                onClick={() => setSelectedRequest(req)}
+                                className="text-blue-600 hover:underline"
+                              >
+                                세금계산서
+                              </button>
+                              {req.is_tax_invoice_processed && (
+                                <span className="px-2 py-1 text-xs font-semibold text-green-800 bg-green-100 rounded-full">
+                                  완료
+                                </span>
+                              )}
+                            </div>
                           ) : (
                             receiptTypeDisplayNames[req.receipt_type] || req.receipt_type
                           )}
@@ -192,20 +226,30 @@ const RechargeManagementPage = () => {
         </div>
       </div>
 
-      {selectedReceipt && (
+      {selectedRequest && selectedRequest.receipt_info && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 w-full max-w-md">
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white">세금계산서 정보</h3>
             <div className="mt-4 space-y-2 text-sm text-gray-600 dark:text-gray-300">
-              <p><strong>상호명:</strong> {selectedReceipt.companyName}</p>
-              <p><strong>대표자명:</strong> {selectedReceipt.ceoName}</p>
-              <p><strong>사업자등록번호:</strong> {selectedReceipt.businessNumber}</p>
-              <p><strong>이메일:</strong> {selectedReceipt.email}</p>
-              <p><strong>연락처:</strong> {selectedReceipt.contactNumber}</p>
+              <p><strong>상호명:</strong> {selectedRequest.receipt_info.companyName}</p>
+              <p><strong>대표자명:</strong> {selectedRequest.receipt_info.ceoName}</p>
+              <p><strong>사업자등록번호:</strong> {selectedRequest.receipt_info.businessNumber}</p>
+              <p><strong>이메일:</strong> {selectedRequest.receipt_info.email}</p>
+              <p><strong>연락처:</strong> {selectedRequest.receipt_info.contactNumber}</p>
+              <p><strong>업태:</strong> {selectedRequest.receipt_info.businessType || '-'}</p>
+              <p><strong>종목:</strong> {selectedRequest.receipt_info.businessItem || '-'}</p>
             </div>
-            <div className="mt-6 text-right">
+            <div className="mt-6 flex justify-end space-x-3">
+              {!selectedRequest.is_tax_invoice_processed && (
+                 <button
+                  onClick={() => handleProcessTaxInvoice(selectedRequest.id)}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                >
+                  처리완료
+                </button>
+              )}
               <button
-                onClick={() => setSelectedReceipt(null)}
+                onClick={() => setSelectedRequest(null)}
                 className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300"
               >
                 닫기

@@ -9,7 +9,7 @@ import {
   MinusCircleIcon, // 부분완료됨 (또는 PuzzlePieceIcon)
   ArrowPathIcon, // 진행중 (새 아이콘)
 } from '@heroicons/react/24/outline';
-import { statusDisplayNames, realsiteToGramiiStatusMap } from '@/lib/constants';
+import { statusDisplayNames } from '@/lib/constants';
 
 interface DetailedOrderStatusSummaryProps {
   orderStatusSummary: Record<string, number>;
@@ -34,24 +34,23 @@ const colorMap: { [key: string]: string } = {
 };
 
 const DetailedOrderStatusSummary: React.FC<DetailedOrderStatusSummaryProps> = ({ orderStatusSummary }) => {
-  // 원하는 순서대로 상태 키를 정의합니다. (API에서 오는 키 기준)
-  const statusKeysInOrder = [
-    'Pending',
-    'Processing',
-    'In progress',
-    'Completed',
-    'Partial',
-    'Cancelled', // API는 Cancelled 또는 Canceled를 사용할 수 있음
+  // DB에서 사용하는 snake_case 상태 키를 기준으로 순서 정의
+  const statusKeysInOrder: (keyof typeof statusDisplayNames)[] = [
+    'pending',
+    'processing',
+    'in_progress',
+    'completed',
+    'partial',
+    'canceled',
   ];
 
   return (
     <div className="mt-6 bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
       <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">주문 상태별 요약</h3>
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-        {statusKeysInOrder.map(apiKey => {
-          const count = orderStatusSummary[apiKey] || 0;
-          // API 키(PascalCase)를 DB/상수 키(snake_case)로 변환
-          const dbKey = realsiteToGramiiStatusMap[apiKey] || 'pending';
+        {statusKeysInOrder.map(dbKey => {
+          // orderStatusSummary 객체에서 직접 snake_case 키로 값을 조회
+          const count = orderStatusSummary[dbKey] || 0;
           
           const IconComponent = iconMap[dbKey] || CogIcon;
           const textColor = colorMap[dbKey] || 'text-gray-500';
@@ -59,7 +58,7 @@ const DetailedOrderStatusSummary: React.FC<DetailedOrderStatusSummaryProps> = ({
 
           return (
             <div 
-              key={apiKey} 
+              key={dbKey} 
               className="flex flex-col items-center justify-center p-4 bg-gray-50 dark:bg-gray-700 rounded-lg shadow-sm"
             >
               <IconComponent className={`h-8 w-8 mb-2 ${textColor}`} />

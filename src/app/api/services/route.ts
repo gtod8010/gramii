@@ -21,13 +21,15 @@ export async function GET(request: NextRequest) {
       'st.category_id',
       'sc.name as category_name',
       's.special_id',
-      'sp.name as special_name'
+      'sp.name as special_name',
+      'rs.type as type'
     ];
     let joinClause = `
       FROM services s
       JOIN service_types st ON s.service_type_id = st.id
       JOIN service_categories sc ON st.category_id = sc.id
       LEFT JOIN specials sp ON s.special_id = sp.id
+      LEFT JOIN realsite_services rs ON s.external_id::integer = rs.realsite_service_id
     `;
     
     const queryParams: (string | number)[] = [];
@@ -83,7 +85,8 @@ export async function GET(request: NextRequest) {
       // 다만, DB에서 명시적으로 NULL이 아닌 undefined를 반환하는 경우가 있다면 아래 로직 유효
       custom_price: row.custom_price === undefined ? null : row.custom_price,
       special_name: row.special_name === undefined ? null : row.special_name,
-      special_id: row.special_id === undefined ? null : row.special_id
+      special_id: row.special_id === undefined ? null : row.special_id,
+      type: row.type === undefined ? null : row.type
     }));
 
     return NextResponse.json(servicesWithCustomPrice);
