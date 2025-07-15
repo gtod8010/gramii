@@ -1,9 +1,17 @@
 import { Pool } from 'pg';
 
 console.log("POSTGRES_URL from env:", process.env.POSTGRES_URL);
+console.log("SITE_VARIANT from env:", process.env.NEXT_PUBLIC_SITE_VARIANT);
+
+const connectionString =
+  process.env.NEXT_PUBLIC_SITE_VARIANT === 'orda'
+    ? process.env.POSTGRES_URL_ORDA
+    : process.env.POSTGRES_URL_GRAMII;
+
+console.log(`Connecting to DB: ${connectionString ? connectionString.split('@')[1] : 'undefined'}`);
 
 export const pool = new Pool({
-  connectionString: process.env.POSTGRES_URL,
+  connectionString: connectionString,
 });
 
 // 데이터베이스 쿼리를 실행하는 함수

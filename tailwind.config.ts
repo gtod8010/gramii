@@ -27,14 +27,20 @@ const config: Config = {
         'float': {
           '0%, 100%': { transform: 'translateY(0px)' },
           '50%': { transform: 'translateY(-15px)' },
-        }
+        },
       },
       animation: {
         'fade-in-up': 'fade-in-up 0.5s ease-out forwards',
         'float-slow': 'float 4s ease-in-out infinite',
       },
+      colors: {
+        "orda-purple": "#A46DFF",
+        "orda-pink": "#FF6DCE",
+        "orda-dark": "#1A1033",
+        "orda-light": "#EBEBFF",
+      },
     },
   },
   plugins: [],
 };
-export default config; 
+export default config;
