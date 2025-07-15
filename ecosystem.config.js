@@ -12,8 +12,6 @@ module.exports = {
       env: {
         NODE_ENV: 'production',
         NEXT_PUBLIC_SITE_VARIANT: 'gramii',
-        POSTGRES_URL_GRAMII: 'YOUR_GRAMII_DATABASE_URL_HERE',
-        POSTGRES_URL_ORDA: 'YOUR_ORDA_DATABASE_URL_HERE',
       },
     },
     {
@@ -28,8 +26,6 @@ module.exports = {
       env: {
         NODE_ENV: 'production',
         NEXT_PUBLIC_SITE_VARIANT: 'orda',
-        POSTGRES_URL_GRAMII: 'YOUR_GRAMII_DATABASE_URL_HERE',
-        POSTGRES_URL_ORDA: 'YOUR_ORDA_DATABASE_URL_HERE',
       },
     },
   ],
