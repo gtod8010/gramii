@@ -6,7 +6,8 @@
     "dev": "next dev",
     "dev:gramii": "cross-env NEXT_PUBLIC_SITE_VARIANT=gramii next dev -p 3000",
     "dev:orda": "cross-env NEXT_PUBLIC_SITE_VARIANT=orda next dev -p 3001",
-    "build": "next build",
+    "build:gramii": "cross-env NEXT_PUBLIC_SITE_VARIANT=gramii next build",
+    "build:orda": "cross-env NEXT_PUBLIC_SITE_VARIANT=orda next build",
     "start": "next start",
     "lint": "next lint"
   },
