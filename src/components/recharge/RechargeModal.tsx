@@ -70,11 +70,19 @@ export default function RechargeModal({ isOpen, onClose }: RechargeModalProps) {
   if (!isOpen) return null;
 
   const validateAmount = (value: string): boolean => {
-    // if (isNaN(parseInt(value, 10)) || parseInt(value, 10) < 1 || parseInt(value, 10) % 1000 !== 0) {
-    //   setAmountError('최소 충전 금액은 1원이며, 1,000원 단위로 입력해야 합니다.');
-    //   return false;
-    // }
-    console.log(value);
+    const numValue = parseInt(value, 10);
+    if (isNaN(numValue)) {
+        setAmountError('숫자만 입력해주세요.');
+        return false;
+    }
+    if (numValue < 10000) {
+      setAmountError('최소 충전 금액은 10,000원입니다.');
+      return false;
+    }
+    if (numValue % 1000 !== 0) {
+      setAmountError('충전 금액은 1,000원 단위로 입력해야 합니다.');
+      return false;
+    }
     setAmountError(null);
     return true;
   }
@@ -205,9 +213,9 @@ export default function RechargeModal({ isOpen, onClose }: RechargeModalProps) {
         <div className="space-y-4 max-h-[60vh] sm:max-h-[70vh] overflow-y-auto pr-2">
           <div>
             <label htmlFor="amount" className={labelClass}>충전 금액을 입력해주세요.</label>
-            <input type="number" id="amount" value={amount} onChange={handleAmountChange} className={inputClass} placeholder="10000" disabled={isSubmitting} />
+            <input type="number" id="amount" value={amount} onChange={handleAmountChange} className={inputClass} placeholder="10000" step="1000" min="10000" disabled={isSubmitting} />
             {amountError && <p className="mt-1 text-xs text-red-500">{amountError}</p>}
-            {receiptType === 'tax_invoice' && amount && parseInt(amount, 10) > 0 && (
+            {receiptType === 'tax_invoice' && amount && parseInt(amount, 10) > 0 && !amountError && (
                 <p className="mt-2 text-sm text-gray-800 dark:text-gray-200">
                     VAT 10% 포함하여 <strong className="text-blue-600 dark:text-blue-400">{Math.floor(parseInt(amount, 10) * 1.1).toLocaleString()}</strong> 원을 입금해주세요.
                 </p>
