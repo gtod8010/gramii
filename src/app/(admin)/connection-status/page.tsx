@@ -60,7 +60,9 @@ const ConnectionStatusPage = () => {
       const fetchLogs = async () => {
         try {
           setLoading(true);
-          const response = await fetch('/api/sms-logs');
+          const token = localStorage.getItem('jwtToken');
+          const headers = { 'Authorization': `Bearer ${token}` };
+          const response = await fetch('/api/sms-logs', { headers });
           if (!response.ok) {
             throw new Error('데이터를 불러오는데 실패했습니다.');
           }

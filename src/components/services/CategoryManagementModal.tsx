@@ -34,8 +34,12 @@ const CategoryManagementModal: React.FC<CategoryManagementModalProps> = ({
   const fetchCategories = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch('/api/categories');
-      if (!response.ok) throw new Error('카테고리 목록을 불러오는데 실패했습니다.');
+      const token = localStorage.getItem('jwtToken');
+      const headers = { 'Authorization': `Bearer ${token}` };
+      const response = await fetch('/api/categories', { headers });
+      if (!response.ok) {
+        throw new Error('카테고리 정보를 가져오는데 실패했습니다.');
+      }
       const data = await response.json();
       setCategories(data);
     } catch (error) {

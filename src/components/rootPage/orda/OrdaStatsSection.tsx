@@ -17,8 +17,12 @@ const OrdaStatsSection = () => {
   useEffect(() => {
     const fetchMetrics = async () => {
       try {
-        setIsLoading(true);
-        const response = await fetch('/api/main-metrics');
+        const token = localStorage.getItem('jwtToken');
+        const headers: HeadersInit = {};
+        if (token) {
+          headers['Authorization'] = `Bearer ${token}`;
+        }
+        const response = await fetch('/api/main-metrics', { headers });
         if (!response.ok) {
           throw new Error('Failed to fetch metrics');
         }

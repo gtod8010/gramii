@@ -123,12 +123,13 @@ const GramiiHomePage = () => {
   useEffect(() => {
     const fetchMetrics = async () => {
       try {
-        setIsLoadingMetrics(true);
-        const response = await fetch('/api/main-metrics');
-        if (!response.ok) {
-          throw new Error('Failed to fetch metrics');
+        const token = localStorage.getItem('jwtToken');
+        const headers: HeadersInit = {};
+        if (token) {
+          headers['Authorization'] = `Bearer ${token}`;
         }
-        const data: MainPageMetrics = await response.json();
+        const response = await fetch('/api/main-metrics', { headers });
+        const data = await response.json();
         setMetrics(data);
       } catch (error) {
         console.error("Error fetching main page metrics:", error);

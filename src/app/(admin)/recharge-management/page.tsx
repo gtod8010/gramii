@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useUser } from '@/hooks/useUser';
 import { useRouter } from 'next/navigation';
 
@@ -99,7 +99,9 @@ const RechargeManagementPage = () => {
   const fetchDepositRequests = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/recharge-management');
+      const token = localStorage.getItem('jwtToken');
+      const headers = { 'Authorization': `Bearer ${token}` };
+      const response = await fetch('/api/recharge-management', { headers });
       if (!response.ok) {
         throw new Error('Failed to fetch data');
       }

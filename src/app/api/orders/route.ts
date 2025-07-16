@@ -245,19 +245,22 @@ export async function GET(request: Request) {
     }
 
     if (searchTerm) {
-      query += ` AND (s.name ILIKE $${paramCount} OR o.link ILIKE $${paramCount} OR o.id::text ILIKE $${paramCount})`;
-      queryParams.push(`%${searchTerm}%`);
+      const searchTermWithWildcard = `%${searchTerm}%`;
+      query += ` AND (s.name ILIKE $${paramCount++} OR o.link ILIKE $${paramCount++} OR o.id::text ILIKE $${paramCount++})`;
+      queryParams.push(searchTermWithWildcard, searchTermWithWildcard, searchTermWithWildcard);
     }
 
     // 먼저 전체 카운트를 가져옵니다 (페이지네이션을 위해).
-    const totalResult = await client.query(`SELECT COUNT(*) FROM (${query}) AS count_query`, queryParams.slice(0, paramCount - (searchTerm ? 1: 0) )); // searchTerm의 % 와일드카드 제외하고 카운트
+    // 메인 쿼리에서 ORDER BY, LIMIT, OFFSET을 제외하고 COUNT
+    const countQuery = `SELECT COUNT(*) FROM (${query}) AS count_query`;
+    const totalResult = await client.query(countQuery, queryParams);
     const totalOrders = parseInt(totalResult.rows[0].count, 10);
     const totalPages = Math.ceil(totalOrders / limit);
 
     query += ` ORDER BY o.created_at DESC LIMIT $${paramCount++} OFFSET $${paramCount++}`;
     queryParams.push(limit, offset);
-    
-    const result: QueryResult = await client.query(query, queryParams);
+
+    const result = await client.query(query, queryParams);
 
     // 프론트엔드 Order 인터페이스와 키 이름을 맞추기 위해 가공
     const orders = result.rows.map(row => ({
@@ -270,17 +273,13 @@ export async function GET(request: Request) {
 
     return NextResponse.json({
       orders,
-      totalPages,
       currentPage: page,
-      totalOrders,
+      totalPages: totalPages,
+      totalOrders: totalOrders
     });
   } catch (error) {
-    console.error('Error fetching orders:', error);
-    let errorMessage = 'Failed to fetch orders';
-    if (error instanceof Error) {
-      errorMessage = error.message;
-    }
-    return NextResponse.json({ error: errorMessage }, { status: 500 });
+    console.error(`Error fetching orders:`, error);
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   } finally {
     client.release();
   }

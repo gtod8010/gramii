@@ -147,7 +147,9 @@ const ManageServicesPage = () => {
     try {
       // API 호출 시 all=true 파라미터를 사용하여 모든 서비스 정보를 가져옵니다.
       // 이 때, special_id와 special_name도 함께 가져오도록 API가 수정되었다고 가정합니다.
-      const response = await fetch('/api/services?all=true'); 
+      const token = localStorage.getItem('jwtToken');
+      const headers = { 'Authorization': `Bearer ${token}` };
+      const response = await fetch('/api/services?all=true', { headers }); 
       if (!response.ok) {
         throw new Error('서비스 목록을 불러오는데 실패했습니다.');
       }
@@ -190,7 +192,9 @@ const ManageServicesPage = () => {
 
   const fetchCategories = useCallback(async () => { // fetchCategories 복원
     try {
-      const response = await fetch('/api/categories');
+      const token = localStorage.getItem('jwtToken');
+      const headers = { 'Authorization': `Bearer ${token}` };
+      const response = await fetch('/api/categories', { headers });
       if (!response.ok) {
         throw new Error('카테고리 정보를 가져오는데 실패했습니다.');
       }
@@ -204,7 +208,9 @@ const ManageServicesPage = () => {
 
   const fetchSpecials = useCallback(async () => {
     try {
-      const response = await fetch('/api/specials');
+      const token = localStorage.getItem('jwtToken');
+      const headers = { 'Authorization': `Bearer ${token}` };
+      const response = await fetch('/api/specials', { headers });
       if (!response.ok) {
         throw new Error('스페셜 정보를 가져오는데 실패했습니다.');
       }
@@ -275,6 +281,8 @@ const ManageServicesPage = () => {
     const toastId = toast.loading(`${service.name} 서비스의 상태를 ${newStatus ? '활성' : '비활성'}으로 변경 중...`);
 
     try {
+      const token = localStorage.getItem('jwtToken');
+      const headers = { 'Authorization': `Bearer ${token}` };
       const response = await fetch(`/api/services/${service.id}`, {
         method: 'PUT',
         headers: {
@@ -311,6 +319,8 @@ const ManageServicesPage = () => {
     }
     setIsSyncing(true);
     try {
+      const token = localStorage.getItem('jwtToken');
+      const headers = { 'Authorization': `Bearer ${token}` };
       const response = await fetch('/api/realsite/sync-services', {
         method: 'POST',
       });
@@ -340,6 +350,8 @@ const ManageServicesPage = () => {
     if (window.confirm(`'${serviceName}' 서비스를 정말로 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.`)) {
       setIsLoading(true); // 로딩 상태 시작
       try {
+        const token = localStorage.getItem('jwtToken');
+        const headers = { 'Authorization': `Bearer ${token}` };
         const response = await fetch(`/api/services/${serviceId}`, {
           method: 'DELETE',
         });
@@ -368,6 +380,8 @@ const ManageServicesPage = () => {
     if (window.confirm(`'${categoryName}' 카테고리를 정말로 삭제하시겠습니까? 이 카테고리에 속한 모든 서비스 타입과 서비스도 함께 삭제될 수 있으며, 이 작업은 되돌릴 수 없습니다.`)) {
       setIsLoading(true);
       try {
+        const token = localStorage.getItem('jwtToken');
+        const headers = { 'Authorization': `Bearer ${token}` };
         const response = await fetch(`/api/categories/${categoryId}`, {
           method: 'DELETE',
         });

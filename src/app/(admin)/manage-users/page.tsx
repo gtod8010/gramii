@@ -6,6 +6,7 @@ import { useUser } from '@/hooks/useUser';
 import PageBreadCrumb from '@/components/common/PageBreadCrumb';
 import Button from '@/components/ui/button/Button';
 import { statusDisplayNames } from '@/lib/constants';
+import { toast } from 'react-hot-toast';
 
 interface ManagedUser {
   id: number;
@@ -134,7 +135,11 @@ const ManageUsersPage = () => {
     setIsLoadingUsers(true);
     setErrorUsers(null);
     try {
-      const response = await fetch('/api/users');
+      const token = localStorage.getItem('jwtToken');
+      const headers = {
+        'Authorization': `Bearer ${token}`,
+      };
+      const response = await fetch('/api/users', { headers });
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.message || '회원 목록을 불러오는데 실패했습니다.');
@@ -330,7 +335,11 @@ const ManageUsersPage = () => {
   const fetchAllServicesForModal = async () => {
     setIsLoadingAllServices(true);
     try {
-      const response = await fetch('/api/services?limit=1000&include_type_name=true'); // include_type_name 파라미터 추가 (API에서 지원해야 함)
+      const token = localStorage.getItem('jwtToken');
+      const headers = {
+        'Authorization': `Bearer ${token}`,
+      };
+      const response = await fetch('/api/services?limit=1000&include_type_name=true', { headers });
       if (!response.ok) throw new Error('전체 서비스 목록을 불러오는데 실패했습니다.');
       const data = await response.json();
       // API 응답이 { services: [] } 형태인지, 아니면 바로 [] 형태인지 확인 필요
@@ -356,7 +365,11 @@ const ManageUsersPage = () => {
     setIsLoadingUserServicePrices(true);
     setErrorUserServicePrices(null);
     try {
-      const response = await fetch(`/api/users/${userId}/service-prices`);
+      const token = localStorage.getItem('jwtToken');
+      const headers = {
+        'Authorization': `Bearer ${token}`,
+      };
+      const response = await fetch(`/api/users/${userId}/service-prices`, { headers });
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.message || '사용자 특별 단가 목록을 불러오는데 실패했습니다.');
@@ -418,6 +431,10 @@ const ManageUsersPage = () => {
     }
 
     try {
+      const token = localStorage.getItem('jwtToken');
+      const headers = {
+        'Authorization': `Bearer ${token}`,
+      };
       const response = await fetch(`/api/users/${selectedUserForPriceModal.id}/service-prices`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -446,8 +463,13 @@ const ManageUsersPage = () => {
     if (!selectedUserForPriceModal || !confirm('정말로 이 특별 단가 설정을 삭제하시겠습니까?')) return;
 
     try {
+      const token = localStorage.getItem('jwtToken');
+      const headers = {
+        'Authorization': `Bearer ${token}`,
+      };
       const response = await fetch(`/api/users/${selectedUserForPriceModal.id}/service-prices/${serviceId}`, {
         method: 'DELETE',
+        headers: headers,
       });
       if (!response.ok) {
         const errorData = await response.json();

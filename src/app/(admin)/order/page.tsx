@@ -34,10 +34,10 @@ interface ApiService {
   name: string;
   type: string; // 'Custom Comments' 등을 식별하기 위한 타입
   price_per_unit: string; // API에서 문자열로 오므로 파싱 필요
+  custom_price: string | null; // user_specific_price -> custom_price로 수정 및 타입 일치
   min_order_quantity: number;
   max_order_quantity: number;
   description: string | null;
-  user_specific_price: string | null; // API에서 문자열로 오므로 파싱 필요
   is_active: boolean;
   category_id: number;
   service_type_id: number;
@@ -120,7 +120,7 @@ export default function OrderPage() {
           minOrder: service.min_order_quantity,
           maxOrder: service.max_order_quantity,
           description: service.description || '',
-          custom_price: service.user_specific_price ? parseFloat(service.user_specific_price) : null,
+          custom_price: service.custom_price ? parseFloat(service.custom_price) : null,
           type: service.type,
         });
       }
@@ -367,9 +367,11 @@ export default function OrderPage() {
             <select id="subService" name="subService" value={selectedSubServiceId} onChange={handleSubServiceChange} disabled={!selectedServiceTypeId || availableSubServices.length === 0} className="mt-1 block w-full py-2 px-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:text-white disabled:bg-gray-50 dark:disabled:bg-gray-700">
               <option value="">세부 서비스 선택</option>
               {availableSubServices.map(sub => {
-                const displayPrice = sub.custom_price !== null && sub.custom_price !== undefined && sub.custom_price < sub.pricePerUnit
-                  ? `${sub.custom_price.toLocaleString()}P (할인)`
+                const isDiscounted = sub.custom_price !== null && sub.custom_price !== undefined && sub.custom_price < sub.pricePerUnit;
+                const displayPrice = isDiscounted
+                  ? `${sub.custom_price!.toLocaleString()}P (할인)`
                   : `${sub.pricePerUnit.toLocaleString()}P`;
+                
                 return (
                   <option key={sub.id} value={sub.id}>
                     {sub.name} (1개당: {displayPrice}, 주문범위: {sub.minOrder}~{sub.maxOrder})

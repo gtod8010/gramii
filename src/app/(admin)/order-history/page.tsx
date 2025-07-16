@@ -70,7 +70,13 @@ const OrderHistoryPage = () => {
       if (apiFilterStatus) params.append('status', apiFilterStatus);
       if (searchTerm) params.append('searchTerm', searchTerm);
 
-      const response = await fetch(`/api/orders?${params.toString()}`);
+      const token = localStorage.getItem('jwtToken');
+      const headers: HeadersInit = { 'Content-Type': 'application/json' };
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
+      const response = await fetch(`/api/orders?${params.toString()}`, { headers });
       if (!response.ok) {
         const errData = await response.json();
         throw new Error(errData.message || '주문 내역을 가져오는데 실패했습니다.');

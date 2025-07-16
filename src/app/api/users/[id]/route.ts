@@ -13,7 +13,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 
     const decoded = verifyToken(token);
     if (!decoded) {
-      return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
+      return NextResponse.json({ error: 'Invalid or expired token' }, { status: 401 });
     }
 
     const requesterId = decoded.id;

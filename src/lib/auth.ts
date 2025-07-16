@@ -57,11 +57,8 @@ export async function getUserRoleFromRequest(request: NextRequest): Promise<stri
   }
 }
 
-export const verifyToken = (token: string): DecodedPayload => {
-  const secret = process.env.JWT_SECRET;
-  if (!secret) {
-    throw new Error('JWT_SECRET is not defined in environment variables');
-  }
+export const verifyToken = (token: string): DecodedPayload | null => {
+  const secret = process.env.JWT_SECRET || 'your-fallback-secret-key';
   
   try {
     const decoded = jwt.verify(token, secret) as DecodedPayload;
@@ -72,6 +69,6 @@ export const verifyToken = (token: string): DecodedPayload => {
     return decoded;
   } catch (err) {
     console.error("Token verification failed:", err);
-    throw err; // Re-throw the error to be caught by the calling function
+    return null; // 에러 발생 시 예외를 던지는 대신 null을 반환
   }
 };
