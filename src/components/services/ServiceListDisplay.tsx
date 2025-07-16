@@ -102,12 +102,14 @@ const ServiceTable: React.FC<{ services: DisplayServiceItem[]; onViewDetails: (s
                 <span className="font-semibold text-xs uppercase text-slate-500 lg:hidden">가격(P)</span>
                 <div className='text-right lg:text-left'>
                 {isDiscounted ? (
-                  <>
-                    <span className="text-red-500 font-semibold">{service.custom_price?.toLocaleString()} P</span>
-                    <span className="ml-2 text-xs text-gray-500 dark:text-gray-400 block sm:inline">
-                      (기본: {service.pricePerUnit.toLocaleString()} P)
-                    </span>
-                  </>
+                  <div>
+                    <del className="text-xs text-gray-400 dark:text-gray-500">
+                      {service.pricePerUnit.toLocaleString()} P
+                    </del>
+                    <p className="font-semibold text-blue-600 dark:text-blue-400">
+                      {service.custom_price?.toLocaleString()} P
+                    </p>
+                  </div>
                 ) : (
                   <span>{effectivePrice.toLocaleString()} P</span>
                 )}
@@ -180,13 +182,22 @@ const ServiceListDisplay = () => {
   const fetchAndGroupServices = useCallback(async () => {
     setIsLoading(true);
     setError(null);
+
+    const token = localStorage.getItem('jwtToken');
+    const headers: HeadersInit = {
+      'Content-Type': 'application/json',
+    };
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
     try {
       // 서비스 타입 API 호출 추가
       const [servicesResponse, specialsResponse, categoriesResponse, serviceTypesResponse] = await Promise.all([
-        fetch('/api/services'),
-        fetch('/api/specials'),
-        fetch('/api/categories'),
-        fetch('/api/service-types') // 서비스 타입 fetch 추가
+        fetch('/api/services', { headers }),
+        fetch('/api/specials', { headers }),
+        fetch('/api/categories', { headers }),
+        fetch('/api/service-types', { headers }) // 서비스 타입 fetch 추가
       ]);
 
       if (!servicesResponse.ok) {
