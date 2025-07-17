@@ -6,7 +6,6 @@ import { useUser } from '@/hooks/useUser';
 import PageBreadCrumb from '@/components/common/PageBreadCrumb';
 import Button from '@/components/ui/button/Button';
 import { statusDisplayNames } from '@/lib/constants';
-import { toast } from 'react-hot-toast';
 
 interface ManagedUser {
   id: number;
@@ -437,7 +436,7 @@ const ManageUsersPage = () => {
       };
       const response = await fetch(`/api/users/${selectedUserForPriceModal.id}/service-prices`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: headers,
         body: JSON.stringify({ 
           service_id: serviceId, 
           custom_price: customPrice 
@@ -485,6 +484,27 @@ const ManageUsersPage = () => {
       }
     }
   };
+
+  // const handleDeleteUser = async (userId: number) => {
+  //   if (window.confirm('정말로 이 사용자를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) {
+  //     const token = localStorage.getItem('jwtToken');
+  //     const headers = { 'Authorization': `Bearer ${token}` };
+  //     try {
+  //       const response = await fetch(`/api/users/${userId}`, { 
+  //         method: 'DELETE',
+  //         headers: headers,
+  //       });
+  //       if (!response.ok) {
+  //         throw new Error('사용자 삭제에 실패했습니다.');
+  //       }
+  //       setUsers(users.filter((user) => user.id !== userId));
+  //       toast.success('사용자가 성공적으로 삭제되었습니다.');
+  //     } catch (error) {
+  //       console.error(error);
+  //       toast.error('사용자 삭제 중 오류가 발생했습니다.');
+  //     }
+  //   }
+  // };
 
   if (userLoading || !user || user?.role !== 'admin') {
     return <div className="flex items-center justify-center h-screen"><p>Loading or unauthorized...</p></div>;

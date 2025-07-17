@@ -125,9 +125,11 @@ const ManageServicesPage = () => {
     setGroupedServices(newGroupedServices);
 
     try {
+      const token = localStorage.getItem('jwtToken');
+      const headers = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
       const response = await fetch('/api/services/swap-order', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: headers,
         body: JSON.stringify({ service1, service2 }),
       });
       if (!response.ok) {
@@ -283,12 +285,10 @@ const ManageServicesPage = () => {
 
     try {
       const token = localStorage.getItem('jwtToken');
-      const headers = { 'Authorization': `Bearer ${token}` };
+      const headers = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
       const response = await fetch(`/api/services/${service.id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        method: 'PATCH',
+        headers: headers,
         body: JSON.stringify({ is_active: newStatus }),
       });
 
@@ -319,11 +319,12 @@ const ManageServicesPage = () => {
       return;
     }
     setIsSyncing(true);
+    const token = localStorage.getItem('jwtToken');
+    const headers = { 'Authorization': `Bearer ${token}` };
     try {
-      const token = localStorage.getItem('jwtToken');
-      const headers = { 'Authorization': `Bearer ${token}` };
       const response = await fetch('/api/realsite/sync-services', {
         method: 'POST',
+        headers: headers,
       });
       const data = await response.json();
 
@@ -350,11 +351,12 @@ const ManageServicesPage = () => {
   const handleDeleteService = async (serviceId: number, serviceName: string) => {
     if (window.confirm(`'${serviceName}' 서비스를 정말로 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.`)) {
       setIsLoading(true); // 로딩 상태 시작
+      const token = localStorage.getItem('jwtToken');
+      const headers = { 'Authorization': `Bearer ${token}` };
       try {
-        const token = localStorage.getItem('jwtToken');
-        const headers = { 'Authorization': `Bearer ${token}` };
         const response = await fetch(`/api/services/${serviceId}`, {
           method: 'DELETE',
+          headers: headers,
         });
         if (!response.ok) {
           const errorData = await response.json();
@@ -380,11 +382,12 @@ const ManageServicesPage = () => {
   const handleDeleteCategory = async (categoryId: number, categoryName: string) => {
     if (window.confirm(`'${categoryName}' 카테고리를 정말로 삭제하시겠습니까? 이 카테고리에 속한 모든 서비스 타입과 서비스도 함께 삭제될 수 있으며, 이 작업은 되돌릴 수 없습니다.`)) {
       setIsLoading(true);
+      const token = localStorage.getItem('jwtToken');
+      const headers = { 'Authorization': `Bearer ${token}` };
       try {
-        const token = localStorage.getItem('jwtToken');
-        const headers = { 'Authorization': `Bearer ${token}` };
         const response = await fetch(`/api/categories/${categoryId}`, {
           method: 'DELETE',
+          headers: headers,
         });
         if (!response.ok) {
           const errorData = await response.json();
