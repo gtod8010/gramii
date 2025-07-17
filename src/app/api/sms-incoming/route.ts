@@ -25,18 +25,35 @@ export async function POST(request: NextRequest) {
       `;
       await client.query(logSmsQuery, [from, body, receivedAt]);
 
-      // 2. 줄 단위로 파싱 (실제 KB국민은행 알림톡 포맷 대응)
-      const lines = body.split('\n').map(line => line.trim()).filter(Boolean);
-      let depositorName = '';
-      let amount = NaN;
-      if (lines.length >= 6) {
-        depositorName = lines[3];
-        const amountStr = lines[5].replace(/,/g, '');
-        amount = parseInt(amountStr, 10);
+      // 2. 다양한 은행 포맷을 처리하기 위한 파싱 로직
+      let depositorName: string | null = null;
+      let amount: number | null = null;
+
+      // 카카오뱅크 포맷 처리: "입금 [금액]원" 바로 다음 줄에 이름이 오는 패턴
+      if (body.includes('[카카오뱅크]')) {
+        const match = body.match(/입금 ([\d,]+)원\n([^\n]+)/);
+        if (match && match[1] && match[2]) {
+          amount = parseInt(match[1].replace(/,/g, ''), 10);
+          depositorName = match[2].trim();
+        }
+      } 
+      // KB국민은행 포맷 처리: 이름 다음 줄에 "입금 [금액]원"이 오는 패턴
+      else if (body.includes('[KB')) {
+        const lines = body.split('\n').map(line => line.trim());
+        const amountLineIndex = lines.findIndex(l => l.startsWith('입금'));
+        
+        if (amountLineIndex > 0) { // '입금' 줄이 있고, 그 앞에 다른 줄이 있다면
+          const amountLine = lines[amountLineIndex];
+          const amountStr = amountLine.replace(/[^0-9]/g, '');
+          if (amountStr) {
+            amount = parseInt(amountStr, 10);
+            depositorName = lines[amountLineIndex - 1]; // '입금' 바로 윗 줄을 입금자명으로 간주
+          }
+        }
       }
 
-      if (!depositorName || isNaN(amount)) {
-        console.log(`SMS from ${from} did not match the expected format. Body: "${body}"`);
+      if (!depositorName || amount === null || isNaN(amount)) {
+        console.log(`SMS from ${from} did not match any known bank format. Body: "${body}"`);
         // 파싱 실패 시에도 로그는 남았으므로, 여기서 처리를 중단하고 응답합니다.
         return NextResponse.json({ message: 'SMS format not supported.' });
       }

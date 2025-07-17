@@ -130,13 +130,29 @@ export async function POST() {
       upsertedCount++;
     }
 
-    // 5. 트랜잭션 커밋
+    // 5. 가격 역전 현상이 발생한 서비스를 찾아 비활성화합니다.
+    const findProblematicServicesQuery = `
+      UPDATE services s
+      SET is_active = false
+      WHERE s.external_id IS NOT NULL 
+        AND s.is_active = true
+        AND EXISTS (
+          SELECT 1
+          FROM realsite_services rs
+          WHERE rs.realsite_service_id::text = s.external_id
+            AND rs.rate >= s.price_per_unit
+        );
+    `;
+    const { rowCount: deactivatedCount } = await client.query(findProblematicServicesQuery);
+
+    // 6. 트랜잭션 커밋
     await client.query('COMMIT');
 
     return NextResponse.json({
       message: 'Realsite 서비스 목록 동기화가 성공적으로 완료되었습니다.',
       total_services_from_api: services.length,
       processed_services: upsertedCount,
+      deactivated_on_price_issue: deactivatedCount, // 비활성화된 서비스 수 추가
     });
 
   } catch (error) {

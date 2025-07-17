@@ -227,7 +227,8 @@ const ServiceListDisplay = () => {
       const serviceTypesData: ServiceType[] = await serviceTypesResponse.json();
       setServiceTypes(serviceTypesData);
       
-      const activeServices = services.filter(service => service.is_active);
+      // is_active가 true인 서비스만 필터링하여 사용자에게 보여줍니다.
+      const activeServices = services.filter(service => service.is_active === true);
 
       // 스페셜 데이터 가공
       const newDisplaySpecials = specialsData.map(special => {

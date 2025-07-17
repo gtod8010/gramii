@@ -16,6 +16,7 @@ import {
   TableIcon,
   UserCircleIcon,
   DollarLineIcon,
+  FileIcon
 } from "../icons/index";
 
 type NavItem = {
@@ -70,6 +71,12 @@ const baseNavItems: NavItem[] = [
     path: "/recharge-management",
     adminOnly: true,
   },
+  {
+    icon: <FileIcon />,
+    name: "SMS 로그",
+    path: "/sms-logs",
+    adminOnly: true,
+  }
 ];
 
 const AppSidebar: React.FC = () => {

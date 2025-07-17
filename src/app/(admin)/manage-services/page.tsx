@@ -48,6 +48,7 @@ interface Service { // display_order 추가
   special_id?: number | null;
   special_name?: string | null;
   display_order: number;
+  realsite_rate?: number | null; // Realsite 공급가 필드 추가
 }
 
 // ServiceListDisplay.tsx의 ServiceItem과 유사한 형태로 정의
@@ -521,7 +522,14 @@ const ManageServicesPage = () => {
                               
                               <td className="p-3 lg:px-5 lg:py-4 text-sm text-slate-500 lg:whitespace-nowrap flex justify-between items-center lg:table-cell border-t lg:border-t-0 border-slate-200 dark:border-slate-700">
                                 <span className="font-semibold text-xs uppercase text-slate-500 lg:hidden">가격</span>
-                                <span>{item.price}</span>
+                                <div className="flex flex-col">
+                                    <span className="text-gray-900 dark:text-white">{item.originalService.price_per_unit?.toLocaleString() || 0} 원</span>
+                                    {item.originalService.realsite_rate && (
+                                        <span className="text-xs text-blue-500">
+                                            (공급가: {item.originalService.realsite_rate.toLocaleString()})
+                                        </span>
+                                    )}
+                                </div>
                               </td>
                               
                               <td className="p-3 lg:px-5 lg:py-4 text-sm text-slate-500 lg:whitespace-nowrap flex justify-between items-center lg:table-cell border-t lg:border-t-0 border-slate-200 dark:border-slate-700">
@@ -531,15 +539,22 @@ const ManageServicesPage = () => {
 
                               <td className="p-3 lg:px-5 lg:py-4 text-sm lg:whitespace-nowrap flex justify-between items-center lg:table-cell lg:text-center border-t lg:border-t-0 border-slate-200 dark:border-slate-700">
                                 <span className="font-semibold text-xs uppercase text-slate-500 lg:hidden">상태</span>
-                                <span 
-                                  onClick={() => handleToggleServiceStatus(item.originalService)}
-                                  className={`cursor-pointer inline-flex rounded-full px-2.5 py-1 text-xs font-semibold leading-5 ${
-                                    item.originalService.is_active 
-                                    ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400' 
-                                    : 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400'
-                                  }`}>
-                                  {item.originalService.is_active ? '활성' : '비활성'}
-                                </span>
+                                <div className="flex items-center space-x-2">
+                                    <span 
+                                      onClick={() => handleToggleServiceStatus(item.originalService)}
+                                      className={`cursor-pointer px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${item.originalService.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                                        {item.originalService.is_active ? '활성' : '비활성'}
+                                    </span>
+                                    {/* 가격 비교 로직 수정: 문자열이 아닌 숫자로 비교 */}
+                                    {item.originalService.realsite_rate != null && item.originalService.price_per_unit != null && Number(item.originalService.realsite_rate) >= Number(item.originalService.price_per_unit) && (
+                                        <div className="flex items-center text-red-500" title={`공급가(${item.originalService.realsite_rate})가 판매가(${item.originalService.price_per_unit})보다 높거나 같습니다.`}>
+                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                                                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.21 3.03-1.742 3.03H4.42c-1.532 0-2.492-1.696-1.742-3.03l5.58-9.92zM10 13a1 1 0 110-2 1 1 0 010 2zm-1-4a1 1 0 011-1h.01a1 1 0 110 2H10a1 1 0 01-1-1z" clipRule="evenodd" />
+                                            </svg>
+                                            <span className="text-xs font-semibold">가격 확인 필요</span>
+                                        </div>
+                                    )}
+                                </div>
                               </td>
                               <td className="p-3 lg:px-5 lg:py-4 text-sm font-medium lg:whitespace-nowrap flex justify-between items-center lg:table-cell lg:text-center border-t lg:border-t-0 border-slate-200 dark:border-slate-700">
                                 <span className="font-semibold text-xs uppercase text-slate-500 lg:hidden">작업</span>

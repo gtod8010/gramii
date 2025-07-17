@@ -22,7 +22,8 @@ export async function GET(request: NextRequest) {
       'sc.name as category_name',
       's.special_id',
       'sp.name as special_name',
-      'rs.type as type'
+      'rs.type as type',
+      'rs.rate as realsite_rate'
     ];
     let joinClause = `
       FROM services s
@@ -86,7 +87,8 @@ export async function GET(request: NextRequest) {
       custom_price: row.custom_price === undefined ? null : row.custom_price,
       special_name: row.special_name === undefined ? null : row.special_name,
       special_id: row.special_id === undefined ? null : row.special_id,
-      type: row.type === undefined ? null : row.type
+      type: row.type === undefined ? null : row.type,
+      realsite_rate: row.realsite_rate === undefined ? null : row.realsite_rate
     }));
 
     return NextResponse.json(servicesWithCustomPrice);

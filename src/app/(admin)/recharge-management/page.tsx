@@ -53,40 +53,6 @@ const formatDateTime = (dateString: string | null) => {
   });
 };
 
-// 핸드폰 테스트 수신 상태를 표시하는 컴포넌트
-const SmsTestIndicator = () => {
-  const [received, setReceived] = useState(false);
-
-  useEffect(() => {
-    // 서버로부터 오는 실시간 이벤트를 수신
-    const eventSource = new EventSource('/api/sms-events');
-
-    eventSource.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      if (data.status === 'ok') {
-        setReceived(true);
-        // 5초 후에 메시지 자동으로 사라지게 함
-        setTimeout(() => setReceived(false), 5000);
-      }
-    };
-
-    // 컴포넌트가 언마운트되면 연결 종료
-    return () => {
-      eventSource.close();
-    };
-  }, []);
-
-  if (!received) {
-    return null; // 평소에는 아무것도 표시하지 않음
-  }
-
-  return (
-    <div className="mb-4 p-3 rounded-md bg-green-100 dark:bg-green-800 text-green-700 dark:text-green-200 font-semibold">
-      🟢 SMS 테스트 수신 완료!
-    </div>
-  );
-};
-
 const RechargeManagementPage = () => {
   const [requests, setRequests] = useState<DepositRequest[]>([]);
   const [loading, setLoading] = useState(true);
@@ -153,8 +119,6 @@ const RechargeManagementPage = () => {
     <div className="mx-auto max-w-full">
       <h1 className="text-2xl font-semibold text-gray-900 dark:text-white mb-4">충전 관리</h1>
       
-      <SmsTestIndicator />
-      
       <div className="mt-8 flow-root">
         <div className="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
           <div className="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
@@ -170,14 +134,13 @@ const RechargeManagementPage = () => {
                     <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-white">영수증</th>
                     <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-white">상태</th>
                     <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-white">처리시간</th>
-                    <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-white">SMS</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200 dark:divide-gray-600 bg-white dark:bg-gray-800">
                   {loading ? (
-                    <tr><td colSpan={9} className="p-4 text-center">로딩 중...</td></tr>
+                    <tr><td colSpan={8} className="p-4 text-center">로딩 중...</td></tr>
                   ) : error ? (
-                    <tr><td colSpan={9} className="p-4 text-center text-red-500">{error}</td></tr>
+                    <tr><td colSpan={8} className="p-4 text-center text-red-500">{error}</td></tr>
                   ) : (
                     requests.map((req) => (
                       <tr key={req.id}>
@@ -215,9 +178,6 @@ const RechargeManagementPage = () => {
                           </span>
                         </td>
                         <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-gray-400">{formatDateTime(req.confirmed_at)}</td>
-                        <td className="px-3 py-4 text-sm text-gray-500 dark:text-gray-400">
-                          {req.is_sms_received ? '✔️' : '❌'}
-                        </td>
                       </tr>
                     ))
                   )}
