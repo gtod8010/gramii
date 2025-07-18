@@ -22,7 +22,6 @@ export async function GET(request: NextRequest) {
       'sc.name as category_name',
       's.special_id',
       'sp.name as special_name',
-      'rs.type as type',
       'rs.rate as realsite_rate'
     ];
     let joinClause = `
@@ -30,7 +29,10 @@ export async function GET(request: NextRequest) {
       JOIN service_types st ON s.service_type_id = st.id
       JOIN service_categories sc ON st.category_id = sc.id
       LEFT JOIN specials sp ON s.special_id = sp.id
-      LEFT JOIN realsite_services rs ON s.external_id::integer = rs.realsite_service_id
+      LEFT JOIN realsite_services rs 
+        ON s.external_id IS NOT NULL 
+        AND s.external_id != ''
+        AND s.external_id::integer = rs.realsite_service_id
     `;
     
     const queryParams: (string | number)[] = [];
@@ -161,6 +163,21 @@ export async function POST(req: Request) {
     try {
       await client.query('BEGIN');
       
+      // 외부 서비스 ID 중복 체크
+      if (finalExternalId) {
+        const existingServiceCheck = await client.query(
+          'SELECT id FROM services WHERE external_id = $1',
+          [finalExternalId]
+        );
+        if (existingServiceCheck.rows.length > 0) {
+          await client.query('ROLLBACK');
+          return NextResponse.json(
+            { message: `이미 이 외부 서비스(ID: ${finalExternalId})를 사용하는 서비스가 존재합니다.` },
+            { status: 409 } // 409 Conflict
+          );
+        }
+      }
+
       // 서비스 타입 존재 여부 확인
       const serviceTypeExists = await client.query('SELECT id FROM service_types WHERE id = $1', [service_type_id]);
       if (serviceTypeExists.rows.length === 0) {

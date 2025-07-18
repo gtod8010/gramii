@@ -26,7 +26,7 @@ async function ensureTableExists(client: PoolClient) {
       name VARCHAR(255) NOT NULL,
       type VARCHAR(100),
       category VARCHAR(255),
-      rate NUMERIC(14, 6) NOT NULL,
+      rate NUMERIC(20, 6) NOT NULL,
       min_order INTEGER NOT NULL,
       max_order INTEGER NOT NULL,
       dripfeed BOOLEAN DEFAULT FALSE,
@@ -36,6 +36,18 @@ async function ensureTableExists(client: PoolClient) {
     );
   `;
   await client.query(createTableQuery);
+
+  // 테이블이 이미 예전 타입으로 존재할 경우를 대비해 컬럼 타입을 변경합니다.
+  try {
+    const alterTableQuery = `
+      ALTER TABLE realsite_services
+      ALTER COLUMN rate TYPE NUMERIC(20, 6);
+    `;
+    await client.query(alterTableQuery);
+  } catch (error) {
+    // 이미 타입이 맞거나 다른 사소한 오류는 무시하고 진행합니다.
+    console.log("Could not alter realsite_services table, it might be correct already.", error);
+  }
 }
 
 export async function POST() {

@@ -76,52 +76,71 @@ export async function POST(request: Request) {
       let realsiteOrderId: number | null = null;
 
       if (externalId) {
-        const apiKey = process.env.REALSITE_API_KEY;
-        const apiUrl = process.env.REALSITE_API_URL;
+        const externalServiceId = parseInt(externalId, 10);
+        let apiKey: string | undefined;
+        let apiUrl: string | undefined;
+        let payload: any;
 
-        if (!apiKey || !apiUrl) {
-          throw new Error('Realsite API 환경 변수가 설정되지 않았습니다.');
+        // 2pm 서비스 (ID >= 20000) 또는 Realsite 서비스 분기
+        if (externalServiceId >= 20000) {
+          // 2pm.co.kr API 연동
+          apiKey = process.env.TWOPM_API_KEY;
+          apiUrl = process.env.TWOPM_API_URL;
+
+          if (!apiKey || !apiUrl) {
+            throw new Error('2pm.co.kr API 환경 변수가 설정되지 않았습니다.');
+          }
+
+          payload = {
+            key: apiKey,
+            action: 'add',
+            service: externalServiceId - 20000, // 2pm 원본 서비스 ID로 변환
+            link: linkValue,
+            quantity: quantity,
+          };
+          if (comments) {
+            payload.comments = comments;
+          }
+        } else {
+          // Realsite API 연동
+          apiKey = process.env.REALSITE_API_KEY;
+          apiUrl = process.env.REALSITE_API_URL;
+
+          if (!apiKey || !apiUrl) {
+            throw new Error('Realsite API 환경 변수가 설정되지 않았습니다.');
+          }
+
+          payload = {
+            key: apiKey,
+            action: 'add',
+            service: externalServiceId,
+            link: linkValue,
+            quantity: quantity,
+          };
+          if (comments) {
+            payload.comments = comments;
+          }
         }
 
-        const realsitePayload: {
-          key: string;
-          action: string;
-          service: number;
-          link: string | undefined;
-          quantity: number;
-          comments?: string;
-        } = {
-          key: apiKey,
-          action: 'add',
-          service: externalId,
-          link: linkValue,
-          quantity: quantity,
-        };
-
-        if (comments) {
-          realsitePayload.comments = comments;
-        }
-
-        const realsiteResponse = await fetch(apiUrl, {
+        const externalApiResponse = await fetch(apiUrl, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(realsitePayload),
+          body: JSON.stringify(payload),
         });
 
-        const realsiteData = await realsiteResponse.json();
+        const externalApiData = await externalApiResponse.json();
 
-        if (!realsiteResponse.ok || realsiteData.error) {
-          const errorMessage = `Realsite API 주문 실패: ${realsiteData.error || '알 수 없는 오류'}`;
-          console.error(errorMessage);
-          // 트랜잭션을 롤백시키기 위해 에러를 throw합니다.
+        if (!externalApiResponse.ok || externalApiData.error) {
+          const errorMessage = `외부 서비스 API 주문 실패: ${externalApiData.error || '알 수 없는 오류'}`;
+          console.error(errorMessage, { serviceId: externalServiceId, apiUrl });
           throw new Error('외부 서비스 주문 연동에 실패했습니다. 잠시 후 다시 시도해주세요.');
         }
 
-        if (!realsiteData.order) {
-            console.error('Realsite API 응답에 order ID가 없습니다.', realsiteData);
+        if (!externalApiData.order) {
+            console.error('외부 서비스 API 응답에 order ID가 없습니다.', externalApiData);
             throw new Error('외부 서비스로부터 유효하지 않은 응답을 받았습니다.');
         }
-        realsiteOrderId = parseInt(realsiteData.order, 10);
+        realsiteOrderId = parseInt(externalApiData.order, 10);
       }
 
       // 6. 주문 생성 (realsite_order_id 컬럼 추가)

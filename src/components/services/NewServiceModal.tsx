@@ -45,7 +45,7 @@ interface ServiceType { // 서비스 타입 인터페이스 정의
   category_id: number;
 }
 
-// Realsite에서 가져온 서비스 정보를 위한 인터페이스
+// Realsite에서 가져온 서비스 정보를 위한 인터페이스 (이제 통합 테이블 사용)
 interface RealSiteService {
   realsite_service_id: number;
   name: string;
@@ -147,7 +147,7 @@ const NewServiceModal: React.FC<NewServiceModalProps> = ({
   
   // 7. 핸들러 및 이펙트 훅 (Handlers and Effect hooks)
   
-  // Realsite 서비스 검색
+  // Realsite 서비스 검색 (이제 통합 검색)
   useEffect(() => {
     if (debouncedSearchTerm && !editingService) {
       setIsSearching(true);
@@ -282,52 +282,47 @@ const NewServiceModal: React.FC<NewServiceModalProps> = ({
     <Modal isOpen={isOpen} onClose={onClose} title={editingService ? '서비스 수정' : '새 서비스 추가'} className="max-w-2xl max-h-[85vh] overflow-y-auto">
       <form onSubmit={handleSubmit(onSubmit, onInvalid)} className="space-y-4 p-6">
         
-        {!editingService && (
-          <div className="relative">
-            <Label htmlFor="realsite-search">Realsite 서비스 검색</Label>
-            <Input
-              id="realsite-search"
-              placeholder="등록할 Realsite 서비스 이름 또는 ID 검색..."
-              value={realSiteSearchTerm}
-              onChange={(e: ChangeEvent<HTMLInputElement>) => setRealSiteSearchTerm(e.target.value)}
-              disabled={!!selectedRealSiteService}
-            />
-            {isSearching && <p className="text-sm text-slate-500 mt-1">검색 중...</p>}
-            {realSiteServices.length > 0 && (
-              <ul className="absolute z-10 w-full mt-1 bg-white border border-slate-300 rounded-md shadow-lg max-h-60 overflow-auto">
-                {realSiteServices.map(service => (
-                  <li
-                    key={service.realsite_service_id}
-                    onClick={() => handleSelectRealSiteService(service)}
-                    className="px-4 py-3 hover:bg-slate-100 cursor-pointer border-b last:border-b-0"
-                  >
-                    <p className="font-semibold text-slate-800">{service.name}</p>
-                    <p className="text-xs text-slate-500 mt-1">
-                      ID: {service.realsite_service_id} | 카테고리: {service.category} | 최소: {service.min_order} / 최대: {service.max_order}
-                    </p>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-        )}
-
-        {selectedRealSiteService && (
-          <div className="p-4 border rounded-md bg-slate-50 relative">
-            <button
-              type="button"
-              onClick={handleDeselectRealSiteService}
-              className="absolute top-2 right-2 text-slate-400 hover:text-slate-600"
-            >
-              <XCircleIcon className="h-6 w-6" />
-            </button>
-            <h3 className="font-semibold text-slate-800 mb-2">Realsite 서비스 정보</h3>
-            <p className="text-sm text-slate-600"><b>서비스명:</b> {selectedRealSiteService.name}</p>
-            <p className="text-sm text-slate-600"><b>ID:</b> {selectedRealSiteService.realsite_service_id}</p>
-            <p className="text-sm text-slate-600"><b>원가:</b> {selectedRealSiteService.rate}원</p>
-            <p className="text-sm text-slate-600"><b>최소/최대 주문:</b> {selectedRealSiteService.min_order} / {selectedRealSiteService.max_order}</p>
-          </div>
-        )}
+        <div className="mt-4">
+          <Label htmlFor="realSiteSearch">외부 서비스 연동 (선택 사항)</Label>
+          {selectedRealSiteService ? (
+            <div className="flex items-center justify-between p-2 mt-1 bg-slate-100 dark:bg-slate-700 rounded">
+              <span className="text-sm">
+                {selectedRealSiteService.name} (ID: {selectedRealSiteService.realsite_service_id})
+              </span>
+              <button type="button" onClick={handleDeselectRealSiteService}>
+                <XCircleIcon className="w-5 h-5 text-slate-500 hover:text-slate-700" />
+              </button>
+            </div>
+          ) : (
+            <>
+              <Input
+                id="realSiteSearch"
+                type="text"
+                placeholder="서비스명 또는 코드로 검색..."
+                value={realSiteSearchTerm}
+                onChange={(e) => setRealSiteSearchTerm(e.target.value)}
+                disabled={!!editingService}
+              />
+              {isSearching && <p className="text-sm text-slate-500 mt-1">검색 중...</p>}
+              {realSiteServices.length > 0 && (
+                <ul className="mt-2 border border-slate-300 dark:border-slate-600 rounded-md max-h-40 overflow-y-auto">
+                  {realSiteServices.map((service) => (
+                    <li
+                      key={service.realsite_service_id}
+                      onClick={() => handleSelectRealSiteService(service)}
+                      className="p-2 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700 border-b border-slate-200 dark:border-slate-700 last:border-b-0"
+                    >
+                      <p className="font-semibold">{service.name}</p>
+                      <p className="text-xs text-slate-500">
+                        ID: {service.realsite_service_id} | 가격: {service.rate}원 | 수량: {service.min_order}-{service.max_order}
+                      </p>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </>
+          )}
+        </div>
         
         <div>
           <Label htmlFor="category_id">카테고리</Label>

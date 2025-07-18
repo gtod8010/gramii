@@ -91,6 +91,7 @@ const ManageServicesPage = () => {
   const [collapsedCategories, setCollapsedCategories] = useState<Record<string, boolean>>({});
   const [collapsedServiceTypes, setCollapsedServiceTypes] = useState<Record<string, boolean>>({});
   const [isSyncing, setIsSyncing] = useState(false);
+  const [isSyncing2pm, setIsSyncing2pm] = useState(false);
 
   const toggleCategoryCollapse = (categoryName: string) => {
     setCollapsedCategories(prev => ({ ...prev, [categoryName]: !prev[categoryName] }));
@@ -314,7 +315,7 @@ const ManageServicesPage = () => {
     }
   };
 
-  const handleSyncServices = async () => {
+  const handleSyncRealsiteServices = async () => {
     if (!window.confirm('Realsite.shop의 서비스 목록과 동기화를 시작하시겠습니까? API 응답에 따라 시간이 소요될 수 있습니다.')) {
       return;
     }
@@ -345,6 +346,39 @@ const ManageServicesPage = () => {
       }
     } finally {
       setIsSyncing(false);
+    }
+  };
+
+  const handleSync2pmServices = async () => {
+    if (!window.confirm('2pm.co.kr의 서비스 목록과 동기화를 시작하시겠습니까?')) {
+      return;
+    }
+    setIsSyncing2pm(true);
+    const token = localStorage.getItem('jwtToken');
+    const headers = { 'Authorization': `Bearer ${token}` };
+    try {
+      const response = await fetch('/api/2pm/sync-services', {
+        method: 'POST',
+        headers: headers,
+      });
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || '알 수 없는 오류가 발생했습니다.');
+      }
+
+      const alertMessage = `${data.message}\n\n- API에서 받은 총 서비스 수: ${data.total_services_from_api}\n- DB에 처리된 서비스 수: ${data.processed_services}`;
+      alert(alertMessage);
+      
+    } catch (error) {
+      console.error('Failed to sync services from 2pm:', error);
+      if (error instanceof Error) {
+        alert(`동기화 실패: ${error.message}`);
+      } else {
+        alert('동기화 중 알 수 없는 오류가 발생했습니다.');
+      }
+    } finally {
+      setIsSyncing2pm(false);
     }
   };
 
@@ -428,7 +462,8 @@ const ManageServicesPage = () => {
           <Button variant="outline" onClick={handleOpenServiceTypeModal}>서비스 타입 관리</Button>
           <Button onClick={handleNewService}>+ 새 서비스 추가</Button>
           <Button variant="outline" onClick={handleOpenSpecialManagementModal}>스페셜 관리</Button>
-          <Button variant="outline" isLoading={isSyncing} onClick={handleSyncServices}>Realsite 서비스 동기화</Button>
+          <Button variant="outline" isLoading={isSyncing} onClick={handleSyncRealsiteServices}>Realsite 서비스 동기화</Button>
+          <Button variant="outline" isLoading={isSyncing2pm} onClick={handleSync2pmServices}>2pm 서비스 동기화</Button>
         </div>
       </div>
 
