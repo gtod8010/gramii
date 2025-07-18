@@ -11,6 +11,15 @@ interface OrderRequestBody {
   comments?: string;
 }
 
+interface ExternalApiPayload {
+  key: string;
+  action: 'add';
+  service: number;
+  link: string | undefined;
+  quantity: number;
+  comments?: string;
+}
+
 export async function POST(request: Request) {
   try {
     const body: OrderRequestBody = await request.json();
@@ -79,7 +88,7 @@ export async function POST(request: Request) {
         const externalServiceId = parseInt(externalId, 10);
         let apiKey: string | undefined;
         let apiUrl: string | undefined;
-        let payload: any;
+        let payload: ExternalApiPayload;
 
         // 2pm 서비스 (ID >= 20000) 또는 Realsite 서비스 분기
         if (externalServiceId >= 20000) {
