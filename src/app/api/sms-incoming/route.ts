@@ -20,8 +20,8 @@ export async function POST(request: NextRequest) {
     try {
       // 1. 모든 수신 SMS를 sms_logs 테이블에 기록
       const logSmsQuery = `
-        INSERT INTO sms_logs (sender, body, created_at)
-        VALUES ($1, $2, NOW());
+        INSERT INTO sms_logs (sender, body)
+        VALUES ($1, $2);
       `;
       await client.query(logSmsQuery, [from, body]);
 

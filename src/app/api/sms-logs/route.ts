@@ -17,9 +17,9 @@ export async function GET(request: Request) {
     const client = await pool.connect();
     try {
       const query = `
-        SELECT id, sender, body, created_at
+        SELECT id, sender, body, received_at
         FROM sms_logs
-        ORDER BY created_at DESC
+        ORDER BY received_at DESC
         LIMIT 200;
       `;
       const result = await client.query(query);
