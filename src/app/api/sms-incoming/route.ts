@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
   // 인증 로직 제거
   try {
     const payload: SmsWebhookPayload = await request.json();
-    const { from, body, receivedAt } = payload;
+    const { from, body } = payload;
     
     const client = await pool.connect();
     let updatedRequest = null;
@@ -20,10 +20,10 @@ export async function POST(request: NextRequest) {
     try {
       // 1. 모든 수신 SMS를 sms_logs 테이블에 기록
       const logSmsQuery = `
-        INSERT INTO sms_logs (sender, body, received_at_app)
-        VALUES ($1, $2, $3);
+        INSERT INTO sms_logs (sender, body, created_at)
+        VALUES ($1, $2, NOW());
       `;
-      await client.query(logSmsQuery, [from, body, receivedAt]);
+      await client.query(logSmsQuery, [from, body]);
 
       // 2. 다양한 은행 포맷을 처리하기 위한 파싱 로직
       let depositorName: string | null = null;

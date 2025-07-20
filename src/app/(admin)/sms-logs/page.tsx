@@ -8,7 +8,6 @@ interface SmsLog {
   id: number;
   sender: string;
   body: string;
-  received_at_app: string;
   created_at: string;
 }
 
@@ -89,7 +88,7 @@ const SmsLogsPage = () => {
                     logs.map((log) => (
                       <tr key={log.id}>
                         <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm text-gray-500 dark:text-gray-400 sm:pl-6">{log.id}</td>
-                        <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-gray-400">{formatDateTime(log.received_at_app)}</td>
+                        <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-gray-400">{formatDateTime(log.created_at)}</td>
                         <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-900 dark:text-white">{log.sender}</td>
                         <td className="px-3 py-4 text-sm text-gray-500 dark:text-gray-400"><pre className="whitespace-pre-wrap font-sans">{log.body}</pre></td>
                       </tr>
