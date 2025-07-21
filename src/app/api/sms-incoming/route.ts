@@ -82,7 +82,7 @@ export async function POST(request: NextRequest) {
         const updateRequestQuery = `
           UPDATE deposit_requests
           SET status = 'completed', confirmed_at = NOW()
-          WHERE id = $2
+          WHERE id = $1
           RETURNING *;
         `;
         const updateResult = await client.query(updateRequestQuery, [
