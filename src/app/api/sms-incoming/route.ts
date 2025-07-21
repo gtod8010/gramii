@@ -102,10 +102,10 @@ export async function POST(request: NextRequest) {
 
         // 4-3. point_transactions 테이블에 기록 추가
         const transactionQuery = `
-          INSERT INTO point_transactions (user_id, amount, transaction_type, related_order_id, balance_after_transaction)
-          VALUES ($1, $2, 'deposit', $3, $4)
+          INSERT INTO point_transactions (user_id, amount, transaction_type, balance_after_transaction)
+          VALUES ($1, $2, 'deposit', $3)
         `;
-        await client.query(transactionQuery, [userId, amount, requestId, finalBalance]);
+        await client.query(transactionQuery, [userId, amount, finalBalance]);
 
         await client.query('COMMIT');
         console.log(`Successfully processed deposit request ID: ${requestId} for user ID: ${userId}. Amount: ${amount}`);
