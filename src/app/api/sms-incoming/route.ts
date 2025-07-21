@@ -42,9 +42,9 @@ export async function POST(request: NextRequest) {
         const lines = body.split('\n').map(line => line.trim());
         const amountLineIndex = lines.findIndex(l => l.startsWith('입금'));
         
-        if (amountLineIndex > 0) { // '입금' 줄이 있고, 그 앞에 다른 줄이 있다면
-          const amountLine = lines[amountLineIndex];
-          const amountStr = amountLine.replace(/[^0-9]/g, '');
+        // '입금' 줄이 있고, 그 앞뒤로 다른 줄이 있다면
+        if (amountLineIndex > 0 && amountLineIndex < lines.length - 1) { 
+          const amountStr = lines[amountLineIndex + 1].replace(/[^0-9]/g, '');
           if (amountStr) {
             amount = parseInt(amountStr, 10);
             depositorName = lines[amountLineIndex - 1]; // '입금' 바로 윗 줄을 입금자명으로 간주
@@ -91,9 +91,22 @@ export async function POST(request: NextRequest) {
         ]);
         updatedRequest = updateResult.rows[0];
 
-        // 4-2. users 테이블의 포인트(잔액) 증가
-        const updateUserQuery = 'UPDATE users SET points = points + $1 WHERE id = $2';
-        await client.query(updateUserQuery, [amount, userId]);
+        // 4-2. users 테이블의 포인트(잔액) 증가 및 최종 잔액 가져오기
+        const updateUserQuery = `
+          UPDATE users 
+          SET points = points + $1 
+          WHERE id = $2
+          RETURNING points;
+        `;
+        const userUpdateResult = await client.query(updateUserQuery, [amount, userId]);
+        const finalBalance = userUpdateResult.rows[0].points;
+
+        // 4-3. point_transactions 테이블에 기록 추가
+        const transactionQuery = `
+          INSERT INTO point_transactions (user_id, amount, transaction_type, related_order_id, balance_after_transaction)
+          VALUES ($1, $2, 'deposit', $3, $4)
+        `;
+        await client.query(transactionQuery, [userId, amount, requestId, finalBalance]);
 
         await client.query('COMMIT');
         console.log(`Successfully processed deposit request ID: ${requestId} for user ID: ${userId}. Amount: ${amount}`);
