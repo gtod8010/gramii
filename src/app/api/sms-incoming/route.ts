@@ -81,12 +81,11 @@ export async function POST(request: NextRequest) {
         // 4-1. deposit_requests 상태를 'completed'로 변경
         const updateRequestQuery = `
           UPDATE deposit_requests
-          SET status = 'completed', confirmed_at = NOW(), matched_tran_info = $1
+          SET status = 'completed', confirmed_at = NOW()
           WHERE id = $2
           RETURNING *;
         `;
         const updateResult = await client.query(updateRequestQuery, [
-          JSON.stringify(payload), // SMS 전체 내용을 저장
           requestId
         ]);
         updatedRequest = updateResult.rows[0];
