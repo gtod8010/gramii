@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
+import { siteConfig } from '@/lib/constants';
+import Image from 'next/image';
 
 interface RechargeModalProps {
   isOpen: boolean;
@@ -194,9 +196,13 @@ export default function RechargeModal({ isOpen, onClose }: RechargeModalProps) {
     <div className="fixed inset-0 bg-gray-600 bg-opacity-75 overflow-y-auto h-full w-full flex justify-center items-center z-50 p-4">
       <div className="relative bg-white dark:bg-gray-800 p-6 sm:p-8 rounded-lg shadow-xl w-full max-w-md mx-auto max-h-[90vh] overflow-y-auto">
         <div className="flex justify-center mb-6">
-          <div className="inline-flex items-center justify-center bg-pink-100 dark:bg-pink-700 p-3 rounded-md">
-            <span className="text-2xl font-bold text-pink-600 dark:text-pink-300">M</span> 
-            <span className="ml-2 text-lg font-semibold text-gray-700 dark:text-gray-200">gramii</span>
+          <div className="relative h-10 w-32">
+            <Image
+              src={siteConfig.logoPath}
+              alt={`${siteConfig.name.en} Logo`}
+              fill
+              style={{ objectFit: 'contain' }}
+            />
           </div>
         </div>
         

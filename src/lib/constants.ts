@@ -1,4 +1,49 @@
 // src/lib/constants.ts
+const siteVariant = process.env.NEXT_PUBLIC_SITE_VARIANT || 'gramii';
+
+interface SiteConfig {
+  name: {
+    en: string;
+    ko: string;
+  };
+  logoPath: string;
+  contactEmail: string;
+  accountHolder: string;
+  siteUrl: string;
+  address: string;
+  businessNumber: string;
+  mailOrderLicense: string;
+}
+
+const gramiiConfig: SiteConfig = {
+  name: {
+    en: 'GRAMII',
+    ko: '그래미',
+  },
+  logoPath: '/images/gramii_logo.png',
+  contactEmail: 'gramii0505@gmail.com',
+  accountHolder: '김수민(그래미)',
+  siteUrl: 'https://gramii.co.kr',
+  address: '서울특별시 강서구 공항대로 426',
+  businessNumber: '572-05-03128',
+  mailOrderLicense: '제2025-서울강서-1815호',
+};
+
+const ordaConfig: SiteConfig = {
+  name: {
+    en: 'ORDA',
+    ko: '오르다',
+  },
+  logoPath: '/images/logos/orda/1W.png',
+  contactEmail: 'rlaeotjd97@naver.com',
+  accountHolder: '김수민(오르다)',
+  siteUrl: 'https://orda.co.kr', // orda URL (임시)
+  address: '서울특별시 관악구 관천로26길 86',
+  businessNumber: '266-69-00650',
+  mailOrderLicense: '제2025-서울관악-0917호',
+};
+
+export const siteConfig: SiteConfig = siteVariant === 'orda' ? ordaConfig : gramiiConfig;
 
 // 주문 상태에 따른 뱃지 색상을 정의합니다.
 export const statusColors: { [key: string]: string } = {

@@ -34,14 +34,16 @@ const OrdaCarouselSection = () => {
   return (
     <section className="relative w-full py-20 md:py-28 bg-[#EBEBFF] overflow-hidden">
       <div className="container mx-auto text-center px-6 md:px-10">
-        <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
-          오르다에서 클릭 한번으로 올리다.
-        </h2>
-        <p className="text-lg text-gray-600 mb-12">
-          그래미의 검증된 노하우를 이제 오르다에서 경험해보세요.
-        </p>
+        <div className="text-center">
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+            오르다에서 클릭 한번으로 올리다
+          </h2>
+          <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto">
+            검증된 노하우를 이제 오르다에서 경험해보세요.
+          </p>
+        </div>
 
-        <div className="w-full">
+        <div className="mt-12">
             <Swiper
               effect={'coverflow'}
               grabCursor={true}
@@ -74,4 +76,4 @@ const OrdaCarouselSection = () => {
   );
 };
 
-export default OrdaCarouselSection; 
+export default OrdaCarouselSection;

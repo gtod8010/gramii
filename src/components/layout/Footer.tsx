@@ -3,6 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { siteConfig } from '@/lib/constants';
 
 interface FooterProps {
   onOpenTermsModal: () => void;
@@ -19,22 +20,22 @@ const Footer: React.FC<FooterProps> = ({ onOpenTermsModal }) => {
             <Link href="/" className="inline-block mb-6">
               <div className="relative h-12 w-28">
                 <Image
-                  src="/images/gramii_logo.png"
-                  alt="GRAMII Logo"
+                  src={siteConfig.logoPath}
+                  alt={`${siteConfig.name.en} Logo`}
                   fill
                   style={{ objectFit: 'contain' }}
                 />
               </div>
             </Link>
-            <p className="font-semibold text-white">그래미</p>
+            <p className="font-semibold text-white">{siteConfig.name.ko}</p>
             <div className="text-sm flex flex-wrap gap-x-4 gap-y-1">
-                <p>주소 : 서울특별시 강서구 공항대로 426</p>
-                <p>사업자등록번호 : 572-05-03128</p>
-                <p>통신판매 : 제2025-서울강서-1815호</p>
-                <p>이메일 : gramii0505@gmail.com</p>
+                <p>주소 : {siteConfig.address}</p>
+                <p>사업자등록번호 : {siteConfig.businessNumber}</p>
+                <p>통신판매 : {siteConfig.mailOrderLicense}</p>
+                <p>이메일 : {siteConfig.contactEmail}</p>
             </div>
             <p className="text-xs text-gray-500 pt-4">
-              Copyright 2024. GRAMII. All rights reserved.
+              Copyright 2024. {siteConfig.name.en}. All rights reserved.
             </p>
           </div>
 
@@ -48,7 +49,6 @@ const Footer: React.FC<FooterProps> = ({ onOpenTermsModal }) => {
               </li>
             </ul>
           </div>
-
         </div>
       </div>
     </footer>

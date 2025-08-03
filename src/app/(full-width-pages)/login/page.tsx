@@ -3,6 +3,8 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
+import { siteConfig } from '@/lib/constants';
 
 export default function LoginPage() {
   const [username, setUsername] = useState('');
@@ -53,8 +55,13 @@ export default function LoginPage() {
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="flex justify-center mb-6">
           <Link href="/">
-            <div className="inline-flex items-center justify-center bg-pink-100 dark:bg-pink-700 p-3 rounded-md">
-              <span className="text-3xl font-bold text-pink-600 dark:text-pink-300">GRAMII</span>
+            <div className="relative h-12 w-32">
+              <Image
+                src={siteConfig.logoPath}
+                alt={`${siteConfig.name.en} Logo`}
+                fill
+                style={{ objectFit: 'contain' }}
+              />
             </div>
           </Link>
         </div>
@@ -159,3 +166,4 @@ export default function LoginPage() {
     </div>
   );
 } 
+

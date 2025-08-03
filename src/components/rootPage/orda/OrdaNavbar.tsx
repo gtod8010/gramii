@@ -44,10 +44,10 @@ const OrdaNavbar = () => {
                 서비스
               </Link>
               <Button 
-                variant="outline" 
+                variant="primary"
                 size="md"
                 onClick={handleLogout}
-                className="text-white border-white hover:bg-white hover:text-black"
+                className="bg-red-600 hover:bg-red-700 text-white border-transparent"
               >
                 로그아웃
               </Button>
@@ -74,4 +74,4 @@ const OrdaNavbar = () => {
   );
 };
 
-export default OrdaNavbar; 
+export default OrdaNavbar;

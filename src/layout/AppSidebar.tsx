@@ -5,6 +5,7 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useSidebar } from "../context/SidebarContext";
 import { useUser } from "@/hooks/useUser";
+import { siteConfig } from '@/lib/constants';
 import {
   ChevronDownIcon,
   GridIcon,
@@ -291,8 +292,8 @@ const AppSidebar: React.FC = () => {
           {(isExpanded || isHovered || isMobileOpen) ? (
             <div className="relative h-12 w-28">
               <Image
-                src="/images/gramii_logo.png"
-                alt="GRAMII Logo"
+                src={siteConfig.logoPath}
+                alt={`${siteConfig.name.en} Logo`}
                 fill
                 style={{ objectFit: 'contain' }}
                 priority

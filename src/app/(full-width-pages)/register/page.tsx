@@ -3,6 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
+import { siteConfig } from '@/lib/constants';
 
 export default function RegisterPage() {
   const [username, setUsername] = useState('');
@@ -84,9 +86,16 @@ export default function RegisterPage() {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="flex justify-center mb-6">
-          <div className="inline-flex items-center justify-center bg-pink-100 dark:bg-pink-700 p-3 rounded-md">
-            <span className="text-3xl font-bold text-pink-600 dark:text-pink-300">GRAMII</span>
-          </div>
+          <Link href="/">
+            <div className="relative h-12 w-32">
+              <Image
+                src={siteConfig.logoPath}
+                alt={`${siteConfig.name.en} Logo`}
+                fill
+                style={{ objectFit: 'contain' }}
+              />
+            </div>
+          </Link>
         </div>
         <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-white">
           회원가입

@@ -11,7 +11,7 @@ module.exports = {
       instances: 1,
       autorestart: true,
       watch: false,
-      max_memory_restart: '1G',
+      max_memory_restart: '4G',
       env: {
         NODE_ENV: 'production',
         NEXT_PUBLIC_SITE_VARIANT: 'gramii',
@@ -26,7 +26,7 @@ module.exports = {
       instances: 1,
       autorestart: true,
       watch: false,
-      max_memory_restart: '1G',
+      max_memory_restart: '4G',
       env: {
         NODE_ENV: 'production',
         NEXT_PUBLIC_SITE_VARIANT: 'orda',
