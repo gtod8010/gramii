@@ -92,6 +92,7 @@ const ManageServicesPage = () => {
   const [collapsedServiceTypes, setCollapsedServiceTypes] = useState<Record<string, boolean>>({});
   const [isSyncing, setIsSyncing] = useState(false);
   const [isSyncing2pm, setIsSyncing2pm] = useState(false);
+  const [isSyncingInstaMonster, setIsSyncingInstaMonster] = useState(false);
 
   const toggleCategoryCollapse = (categoryName: string) => {
     setCollapsedCategories(prev => ({ ...prev, [categoryName]: !prev[categoryName] }));
@@ -382,6 +383,39 @@ const ManageServicesPage = () => {
     }
   };
 
+  const handleSyncInstaMonsterServices = async () => {
+    if (!window.confirm('InstaMonster의 서비스 목록과 동기화를 시작하시겠습니까?')) {
+      return;
+    }
+    setIsSyncingInstaMonster(true);
+    const token = localStorage.getItem('jwtToken');
+    const headers = { 'Authorization': `Bearer ${token}` };
+    try {
+      const response = await fetch('/api/instamonster/sync-services', {
+        method: 'POST',
+        headers: headers,
+      });
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || '알 수 없는 오류가 발생했습니다.');
+      }
+
+      const alertMessage = `${data.message}\n\n- API에서 받은 총 서비스 수: ${data.total_services_from_api}\n- 필터링된 서비스 수: ${data.filtered_services_to_sync}\n- DB에 처리된 서비스 수: ${data.processed_services}`;
+      alert(alertMessage);
+      
+    } catch (error) {
+      console.error('Failed to sync services from InstaMonster:', error);
+      if (error instanceof Error) {
+        alert(`동기화 실패: ${error.message}`);
+      } else {
+        alert('동기화 중 알 수 없는 오류가 발생했습니다.');
+      }
+    } finally {
+      setIsSyncingInstaMonster(false);
+    }
+  };
+
   const handleDeleteService = async (serviceId: number, serviceName: string) => {
     if (window.confirm(`'${serviceName}' 서비스를 정말로 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.`)) {
       setIsLoading(true); // 로딩 상태 시작
@@ -463,7 +497,12 @@ const ManageServicesPage = () => {
           <Button onClick={handleNewService}>+ 새 서비스 추가</Button>
           <Button variant="outline" onClick={handleOpenSpecialManagementModal}>스페셜 관리</Button>
           <Button variant="outline" isLoading={isSyncing} onClick={handleSyncRealsiteServices}>Realsite 서비스 동기화</Button>
-          <Button variant="outline" isLoading={isSyncing2pm} onClick={handleSync2pmServices}>2pm 서비스 동기화</Button>
+          {process.env.NEXT_PUBLIC_SITE_VARIANT === 'gramii' ? (
+            <Button variant="outline" isLoading={isSyncing2pm} onClick={handleSync2pmServices}>2pm 서비스 동기화</Button>
+          ) : (
+            <Button variant="outline" isLoading={isSyncingInstaMonster} onClick={handleSyncInstaMonsterServices}>인스타몬스터 서비스 동기화</Button>
+          )}
+
         </div>
       </div>
 

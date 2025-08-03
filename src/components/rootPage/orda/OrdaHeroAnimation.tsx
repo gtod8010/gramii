@@ -4,6 +4,7 @@ import Image from 'next/image';
 import Button from '@/components/ui/button/Button';
 import CountUp from 'react-countup';
 import { FaThumbsUp } from 'react-icons/fa';
+import { motion } from 'framer-motion';
 
 const OrdaHeroAnimation = () => {
   const [instaKey, setInstaKey] = useState(0);
@@ -43,7 +44,7 @@ const OrdaHeroAnimation = () => {
       <div className="absolute top-1/2 left-1/2 -translate-x-[14rem] -translate-y-[6rem] animate-float">
         <Image src="/images/logos/instagram_logo.png" width={80} height={80} alt="instagram icon" className="drop-shadow-lg" />
         <div className="absolute -top-2 -right-2 w-8 h-8 flex items-center justify-center bg-red-500 rounded-full animate-pulse-bubble text-white font-bold text-sm">
-          <CountUp key={instaKey} end={2} duration={1} onEnd={restartInsta} />
+           <CountUp key={instaKey} end={12} duration={15} onEnd={restartInsta} />
         </div>
       </div>
       
@@ -66,27 +67,78 @@ const OrdaHeroAnimation = () => {
       <div className="absolute top-1/2 left-1/2 translate-x-[10rem] translate-y-[8rem] animate-float animation-delay-1500">
          <Image src="/images/logos/kakaotalk_logo3.png" width={70} height={70} alt="kakaotalk icon" className="drop-shadow-lg" />
          <div className="absolute -top-2 -right-2 w-7 h-7 flex items-center justify-center bg-blue-500 rounded-full text-white font-bold text-sm">
-           <CountUp key={kakaoKey} end={5} duration={1} delay={1} onEnd={restartKakao} />
+            <CountUp key={kakaoKey} end={33} duration={15} delay={1} onEnd={restartKakao} />
          </div>
       </div>
 
       {/* Threads */}
-       <div className="absolute top-1/2 left-1/2 translate-x-[0rem] -translate-y-[10rem] animate-float animation-delay-2000">
+       <div className="absolute top-1/2 left-1/2 translate-x-[-5em] -translate-y-[13rem] animate-float animation-delay-2000">
         <Image src="/images/logos/thread_logo.png" width={50} height={50} alt="threads icon" className="drop-shadow-lg" />
       </div>
       
-      {/* Floating 'Like' Icons for Youtube */}
-      <div className="absolute top-1/2 left-1/2 translate-x-2 -translate-y-24">
-        <FaThumbsUp className="text-blue-500 text-xl animate-rise animation-delay-500" />
-      </div>
-      <div className="absolute top-1/2 left-1/2 translate-x-8 -translate-y-32">
-        <FaThumbsUp className="text-blue-500 text-xl animate-rise animation-delay-1500" />
-      </div>
-       <div className="absolute top-1/2 left-1/2 translate-x-12 -translate-y-20">
-        <FaThumbsUp className="text-blue-500 text-xl animate-rise animation-delay-2500" />
-      </div>
+      {/* Floating 'Like' Icons using Framer Motion */}
+      <motion.div
+        className="absolute top-1/2 left-1/2 translate-x-2 -translate-y-24"
+        animate={{
+          y: [0, -80],
+          opacity: [0, 1, 0],
+        }}
+        transition={{ duration: 3, delay: 0.5, repeat: Infinity, ease: "linear" }}
+      >
+        <FaThumbsUp className="text-blue-500 text-xl" />
+      </motion.div>
+      <motion.div
+        className="absolute top-1/2 left-1/2 translate-x-8 -translate-y-32"
+        animate={{
+          y: [0, -80],
+          opacity: [0, 1, 0],
+        }}
+        transition={{ duration: 3, delay: 1.5, repeat: Infinity, ease: "linear" }}
+      >
+        <FaThumbsUp className="text-blue-500 text-xl" />
+      </motion.div>
+      <motion.div
+        className="absolute top-1/2 left-1/2 translate-x-12 -translate-y-20"
+        animate={{
+          y: [0, -80],
+          opacity: [0, 1, 0],
+        }}
+        transition={{ duration: 3, delay: 2.5, repeat: Infinity, ease: "linear" }}
+      >
+        <FaThumbsUp className="text-blue-500 text-xl" />
+      </motion.div>
+      <motion.div
+        className="absolute top-1/2 left-1/2 -translate-x-6 -translate-y-28"
+        animate={{
+          y: [0, -80],
+          opacity: [0, 1, 0],
+        }}
+        transition={{ duration: 3, delay: 0.8, repeat: Infinity, ease: "linear" }}
+      >
+        <FaThumbsUp className="text-blue-500 text-xl" />
+      </motion.div>
+      <motion.div
+        className="absolute top-1/2 left-1/2 -translate-x-10 -translate-y-22"
+        animate={{
+          y: [0, -80],
+          opacity: [0, 1, 0],
+        }}
+        transition={{ duration: 3, delay: 1.8, repeat: Infinity, ease: "linear" }}
+      >
+        <FaThumbsUp className="text-blue-500 text-xl" />
+      </motion.div>
+      <motion.div
+        className="absolute top-1/2 left-1/2 translate-x-14 -translate-y-30"
+        animate={{
+          y: [0, -80],
+          opacity: [0, 1, 0],
+        }}
+        transition={{ duration: 3, delay: 2.8, repeat: Infinity, ease: "linear" }}
+      >
+        <FaThumbsUp className="text-blue-500 text-xl" />
+      </motion.div>
     </div>
   );
 };
 
-export default OrdaHeroAnimation; 
+export default OrdaHeroAnimation;

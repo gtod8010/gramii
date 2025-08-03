@@ -90,9 +90,29 @@ export async function POST(request: Request) {
         let apiUrl: string | undefined;
         let payload: ExternalApiPayload;
 
-        // 2pm 서비스 (ID >= 20000) 또는 Realsite 서비스 분기
-        if (externalServiceId >= 20000) {
-          // 2pm.co.kr API 연동
+        // ID 값에 따라 Realsite, 2pm, InstaMonster API로 분기
+        if (externalServiceId >= 40000) {
+          // InstaMonster API 연동 (ID >= 40000)
+          apiKey = process.env.INSTAMONSTER_API_KEY;
+          apiUrl = process.env.INSTAMONSTER_API_URL;
+
+          if (!apiKey || !apiUrl) {
+            throw new Error('InstaMonster API 환경 변수가 설정되지 않았습니다. .env.local 파일을 확인해주세요.');
+          }
+
+          payload = {
+            key: apiKey,
+            action: 'add',
+            service: externalServiceId - 40000, // InstaMonster 원본 서비스 ID로 변환
+            link: linkValue,
+            quantity: quantity,
+          };
+          if (comments) {
+            payload.comments = comments;
+          }
+
+        } else if (externalServiceId >= 20000) {
+          // 2pm.co.kr API 연동 (20000 <= ID < 40000)
           apiKey = process.env.TWOPM_API_KEY;
           apiUrl = process.env.TWOPM_API_URL;
 
@@ -111,7 +131,7 @@ export async function POST(request: Request) {
             payload.comments = comments;
           }
         } else {
-          // Realsite API 연동
+          // Realsite API 연동 (ID < 20000)
           apiKey = process.env.REALSITE_API_KEY;
           apiUrl = process.env.REALSITE_API_URL;
 

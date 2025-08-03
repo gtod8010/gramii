@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
+import { siteConfig } from '@/lib/constants';
 
 interface Message {
   id: number;
@@ -11,9 +12,9 @@ interface Message {
 }
 
 const initialMessages: Message[] = [
-  { id: 1, text: '인스타그램팔로워늘리기를 주문했어요! 작업 소요 시간이 궁금합니다!', sender: 'user', avatar: '/images/user/user-03.jpg' },
-  { id: 2, text: '안녕하세요. GRAMII 입니다! 주문 후 평균 1분 ~60분 내 자동으로 작업이 시작됩니다.', sender: 'support', avatar: '/images/user/user-05.jpg' },
-  { id: 3, text: '처음 주문하는건데 인스타팔로워구매는 안전한가요?', sender: 'user', avatar: '/images/user/user-03.jpg' },
+  { id: 1, text: '안녕하세요! 인스타그램 팔로워 늘리고 싶은데 어떻게 해야하나요?', sender: 'user', avatar: '/images/user/user-01.jpg' },
+  { id: 2, text: `안녕하세요. ${siteConfig.name.en} 입니다! 주문 후 평균 1분 ~60분 내 자동으로 작업이 시작됩니다.`, sender: 'support', avatar: '/images/user/user-05.jpg' },
+  { id: 3, text: '팔로워가 줄어들 수도 있나요?', sender: 'user', avatar: '/images/user/user-01.jpg' },
   { id: 4, text: '계정에 무리가 가지 않는 방향으로 테스트를 거친 후 서비스가 진행되기 때문에 안심하셔도 됩니다 :)', sender: 'support', avatar: '/images/user/user-05.jpg' },
   { id: 5, text: '친절한 답변 감사합니다! 빠르게 인스타 팔로워 늘리는법이 있을까요?', sender: 'user', avatar: '/images/user/user-03.jpg' },
 ];

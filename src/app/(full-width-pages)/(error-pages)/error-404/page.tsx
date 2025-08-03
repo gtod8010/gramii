@@ -3,11 +3,11 @@ import { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
+import { siteConfig } from '@/lib/constants';
 
 export const metadata: Metadata = {
-  title: "GRAMII 404",
-  description:
-    "THIS IS FOR 404 PAGE",
+  title: `${siteConfig.name.en} 404`,
+  description: '페이지를 찾을 수 없습니다.',
 };
 
 export default function Error404() {
