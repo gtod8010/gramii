@@ -84,10 +84,13 @@ export async function POST() {
 
     for (const service of servicesToSync) {
       const realsite_service_id = parseInt(service.service, 10) + ID_OFFSET;
-      // InstaMonster는 rate가 이미 최종 가격이므로 1000으로 나누지 않음.
-      const rate = parseFloat(service.rate);
+      
+      const apiRate = parseFloat(service.rate);
       const min_order = parseInt(service.min, 10);
       const max_order = parseInt(service.max, 10);
+      
+      // 단위당 가격 계산: rate를 max_order로 나눔
+      const rate = max_order > 0 ? apiRate / max_order : 0;
 
       if (isNaN(realsite_service_id) || isNaN(rate) || isNaN(min_order) || isNaN(max_order)) {
         console.warn('Skipping invalid service data from InstaMonster:', service);
@@ -137,7 +140,13 @@ export async function POST() {
       total_services_from_api: allServices.length,
       filtered_services_to_sync: servicesToSync.length,
       processed_services: upsertedCount,
-      synced_services: servicesToSync.map(s => ({ id: s.service, name: s.name })),
+      synced_services: servicesToSync.map(s => ({ 
+        id: s.service, 
+        name: s.name, 
+        original_rate: s.rate,
+        max_quantity: s.max,
+        calculated_unit_price: (parseFloat(s.rate) / parseInt(s.max, 10)) 
+      })),
     });
 
   } catch (error) {
