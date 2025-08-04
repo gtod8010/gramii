@@ -8,6 +8,7 @@ import AppSidebar from "@/layout/AppSidebar";
 // import Backdrop from "@/layout/Backdrop"; 
 import React from "react";
 import Image from "next/image";
+import { siteConfig } from "@/lib/constants";
 // import { useSidebar } from "@/context/SidebarContext"; // Backdrop을 위해 필요할 수 있음
 
 export default function AdminLayout({
@@ -36,7 +37,7 @@ export default function AdminLayout({
         </main>
       </div>
       <a
-        href="https://pf.kakao.com/_aIRrn"
+        href={siteConfig.kakaoTalkUrl}
         target="_blank"
         rel="noopener noreferrer"
         className="fixed bottom-10 right-10 z-50 transition-transform duration-300 hover:scale-110"

@@ -1,0 +1,19 @@
+<lint-module
+    format="1"
+    dir="/Users/dwight.k/Desktop/Utill/rhm/gramii/android-sms-forwarder/app"
+    name=":app"
+    type="APP"
+    maven="Gramii Sms Forwarder:app:"
+    agpVersion="8.2.0"
+    buildFolder="build"
+    bootClassPath="/Users/dwight.k/Library/Android/sdk/platforms/android-34/android.jar:/Users/dwight.k/Library/Android/sdk/build-tools/34.0.0/core-lambda-stubs.jar"
+    javaSourceLevel="1.8"
+    compileTarget="android-34"
+    neverShrinking="true">
+  <lintOptions
+      abortOnError="true"
+      absolutePaths="true"
+      checkReleaseBuilds="true"
+      explainIssues="true"/>
+  <variant name="release"/>
+</lint-module>

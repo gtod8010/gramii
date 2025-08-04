@@ -11,9 +11,9 @@ import 'swiper/css/pagination';
 
 const platformData = [
   { name: '인스타그램', icon: '/images/logos/instagram_logo.png' },
-  { name: '유투브', icon: '/images/logos/youtube_logo.png' },
+  { name: '유튜브', icon: '/images/logos/youtube_logo.png' },
   { name: '틱톡', icon: '/images/logos/tiktok_logo.png' },
-  { name: '쓰레드', icon: '/images/logos/thread_logo.png' },
+  { name: '스레드', icon: '/images/logos/thread_logo.png' },
   { name: '페이스북', icon: '/images/logos/facebook_logo.png' },
   { name: '네이버', icon: '/images/logos/naver_logo.png' },
   { name: '카카오톡', icon: '/images/logos/kakaotalk_logo.png' },
@@ -36,7 +36,7 @@ const OrdaCarouselSection = () => {
       <div className="container mx-auto text-center px-6 md:px-10">
         <div className="text-center">
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-            오르다에서 클릭 한번으로 올리다
+            오르다에서 클릭 한번으로 오르다
           </h2>
           <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto">
             검증된 노하우를 이제 오르다에서 경험해보세요.
