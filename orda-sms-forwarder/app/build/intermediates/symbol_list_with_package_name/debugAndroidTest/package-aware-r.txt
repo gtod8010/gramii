@@ -1,0 +1,3 @@
+com.gramii.smsforwarder.test
+style WhiteBackgroundDialogTheme
+style WhiteBackgroundTheme

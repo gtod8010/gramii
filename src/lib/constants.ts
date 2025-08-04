@@ -13,6 +13,7 @@ interface SiteConfig {
   address: string;
   businessNumber: string;
   mailOrderLicense: string;
+  kakaoTalkUrl: string;
 }
 
 const gramiiConfig: SiteConfig = {
@@ -27,6 +28,7 @@ const gramiiConfig: SiteConfig = {
   address: '서울특별시 강서구 공항대로 426',
   businessNumber: '572-05-03128',
   mailOrderLicense: '제2025-서울강서-1815호',
+  kakaoTalkUrl: 'http://pf.kakao.com/_aIRrn',
 };
 
 const ordaConfig: SiteConfig = {
@@ -41,9 +43,51 @@ const ordaConfig: SiteConfig = {
   address: '서울특별시 관악구 관천로26길 86',
   businessNumber: '266-69-00650',
   mailOrderLicense: '제2025-서울관악-0917호',
+  kakaoTalkUrl: 'http://pf.kakao.com/_xoxaPan',
 };
 
 export const siteConfig: SiteConfig = siteVariant === 'orda' ? ordaConfig : gramiiConfig;
+
+// 사이트별 입금 계좌 정보
+interface AccountDetail {
+  bank: string;
+  accountNumber: string;
+  accountHolder: string;
+}
+
+interface SiteAccountInfo {
+  default: AccountDetail;
+  tax: AccountDetail;
+}
+
+const gramiiAccounts: SiteAccountInfo = {
+  default: {
+    bank: '카카오뱅크',
+    accountNumber: '3333-09-7616546',
+    accountHolder: '김수민',
+  },
+  tax: {
+    bank: 'KB 국민은행',
+    accountNumber: '444401-01-499150',
+    accountHolder: '김수민(그래미)',
+  }
+};
+
+const ordaAccounts: SiteAccountInfo = {
+  default: {
+    bank: '카카오뱅크',
+    accountNumber: '3333-34-6848406',
+    accountHolder: '이승찬',
+  },
+  tax: {
+    bank: 'KB 국민은행',
+    accountNumber: '811401-04-358621',
+    accountHolder: '김대성',
+  }
+};
+
+export const accountInfo: SiteAccountInfo = siteVariant === 'orda' ? ordaAccounts : gramiiAccounts;
+
 
 // 주문 상태에 따른 뱃지 색상을 정의합니다.
 export const statusColors: { [key: string]: string } = {

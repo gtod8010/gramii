@@ -48,9 +48,14 @@ const OrdaReviewsSection = () => {
             <p className="text-lg text-gray-400 mb-10">
               전문 상담사가 친절하고 빠르게 안내해드립니다.
             </p>
-            <button className="bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold py-4 px-10 rounded-full transition-all duration-300 ease-in-out hover:scale-105 hover:shadow-lg hover:shadow-purple-500/50">
+            <a 
+              href="http://pf.kakao.com/_xoxaPan" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="inline-block bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold py-4 px-10 rounded-full transition-all duration-300 ease-in-out hover:scale-105 hover:shadow-lg hover:shadow-purple-500/50"
+            >
               상담사 연결하기
-            </button>
+            </a>
           </div>
 
           {/* Right Column - Reviews */}

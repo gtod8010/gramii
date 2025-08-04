@@ -1,0 +1,115 @@
+1<?xml version="1.0" encoding="utf-8"?>
+2<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+3    package="com.gramii.smsforwarder"
+4    android:versionCode="1"
+5    android:versionName="1.0" >
+6
+7    <uses-sdk
+8        android:minSdkVersion="26"
+9        android:targetSdkVersion="34" />
+10
+11    <!-- Permissions -->
+12    <uses-permission android:name="android.permission.INTERNET" />
+12-->/Users/dwight.k/Desktop/Utill/rhm/gramii/android-sms-forwarder/app/src/main/AndroidManifest.xml:6:5-67
+12-->/Users/dwight.k/Desktop/Utill/rhm/gramii/android-sms-forwarder/app/src/main/AndroidManifest.xml:6:22-64
+13    <uses-permission android:name="android.permission.RECEIVE_SMS" />
+13-->/Users/dwight.k/Desktop/Utill/rhm/gramii/android-sms-forwarder/app/src/main/AndroidManifest.xml:7:5-70
+13-->/Users/dwight.k/Desktop/Utill/rhm/gramii/android-sms-forwarder/app/src/main/AndroidManifest.xml:7:22-67
+14    <uses-permission android:name="android.permission.READ_SMS" />
+14-->/Users/dwight.k/Desktop/Utill/rhm/gramii/android-sms-forwarder/app/src/main/AndroidManifest.xml:8:5-67
+14-->/Users/dwight.k/Desktop/Utill/rhm/gramii/android-sms-forwarder/app/src/main/AndroidManifest.xml:8:22-64
+15
+16    <permission
+16-->[androidx.core:core:1.12.0] /Users/dwight.k/.gradle/caches/8.12/transforms/96bfd91bf2a39377ced47a1036eeab2d/transformed/core-1.12.0/AndroidManifest.xml:22:5-24:47
+17        android:name="com.gramii.smsforwarder.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
+17-->[androidx.core:core:1.12.0] /Users/dwight.k/.gradle/caches/8.12/transforms/96bfd91bf2a39377ced47a1036eeab2d/transformed/core-1.12.0/AndroidManifest.xml:23:9-81
+18        android:protectionLevel="signature" />
+18-->[androidx.core:core:1.12.0] /Users/dwight.k/.gradle/caches/8.12/transforms/96bfd91bf2a39377ced47a1036eeab2d/transformed/core-1.12.0/AndroidManifest.xml:24:9-44
+19
+20    <uses-permission android:name="com.gramii.smsforwarder.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" />
+20-->[androidx.core:core:1.12.0] /Users/dwight.k/.gradle/caches/8.12/transforms/96bfd91bf2a39377ced47a1036eeab2d/transformed/core-1.12.0/AndroidManifest.xml:26:5-97
+20-->[androidx.core:core:1.12.0] /Users/dwight.k/.gradle/caches/8.12/transforms/96bfd91bf2a39377ced47a1036eeab2d/transformed/core-1.12.0/AndroidManifest.xml:26:22-94
+21
+22    <application
+22-->/Users/dwight.k/Desktop/Utill/rhm/gramii/android-sms-forwarder/app/src/main/AndroidManifest.xml:10:5-40:19
+23        android:allowBackup="true"
+23-->/Users/dwight.k/Desktop/Utill/rhm/gramii/android-sms-forwarder/app/src/main/AndroidManifest.xml:11:9-35
+24        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
+24-->[androidx.core:core:1.12.0] /Users/dwight.k/.gradle/caches/8.12/transforms/96bfd91bf2a39377ced47a1036eeab2d/transformed/core-1.12.0/AndroidManifest.xml:28:18-86
+25        android:dataExtractionRules="@xml/data_extraction_rules"
+25-->/Users/dwight.k/Desktop/Utill/rhm/gramii/android-sms-forwarder/app/src/main/AndroidManifest.xml:12:9-65
+26        android:debuggable="true"
+27        android:extractNativeLibs="false"
+28        android:fullBackupContent="@xml/backup_rules"
+28-->/Users/dwight.k/Desktop/Utill/rhm/gramii/android-sms-forwarder/app/src/main/AndroidManifest.xml:13:9-54
+29        android:icon="@mipmap/ic_launcher"
+29-->/Users/dwight.k/Desktop/Utill/rhm/gramii/android-sms-forwarder/app/src/main/AndroidManifest.xml:14:9-43
+30        android:label="@string/app_name"
+30-->/Users/dwight.k/Desktop/Utill/rhm/gramii/android-sms-forwarder/app/src/main/AndroidManifest.xml:15:9-41
+31        android:roundIcon="@mipmap/ic_launcher_round"
+31-->/Users/dwight.k/Desktop/Utill/rhm/gramii/android-sms-forwarder/app/src/main/AndroidManifest.xml:16:9-54
+32        android:supportsRtl="true"
+32-->/Users/dwight.k/Desktop/Utill/rhm/gramii/android-sms-forwarder/app/src/main/AndroidManifest.xml:17:9-35
+33        android:theme="@style/Theme.GramiiSmsForwarder"
+33-->/Users/dwight.k/Desktop/Utill/rhm/gramii/android-sms-forwarder/app/src/main/AndroidManifest.xml:18:9-56
+34        android:usesCleartextTraffic="true" >
+34-->/Users/dwight.k/Desktop/Utill/rhm/gramii/android-sms-forwarder/app/src/main/AndroidManifest.xml:19:9-44
+35        <activity
+35-->/Users/dwight.k/Desktop/Utill/rhm/gramii/android-sms-forwarder/app/src/main/AndroidManifest.xml:21:9-28:20
+36            android:name="com.gramii.smsforwarder.MainActivity"
+36-->/Users/dwight.k/Desktop/Utill/rhm/gramii/android-sms-forwarder/app/src/main/AndroidManifest.xml:22:13-41
+37            android:exported="true" >
+37-->/Users/dwight.k/Desktop/Utill/rhm/gramii/android-sms-forwarder/app/src/main/AndroidManifest.xml:23:13-36
+38            <intent-filter>
+38-->/Users/dwight.k/Desktop/Utill/rhm/gramii/android-sms-forwarder/app/src/main/AndroidManifest.xml:24:13-27:29
+39                <action android:name="android.intent.action.MAIN" />
+39-->/Users/dwight.k/Desktop/Utill/rhm/gramii/android-sms-forwarder/app/src/main/AndroidManifest.xml:25:17-69
+39-->/Users/dwight.k/Desktop/Utill/rhm/gramii/android-sms-forwarder/app/src/main/AndroidManifest.xml:25:25-66
+40
+41                <category android:name="android.intent.category.LAUNCHER" />
+41-->/Users/dwight.k/Desktop/Utill/rhm/gramii/android-sms-forwarder/app/src/main/AndroidManifest.xml:26:17-77
+41-->/Users/dwight.k/Desktop/Utill/rhm/gramii/android-sms-forwarder/app/src/main/AndroidManifest.xml:26:27-74
+42            </intent-filter>
+43        </activity>
+44
+45        <!-- BroadcastReceiver for SMS -->
+46        <receiver
+46-->/Users/dwight.k/Desktop/Utill/rhm/gramii/android-sms-forwarder/app/src/main/AndroidManifest.xml:31:9-38:20
+47            android:name="com.gramii.smsforwarder.SmsReceiver"
+47-->/Users/dwight.k/Desktop/Utill/rhm/gramii/android-sms-forwarder/app/src/main/AndroidManifest.xml:32:13-40
+48            android:exported="true"
+48-->/Users/dwight.k/Desktop/Utill/rhm/gramii/android-sms-forwarder/app/src/main/AndroidManifest.xml:33:13-36
+49            android:permission="android.permission.BROADCAST_SMS" >
+49-->/Users/dwight.k/Desktop/Utill/rhm/gramii/android-sms-forwarder/app/src/main/AndroidManifest.xml:34:13-66
+50            <intent-filter>
+50-->/Users/dwight.k/Desktop/Utill/rhm/gramii/android-sms-forwarder/app/src/main/AndroidManifest.xml:35:13-37:29
+51                <action android:name="android.provider.Telephony.SMS_RECEIVED" />
+51-->/Users/dwight.k/Desktop/Utill/rhm/gramii/android-sms-forwarder/app/src/main/AndroidManifest.xml:36:17-82
+51-->/Users/dwight.k/Desktop/Utill/rhm/gramii/android-sms-forwarder/app/src/main/AndroidManifest.xml:36:25-79
+52            </intent-filter>
+53        </receiver>
+54
+55        <provider
+55-->[androidx.emoji2:emoji2:1.2.0] /Users/dwight.k/.gradle/caches/8.12/transforms/4827947e39fb2755bd683b4d18ca332b/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:24:9-32:20
+56            android:name="androidx.startup.InitializationProvider"
+56-->[androidx.emoji2:emoji2:1.2.0] /Users/dwight.k/.gradle/caches/8.12/transforms/4827947e39fb2755bd683b4d18ca332b/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:25:13-67
+57            android:authorities="com.gramii.smsforwarder.androidx-startup"
+57-->[androidx.emoji2:emoji2:1.2.0] /Users/dwight.k/.gradle/caches/8.12/transforms/4827947e39fb2755bd683b4d18ca332b/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:26:13-68
+58            android:exported="false" >
+58-->[androidx.emoji2:emoji2:1.2.0] /Users/dwight.k/.gradle/caches/8.12/transforms/4827947e39fb2755bd683b4d18ca332b/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:27:13-37
+59            <meta-data
+59-->[androidx.emoji2:emoji2:1.2.0] /Users/dwight.k/.gradle/caches/8.12/transforms/4827947e39fb2755bd683b4d18ca332b/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:29:13-31:52
+60                android:name="androidx.emoji2.text.EmojiCompatInitializer"
+60-->[androidx.emoji2:emoji2:1.2.0] /Users/dwight.k/.gradle/caches/8.12/transforms/4827947e39fb2755bd683b4d18ca332b/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:30:17-75
+61                android:value="androidx.startup" />
+61-->[androidx.emoji2:emoji2:1.2.0] /Users/dwight.k/.gradle/caches/8.12/transforms/4827947e39fb2755bd683b4d18ca332b/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:31:17-49
+62            <meta-data
+62-->[androidx.lifecycle:lifecycle-process:2.4.1] /Users/dwight.k/.gradle/caches/8.12/transforms/73af86430606a34a505790c2d144d898/transformed/jetified-lifecycle-process-2.4.1/AndroidManifest.xml:31:13-33:52
+63                android:name="androidx.lifecycle.ProcessLifecycleInitializer"
+63-->[androidx.lifecycle:lifecycle-process:2.4.1] /Users/dwight.k/.gradle/caches/8.12/transforms/73af86430606a34a505790c2d144d898/transformed/jetified-lifecycle-process-2.4.1/AndroidManifest.xml:32:17-78
+64                android:value="androidx.startup" />
+64-->[androidx.lifecycle:lifecycle-process:2.4.1] /Users/dwight.k/.gradle/caches/8.12/transforms/73af86430606a34a505790c2d144d898/transformed/jetified-lifecycle-process-2.4.1/AndroidManifest.xml:33:17-49
+65        </provider>
+66    </application>
+67
+68</manifest>

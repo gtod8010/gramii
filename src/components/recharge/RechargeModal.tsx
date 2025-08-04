@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
-import { siteConfig } from '@/lib/constants';
+import { siteConfig, accountInfo } from '@/lib/constants';
 import Image from 'next/image';
 
 interface RechargeModalProps {
@@ -22,19 +22,6 @@ export default function RechargeModal({ isOpen, onClose }: RechargeModalProps) {
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [amountError, setAmountError] = useState<string | null>(null);
 
-  const accountInfo = {
-    default: {
-      bank: '카카오뱅크',
-      accountNumber: '3333-09-7616546',
-      accountHolder: '김수민',
-    },
-    tax: {
-      bank: 'KB 국민은행',
-      accountNumber: '444401-01-499150',
-      accountHolder: '김수민(그래미)',
-    }
-  };
-  
   const depositAccount = receiptType === 'tax_invoice' ? accountInfo.tax : accountInfo.default;
 
   // 세금계산서 필드
