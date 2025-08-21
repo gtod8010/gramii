@@ -112,7 +112,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun sendTestSms() {
-        val apiUrl = "http://192.168.45.190:3001/api/sms-incoming/test"
+        val apiUrl = "https://www.orda.it.kr/api/sms-incoming"
         val from = "010-0000-0000"
         val body = "[테스트] Gramii SMS Forwarder Test Message"
         val isoFormat = java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", java.util.Locale.getDefault())

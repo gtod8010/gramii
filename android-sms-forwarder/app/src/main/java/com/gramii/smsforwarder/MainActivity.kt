@@ -28,7 +28,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var logAdapter: LogAdapter
     private val logMessages = mutableListOf<String>()
     private val gson = Gson()
-    
+
     private val logReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             intent?.getStringExtra(EXTRA_LOG_MESSAGE)?.let { message ->
@@ -47,7 +47,7 @@ class MainActivity : AppCompatActivity() {
         setupUI()
         loadLogs()
         checkAndRequestPermissions()
-        
+
         val intentFilter = IntentFilter(ACTION_LOG_UPDATE)
         ContextCompat.registerReceiver(this, logReceiver, intentFilter, ContextCompat.RECEIVER_NOT_EXPORTED)
     }
@@ -72,7 +72,7 @@ class MainActivity : AppCompatActivity() {
             clearLogs()
         }
     }
-    
+
     override fun onPause() {
         super.onPause()
         saveLogs()
@@ -112,7 +112,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun sendTestSms() {
-        val apiUrl = "https://gramii.co.kr/api/sms-incoming/test"
+        val apiUrl = "https://gramii.co.kr/api/sms-incoming"
         val from = "010-0000-0000"
         val body = "[테스트] Gramii SMS Forwarder Test Message"
         val isoFormat = java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", java.util.Locale.getDefault())
@@ -137,7 +137,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun addLogMessage(message: String) {
         val timestampedMessage = "[${getCurrentTimestamp()}] $message"
-        logMessages.add(0, timestampedMessage) // Add to the top of the list
+        logMessages.add(0, timestampedMessage)
         logAdapter.notifyDataSetChanged()
     }
 
@@ -146,7 +146,7 @@ class MainActivity : AppCompatActivity() {
         logAdapter.notifyDataSetChanged()
         saveLogs()
     }
-    
+
     private fun saveLogs() {
         val json = gson.toJson(logMessages)
         prefs.edit().putString(KEY_LOGS, json).apply()
@@ -171,7 +171,7 @@ class MainActivity : AppCompatActivity() {
         const val KEY_LOGS = "sms_logs"
         const val ACTION_LOG_UPDATE = "com.gramii.smsforwarder.LOG_UPDATE"
         const val EXTRA_LOG_MESSAGE = "log_message"
-        
+
         private const val PERMISSION_REQUEST_CODE = 101
     }
 } 
