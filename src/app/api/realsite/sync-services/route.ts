@@ -58,11 +58,14 @@ export async function POST() {
 
     // 2. Realsite API에서 서비스 목록을 가져옵니다.
     // 실제 API URL과 키는 환경 변수에서 가져와야 합니다.
-    const apiKey = process.env.REALSITE_API_KEY;
+    const siteVariant = process.env.NEXT_PUBLIC_SITE_VARIANT || 'gramii';
+    const apiKey = siteVariant === 'orda'
+      ? process.env.REALSITE_API_KEY_ORDA
+      : process.env.REALSITE_API_KEY_GRAMII;
     const apiUrl = process.env.REALSITE_API_URL;
 
     if (!apiKey || !apiUrl) {
-      throw new Error('Realsite API 키 또는 URL이 설정되지 않았습니다.');
+      throw new Error('Realsite API 키 또는 URL이 설정되지 않았습니다. (.env.local의 REALSITE_API_KEY_GRAMII / REALSITE_API_KEY_ORDA 확인)');
     }
 
     // Realsite.shop API 사양에 따라 요청 본문을 구성합니다.

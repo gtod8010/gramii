@@ -132,11 +132,14 @@ export async function POST(request: Request) {
           }
         } else {
           // Realsite API 연동 (ID < 20000)
-          apiKey = process.env.REALSITE_API_KEY;
+          const siteVariant = process.env.NEXT_PUBLIC_SITE_VARIANT || 'gramii';
+          apiKey = siteVariant === 'orda'
+            ? process.env.REALSITE_API_KEY_ORDA
+            : process.env.REALSITE_API_KEY_GRAMII;
           apiUrl = process.env.REALSITE_API_URL;
 
           if (!apiKey || !apiUrl) {
-            throw new Error('Realsite API 환경 변수가 설정되지 않았습니다.');
+            throw new Error('Realsite API 환경 변수가 설정되지 않았습니다. (.env.local의 REALSITE_API_KEY_GRAMII / REALSITE_API_KEY_ORDA 확인)');
           }
 
           payload = {
