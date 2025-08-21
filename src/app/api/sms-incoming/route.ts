@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
   // 인증 로직 제거
   try {
     const payload: SmsWebhookPayload = await request.json();
-    const { from, body } = payload;
+    const { from, body, receivedAt } = payload;
     
     const client = await pool.connect();
     let updatedRequest = null;
@@ -20,10 +20,10 @@ export async function POST(request: NextRequest) {
     try {
       // 1. 모든 수신 SMS를 sms_logs 테이블에 기록
       const logSmsQuery = `
-        INSERT INTO sms_logs (sender, body)
-        VALUES ($1, $2);
+        INSERT INTO sms_logs (sender, body, received_at)
+        VALUES ($1, $2, $3);
       `;
-      await client.query(logSmsQuery, [from, body]);
+      await client.query(logSmsQuery, [from, body, receivedAt]);
 
       // 2. 다양한 은행 포맷을 처리하기 위한 파싱 로직
       let depositorName: string | null = null;
@@ -37,17 +37,56 @@ export async function POST(request: NextRequest) {
           depositorName = match[2].trim();
         }
       } 
-      // KB국민은행 포맷 처리: 이름 다음 줄에 "입금 [금액]원"이 오는 패턴
+      // KB국민은행 포맷 처리: 이름 다음 줄에 금액 라인이 오는 패턴
       else if (body.includes('[KB')) {
         const lines = body.split('\n').map(line => line.trim());
         const amountLineIndex = lines.findIndex(l => l.startsWith('입금'));
-        
-        // '입금' 줄이 있고, 그 앞뒤로 다른 줄이 있다면
-        if (amountLineIndex > 0 && amountLineIndex < lines.length - 1) { 
+        if (amountLineIndex > 0 && amountLineIndex < lines.length - 1) {
           const amountStr = lines[amountLineIndex + 1].replace(/[^0-9]/g, '');
           if (amountStr) {
             amount = parseInt(amountStr, 10);
-            depositorName = lines[amountLineIndex - 1]; // '입금' 바로 윗 줄을 입금자명으로 간주
+            depositorName = lines[amountLineIndex - 1];
+          }
+        }
+      } 
+      // 기업은행(IBK) 등 일반 포맷 처리: "입금 [금액]원"을 찾고, 이후 줄들에서 이름 후보를 탐지
+      else {
+        const lines = body.split('\n').map(line => line.trim()).filter(l => l.length > 0);
+        // 금액 라인 탐색 (예: "입금 1원", "입금 12,000원")
+        const amountIdx = lines.findIndex(l => /^입금\s+[\d,]+원$/.test(l) || l === '입금');
+        if (amountIdx !== -1) {
+          // 금액 파싱
+          let amountCandidate: string | null = null;
+          if (/^입금\s+[\d,]+원$/.test(lines[amountIdx])) {
+            amountCandidate = (lines[amountIdx].match(/([\d,]+)원$/)?.[1] || '').replace(/,/g, '');
+          } else if (lines[amountIdx] === '입금' && amountIdx + 1 < lines.length) {
+            // 다음 줄이 숫자만 있는 경우 (KB와 유사 포맷의 일반화)
+            amountCandidate = lines[amountIdx + 1].replace(/[^0-9]/g, '');
+          }
+          if (amountCandidate && amountCandidate.length > 0) {
+            amount = parseInt(amountCandidate, 10);
+          }
+
+          // 이름 후보 탐색: 금액 라인 이후 1~3줄 중에서 한글/영문 위주, 숫자나 별표가 거의 없는 라인
+          const isProbableName = (s: string) => {
+            if (!s) return false;
+            if (s.includes('잔액')) return false;
+            if (/[0-9*]/.test(s)) return false;
+            // 한글/영문 및 공백만 허용
+            return /^[A-Za-z가-힣\s]{2,20}$/.test(s);
+          };
+
+          const searchRange = lines.slice(amountIdx + 1, amountIdx + 4);
+          const nameAfter = searchRange.find(isProbableName);
+          if (nameAfter) {
+            depositorName = nameAfter.trim();
+          } else {
+            // 혹시 앞줄에 있는 경우도 대비
+            const prevRange = lines.slice(Math.max(0, amountIdx - 3), amountIdx).reverse();
+            const nameBefore = prevRange.find(isProbableName);
+            if (nameBefore) {
+              depositorName = nameBefore.trim();
+            }
           }
         }
       }

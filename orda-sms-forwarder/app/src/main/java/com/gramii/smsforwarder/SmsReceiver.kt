@@ -32,7 +32,7 @@ class SmsReceiver : BroadcastReceiver() {
     }
 
     private fun sendToServer(context: Context, from: String, body: String) {
-        val apiUrl = "https://www.orda.it.kr/api/sms-incoming"
+        val apiUrl = "http://192.168.45.190:3001/api/sms-incoming"
         
         val isoFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.getDefault())
         isoFormat.timeZone = TimeZone.getTimeZone("UTC")

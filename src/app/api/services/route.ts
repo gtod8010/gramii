@@ -90,7 +90,9 @@ export async function GET(request: NextRequest) {
       special_name: row.special_name === undefined ? null : row.special_name,
       special_id: row.special_id === undefined ? null : row.special_id,
       type: row.type === undefined ? null : row.type,
-      realsite_rate: row.realsite_rate === undefined ? null : row.realsite_rate
+      realsite_rate: row.realsite_rate === undefined ? null : row.realsite_rate,
+      // 진단 필드: 판매가 대비 공급가 역전 여부
+      realsite_vs_price_flag: (row.realsite_rate != null && row.price_per_unit != null && Number(row.realsite_rate) >= Number(row.price_per_unit)) ? 'check' : null
     }));
 
     return NextResponse.json(servicesWithCustomPrice);

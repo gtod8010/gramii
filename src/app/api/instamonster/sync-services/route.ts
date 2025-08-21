@@ -89,8 +89,11 @@ export async function POST() {
       const min_order = parseInt(service.min, 10);
       const max_order = parseInt(service.max, 10);
       
-      // 단위당 가격 계산: rate를 max_order로 나눔
-      const rate = max_order > 0 ? apiRate / max_order : 0;
+      // 단위당 가격 계산 후보 2가지
+      const unitByMax = max_order > 0 ? apiRate / max_order : 0;
+      const unitByThousand = apiRate / 1000;
+      // Instamonster는 1000단위 요금 체계를 사용하므로 1000으로 나눈 값을 저장
+      const rate = unitByThousand;
 
       if (isNaN(realsite_service_id) || isNaN(rate) || isNaN(min_order) || isNaN(max_order)) {
         console.warn('Skipping invalid service data from InstaMonster:', service);
@@ -140,13 +143,24 @@ export async function POST() {
       total_services_from_api: allServices.length,
       filtered_services_to_sync: servicesToSync.length,
       processed_services: upsertedCount,
-      synced_services: servicesToSync.map(s => ({ 
-        id: s.service, 
-        name: s.name, 
-        original_rate: s.rate,
-        max_quantity: s.max,
-        calculated_unit_price: (parseFloat(s.rate) / parseInt(s.max, 10)) 
-      })),
+      // 진단 정보: 단가 계산 방식 비교용
+      synced_services: servicesToSync.map(s => {
+        const apiRate = parseFloat(s.rate);
+        const maxQty = parseInt(s.max, 10);
+        const byMax = maxQty > 0 ? apiRate / maxQty : 0;
+        const byThousand = apiRate / 1000;
+        return ({
+          id: s.service,
+          name: s.name,
+          category: s.category,
+          original_rate_from_api: s.rate,
+          min_quantity: s.min,
+          max_quantity: s.max,
+          calculated_unit_price_by_max: byMax,
+          calculated_unit_price_by_1000: byThousand,
+          chosen_unit_price: byThousand,
+        });
+      }),
     });
 
   } catch (error) {

@@ -75,9 +75,9 @@ const gramiiAccounts: SiteAccountInfo = {
 
 const ordaAccounts: SiteAccountInfo = {
   default: {
-    bank: '카카오뱅크',
-    accountNumber: '3333-34-6848406',
-    accountHolder: '이승찬',
+    bank: '기업은행',
+    accountNumber: '972-012766-01-019',
+    accountHolder: '김대성',
   },
   tax: {
     bank: 'KB 국민은행',
