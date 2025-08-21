@@ -97,6 +97,7 @@ export async function POST() {
 
     // 4. 가져온 모든 서비스를 DB에 Upsert(Update or Insert) 합니다.
     let upsertedCount = 0;
+    const remoteIds: number[] = [];
     for (const service of services) {
       // 숫자형 데이터 파싱 및 유효성 검사
       const realsite_service_id = parseInt(service.service, 10);
@@ -109,6 +110,9 @@ export async function POST() {
         continue; // 유효하지 않은 데이터는 건너뜁니다.
       }
       
+      // 수집: 원격에 존재하는 서비스 ID 목록 (정수)
+      remoteIds.push(realsite_service_id);
+
       const upsertQuery = `
         INSERT INTO realsite_services (
           realsite_service_id, name, type, category, rate, min_order, max_order, dripfeed, refill, cancel, last_synced_at
@@ -160,14 +164,27 @@ export async function POST() {
     `;
     const { rowCount: deactivatedCount } = await client.query(findProblematicServicesQuery);
 
-    // 6. 트랜잭션 커밋
+    // 6. 벤더에서 사라진 서비스 비활성화 처리 (Realsite: 오프셋 없음, 숫자 external_id만 대상)
+    // external_id가 숫자이고, 20000 미만(오프셋 ID 아님)이며, 원격 목록에 없는 경우 비활성화
+    const deactivateMissingQuery = `
+      UPDATE services s
+      SET is_active = false
+      WHERE s.is_active = true
+        AND s.external_id ~ '^[0-9]+$'
+        AND (s.external_id)::integer < 20000
+        AND NOT ((s.external_id)::integer = ANY($1::int[]));
+    `;
+    const { rowCount: deactivatedMissingCount } = await client.query(deactivateMissingQuery, [remoteIds]);
+
+    // 7. 트랜잭션 커밋
     await client.query('COMMIT');
 
     return NextResponse.json({
       message: 'Realsite 서비스 목록 동기화가 성공적으로 완료되었습니다.',
       total_services_from_api: services.length,
       processed_services: upsertedCount,
-      deactivated_on_price_issue: deactivatedCount, // 비활성화된 서비스 수 추가
+      deactivated_on_price_issue: deactivatedCount, // 비활성화된 서비스 수(가격 역전)
+      deactivated_missing_on_vendor: deactivatedMissingCount, // 벤더에 존재하지 않아 비활성화
     });
 
   } catch (error) {

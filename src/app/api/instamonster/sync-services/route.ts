@@ -81,9 +81,11 @@ export async function POST() {
 
     let upsertedCount = 0;
     const ID_OFFSET = 40000; // InstaMonster 서비스 ID에 대한 오프셋
+    const remoteIds: number[] = [];
 
     for (const service of servicesToSync) {
       const realsite_service_id = parseInt(service.service, 10) + ID_OFFSET;
+      remoteIds.push(realsite_service_id);
       
       const apiRate = parseFloat(service.rate);
       const min_order = parseInt(service.min, 10);
@@ -135,6 +137,17 @@ export async function POST() {
       upsertedCount++;
     }
 
+    // 벤더에서 사라진 서비스 비활성화 (external_id 숫자 AND 40000 이상)
+    const deactivateMissingQuery = `
+      UPDATE services s
+      SET is_active = false
+      WHERE s.is_active = true
+        AND s.external_id ~ '^[0-9]+$'
+        AND (s.external_id)::integer >= 40000
+        AND NOT ((s.external_id)::integer = ANY($1::int[]));
+    `;
+    const { rowCount: deactivatedMissingCount } = await client.query(deactivateMissingQuery, [remoteIds]);
+
     await client.query('COMMIT');
 
     return NextResponse.json({
@@ -160,6 +173,7 @@ export async function POST() {
           chosen_unit_price: byThousand,
         });
       }),
+      deactivated_missing_on_vendor: deactivatedMissingCount,
     });
 
   } catch (error) {

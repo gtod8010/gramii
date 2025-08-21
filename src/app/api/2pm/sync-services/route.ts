@@ -74,10 +74,12 @@ export async function POST() {
 
     let upsertedCount = 0;
     const ID_OFFSET = 20000; // ID 충돌 방지를 위한 오프셋
+    const remoteIds: number[] = [];
 
     for (const service of services) {
       // 2pm 서비스 ID에 20000을 더합니다.
       const realsite_service_id = parseInt(service.service, 10) + ID_OFFSET;
+      remoteIds.push(realsite_service_id);
       // rate는 1000으로 나눕니다.
       const rate = parseFloat(service.rate) / 1000;
       const min_order = parseInt(service.min, 10);
@@ -125,12 +127,24 @@ export async function POST() {
       upsertedCount++;
     }
 
+    // 벤더에서 사라진 서비스 비활성화 (external_id 숫자 AND 20000~39999 범위)
+    const deactivateMissingQuery = `
+      UPDATE services s
+      SET is_active = false
+      WHERE s.is_active = true
+        AND s.external_id ~ '^[0-9]+$'
+        AND (s.external_id)::integer >= 20000 AND (s.external_id)::integer < 40000
+        AND NOT ((s.external_id)::integer = ANY($1::int[]));
+    `;
+    const { rowCount: deactivatedMissingCount } = await client.query(deactivateMissingQuery, [remoteIds]);
+
     await client.query('COMMIT');
 
     return NextResponse.json({
       message: '2pm.co.kr 서비스 목록이 realsite_services 테이블에 성공적으로 동기화되었습니다.',
       total_services_from_api: services.length,
       processed_services: upsertedCount,
+      deactivated_missing_on_vendor: deactivatedMissingCount,
     });
 
   } catch (error) {
