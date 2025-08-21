@@ -89,8 +89,7 @@ export async function POST() {
       const min_order = parseInt(service.min, 10);
       const max_order = parseInt(service.max, 10);
       
-      // 단위당 가격 계산 후보 2가지
-      const unitByMax = max_order > 0 ? apiRate / max_order : 0;
+      // 단위당 가격 계산: Instamonster는 1000단위 요금 체계
       const unitByThousand = apiRate / 1000;
       // Instamonster는 1000단위 요금 체계를 사용하므로 1000으로 나눈 값을 저장
       const rate = unitByThousand;
