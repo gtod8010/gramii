@@ -2,7 +2,8 @@
 import { ThemeToggleButton } from "@/components/common/ThemeToggleButton";
 import UserDropdown from "@/components/header/UserDropdown";
 import { useSidebar } from "@/context/SidebarContext";
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { useUser } from '@/hooks/useUser';
 import { usePathname } from 'next/navigation';
 
 // 페이지 경로에 따른 타이틀 매핑
@@ -59,6 +60,10 @@ const AppHeader: React.FC = () => {
 
         {/* 오른쪽 영역: 테마 토글, 사용자 드롭다운 */}
         <div className="flex items-center gap-3 sm:gap-4">
+          {/* 일 방문자 수 표시 (대시보드에서만 보이도록 간단 분기) */}
+          {pathname === '/dashboard' && (
+            <DailyVisitorsBadge />
+          )}
           <ThemeToggleButton className="mr-2" />
           <UserDropdown />
         </div>
@@ -68,3 +73,32 @@ const AppHeader: React.FC = () => {
 };
 
 export default AppHeader;
+
+// 서브 컴포넌트: 일 방문자 수 배지
+function DailyVisitorsBadge() {
+  const { user } = useUser();
+  const isAdmin = user?.role === 'admin';
+  const [uniqueVisitors, setUniqueVisitors] = useState<number | null>(null);
+  useEffect(() => {
+    if (!isAdmin) return; // 관리자 아닐 때는 호출하지 않음
+    let aborted = false;
+    const call = async () => {
+      try {
+        const res = await fetch('/api/track-visit', { method: 'POST' });
+        if (!res.ok) return;
+        const data = await res.json();
+        if (!aborted) setUniqueVisitors(Number(data.unique_visitors || 0));
+      } catch {}
+    };
+    call();
+    return () => { aborted = true; };
+  }, [isAdmin]);
+
+  if (!isAdmin) return null;
+
+  return (
+    <span className="text-sm text-gray-600 dark:text-gray-300 mr-2">
+      일 방문자 수: {uniqueVisitors === null ? '...' : uniqueVisitors.toLocaleString()}
+    </span>
+  );
+}
