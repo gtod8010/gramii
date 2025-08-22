@@ -58,9 +58,9 @@ export async function GET(request: NextRequest) {
       queryParams.push(Number(serviceTypeId));
     }
 
-    if (whereConditions.length > 0) {
-      query += ` WHERE ${whereConditions.join(' AND ')}`;
-    }
+    // 소프트 삭제 제외
+    whereConditions.push('s.deleted_at IS NULL');
+    query += ` WHERE ${whereConditions.join(' AND ')}`;
 
     // ORDER BY 절 구성
     if (serviceTypeId) {

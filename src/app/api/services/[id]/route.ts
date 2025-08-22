@@ -144,16 +144,35 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
   }
 
   try {
-    const ordersExist = await pool.query('SELECT id FROM orders WHERE service_id = $1 LIMIT 1', [id]);
-    if (ordersExist.rows.length > 0) {
-      return NextResponse.json({ message: '해당 서비스를 참조하는 주문 내역이 있어 삭제할 수 없습니다.' }, { status: 400 });
+    // 현재 서비스 상태 확인
+    const currentService = await pool.query('SELECT id, is_active, deleted_at FROM services WHERE id = $1', [id]);
+    if (currentService.rowCount === 0) {
+      return NextResponse.json({ message: '서비스를 찾을 수 없거나 이미 삭제되었습니다.' }, { status: 404 });
     }
 
-    const result = await pool.query('DELETE FROM services WHERE id = $1 RETURNING *', [id]);
+    const ordersExist = await pool.query('SELECT id FROM orders WHERE service_id = $1 LIMIT 1', [id]);
+
+    if (ordersExist.rows.length > 0) {
+      // 주문 이력이 있으면 소프트 삭제 처리
+      const soft = await pool.query(
+        `UPDATE services 
+         SET is_active = false, deleted_at = NOW(), updated_at = NOW()
+         WHERE id = $1 AND deleted_at IS NULL
+         RETURNING id`,
+        [id]
+      );
+      if (soft.rowCount === 0) {
+        return NextResponse.json({ message: '이미 삭제된 서비스입니다.' }, { status: 410 });
+      }
+      return NextResponse.json({ message: '주문 이력이 있어 소프트 삭제로 처리되었습니다.', softDeleted: true });
+    }
+
+    // 주문 이력이 없으면 물리 삭제
+    const result = await pool.query('DELETE FROM services WHERE id = $1 RETURNING id', [id]);
     if (result.rowCount === 0) {
       return NextResponse.json({ message: '서비스를 찾을 수 없거나 이미 삭제되었습니다.' }, { status: 404 });
     }
-    return NextResponse.json({ message: '서비스가 성공적으로 삭제되었습니다.' });
+    return NextResponse.json({ message: '서비스가 성공적으로 삭제되었습니다.', softDeleted: false });
   } catch (error) {
     console.error('Error deleting service:', error);
     if (error instanceof DatabaseError) {
