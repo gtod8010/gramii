@@ -164,21 +164,9 @@ export async function POST(req: Request) {
     const client = await pool.connect();
     try {
       await client.query('BEGIN');
-      
-      // 외부 서비스 ID 중복 체크
-      if (finalExternalId) {
-        const existingServiceCheck = await client.query(
-          'SELECT id FROM services WHERE external_id = $1',
-          [finalExternalId]
-        );
-        if (existingServiceCheck.rows.length > 0) {
-          await client.query('ROLLBACK');
-          return NextResponse.json(
-            { message: `이미 이 외부 서비스(ID: ${finalExternalId})를 사용하는 서비스가 존재합니다.` },
-            { status: 409 } // 409 Conflict
-          );
-        }
-      }
+      // 외부 서비스 ID는 중복 허용 (동일 벤더 서비스로 여러 로컬 서비스 운영 가능)
+      // 다만, 안전을 위해 공백을 정리해 저장합니다.
+      const cleanedExternalId = finalExternalId ? String(finalExternalId).trim() : null;
 
       // 서비스 타입 존재 여부 확인
       const serviceTypeExists = await client.query('SELECT id FROM service_types WHERE id = $1', [service_type_id]);
@@ -206,7 +194,7 @@ export async function POST(req: Request) {
           price_per_unit,
           min_order_quantity,
           max_order_quantity,
-          finalExternalId,
+          cleanedExternalId,
           nextOrder
         ]
       );
