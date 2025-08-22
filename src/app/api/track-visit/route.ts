@@ -72,10 +72,11 @@ export async function POST(req: NextRequest) {
     // 방문자 쿠키 설정(30일)
     res.cookies.set('v_id', visitorId, { path: '/', maxAge: 60 * 60 * 24 * 30, httpOnly: false, sameSite: 'lax' });
     return res;
-  } catch (error: any) {
+  } catch (error: unknown) {
     try { await client.query('ROLLBACK'); } catch {}
+    const message = error instanceof Error ? error.message : 'fail';
     console.error('track-visit error:', error);
-    return NextResponse.json({ error: error?.message || 'fail' }, { status: 500 });
+    return NextResponse.json({ error: message }, { status: 500 });
   } finally {
     client.release();
   }
