@@ -71,6 +71,7 @@ export async function POST() {
       '인스타그램 리그램 상위노출 패키지 📈',
       '인스타그램 추천탭 셀프 상위노출 ⭐',
       '인스타그램 추천탭 동영상 작업 🚀',
+      '인스타그램 한국인 팔로워 👩‍🚀',
     ];
 
     const servicesToSync = allServices.filter(service => 

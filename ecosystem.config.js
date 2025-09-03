@@ -16,6 +16,7 @@ module.exports = {
         NODE_ENV: 'production',
         NEXT_PUBLIC_SITE_VARIANT: 'gramii',
         POSTGRES_URL: process.env.POSTGRES_URL_GRAMII,
+        JWT_SECRET: process.env.JWT_SECRET,
       },
     },
     {
@@ -31,6 +32,7 @@ module.exports = {
         NODE_ENV: 'production',
         NEXT_PUBLIC_SITE_VARIANT: 'orda',
         POSTGRES_URL: process.env.POSTGRES_URL_ORDA,
+        JWT_SECRET: process.env.JWT_SECRET,
       },
     },
   ],

@@ -83,6 +83,8 @@ export async function POST(request: Request) {
       // Realsite API 연동 로직 추가
       const externalId = serviceInfo.external_id;
       let realsiteOrderId: number | null = null;
+      let vendorName: string | null = null;
+      let vendorUnitCost: number | null = null; // per unit cost at order time
 
       if (externalId) {
         const externalServiceId = parseInt(externalId, 10);
@@ -110,6 +112,15 @@ export async function POST(request: Request) {
           if (comments) {
             payload.comments = comments;
           }
+          vendorName = 'instamonster';
+          // 벤더 단가 스냅샷 시도: realsite_services 테이블을 범용 카탈로그로 사용 (없으면 null)
+          try {
+            const { rows } = await client.query('SELECT rate FROM realsite_services WHERE realsite_service_id = $1 LIMIT 1', [externalServiceId - 40000]);
+            if (rows.length > 0 && rows[0].rate != null) {
+              const unitByThousand = Number(rows[0].rate) / 1000;
+              vendorUnitCost = unitByThousand;
+            }
+          } catch {}
 
         } else if (externalServiceId >= 20000) {
           // 2pm.co.kr API 연동 (20000 <= ID < 40000)
@@ -130,6 +141,14 @@ export async function POST(request: Request) {
           if (comments) {
             payload.comments = comments;
           }
+          vendorName = '2pm';
+          try {
+            const { rows } = await client.query('SELECT rate FROM realsite_services WHERE realsite_service_id = $1 LIMIT 1', [externalServiceId - 20000]);
+            if (rows.length > 0 && rows[0].rate != null) {
+              const unitByThousand = Number(rows[0].rate) / 1000;
+              vendorUnitCost = unitByThousand;
+            }
+          } catch {}
         } else {
           // Realsite API 연동 (ID < 20000)
           const siteVariant = process.env.NEXT_PUBLIC_SITE_VARIANT || 'gramii';
@@ -152,6 +171,14 @@ export async function POST(request: Request) {
           if (comments) {
             payload.comments = comments;
           }
+          vendorName = 'realsite';
+          try {
+            const { rows } = await client.query('SELECT rate FROM realsite_services WHERE realsite_service_id = $1 LIMIT 1', [externalServiceId]);
+            if (rows.length > 0 && rows[0].rate != null) {
+              const unitByThousand = Number(rows[0].rate) / 1000;
+              vendorUnitCost = unitByThousand;
+            }
+          } catch {}
         }
 
         const externalApiResponse = await fetch(apiUrl, {
@@ -175,10 +202,13 @@ export async function POST(request: Request) {
         realsiteOrderId = parseInt(externalApiData.order, 10);
       }
 
-      // 6. 주문 생성 (realsite_order_id 컬럼 추가)
+      // 6. 벤더 총 비용 계산 스냅샷
+      const vendorTotalCost = vendorUnitCost != null ? Math.floor(vendorUnitCost * quantity) : null;
+
+      // 7. 주문 생성 (realsite_order_id, vendor cost 스냅샷 컬럼 포함)
       const orderInsertQuery = `
-        INSERT INTO orders (user_id, service_id, quantity, total_price, link, order_status, processed_quantity, realsite_order_id)
-        VALUES ($1, $2, $3, $4, $5, 'pending', 0, $6)
+        INSERT INTO orders (user_id, service_id, quantity, total_price, link, order_status, processed_quantity, realsite_order_id, vendor_name, vendor_unit_cost, vendor_total_cost)
+        VALUES ($1, $2, $3, $4, $5, 'pending', 0, $6, $7, $8, $9)
         RETURNING *;
       `;
       const orderResult: QueryResult = await client.query(orderInsertQuery, [
@@ -188,14 +218,17 @@ export async function POST(request: Request) {
         calculatedTotalPrice,
         linkValue || null,
         realsiteOrderId,
+        vendorName,
+        vendorUnitCost,
+        vendorTotalCost,
       ]);
       const newOrder = orderResult.rows[0];
 
-      // 7. 사용자 포인트 차감
+      // 8. 사용자 포인트 차감
       const updatedUserPoints = currentUserPoints - calculatedTotalPrice;
       await client.query('UPDATE users SET points = $1 WHERE id = $2', [updatedUserPoints, userId]);
 
-      // 8. 포인트 트랜잭션 기록 수정: description 컬럼 제거
+      // 9. 포인트 트랜잭션 기록 수정: description 컬럼 제거
       const finalBalanceAfterOrder = updatedUserPoints;
       const pointTransactionQuery = `
         INSERT INTO point_transactions (user_id, related_order_id, amount, transaction_type, balance_after_transaction)

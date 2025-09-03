@@ -73,6 +73,12 @@ const baseNavItems: NavItem[] = [
     adminOnly: true,
   },
   {
+    icon: <PieChartIcon />,
+    name: "정산 관리",
+    path: "/settlement",
+    adminOnly: true,
+  },
+  {
     icon: <FileIcon />,
     name: "SMS 로그",
     path: "/sms-logs",
