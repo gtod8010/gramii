@@ -497,11 +497,10 @@ const ManageServicesPage = () => {
           <Button onClick={handleNewService}>+ 새 서비스 추가</Button>
           <Button variant="outline" onClick={handleOpenSpecialManagementModal}>스페셜 관리</Button>
           <Button variant="outline" isLoading={isSyncing} onClick={handleSyncRealsiteServices}>Realsite 서비스 동기화</Button>
-          {process.env.NEXT_PUBLIC_SITE_VARIANT === 'gramii' ? (
+          {process.env.NEXT_PUBLIC_SITE_VARIANT === 'gramii' && (
             <Button variant="outline" isLoading={isSyncing2pm} onClick={handleSync2pmServices}>2pm 서비스 동기화</Button>
-          ) : (
-            <Button variant="outline" isLoading={isSyncingInstaMonster} onClick={handleSyncInstaMonsterServices}>인스타몬스터 서비스 동기화</Button>
           )}
+          <Button variant="outline" isLoading={isSyncingInstaMonster} onClick={handleSyncInstaMonsterServices}>인스타몬스터 서비스 동기화</Button>
 
         </div>
       </div>

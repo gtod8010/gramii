@@ -180,4 +180,61 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
     }
     return NextResponse.json({ message: '서비스 삭제 중 오류가 발생했습니다.' }, { status: 500 });
   }
+}
+
+// 서비스 부분 업데이트 (PATCH) - 활성화/비활성화 등
+export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id: idParam } = await params;
+  const id = parseInt(idParam, 10);
+  if (isNaN(id) || id <= 0) {
+    return NextResponse.json({ message: '유효하지 않은 서비스 ID입니다.' }, { status: 400 });
+  }
+
+  try {
+    const body = await request.json();
+    
+    // 부분 업데이트를 위한 스키마 (is_active만 허용)
+    const patchSchema = z.object({
+      is_active: z.boolean()
+    });
+
+    const parsedData = patchSchema.safeParse(body);
+    if (!parsedData.success) {
+      return NextResponse.json({ 
+        message: '입력 데이터가 유효하지 않습니다.', 
+        errors: parsedData.error.errors 
+      }, { status: 400 });
+    }
+
+    // 서비스 존재 여부 확인
+    const existingService = await pool.query('SELECT id FROM services WHERE id = $1', [id]);
+    if (existingService.rowCount === 0) {
+      return NextResponse.json({ message: '서비스를 찾을 수 없습니다.' }, { status: 404 });
+    }
+
+    // is_active 상태 업데이트
+    const result = await pool.query(
+      `UPDATE services 
+       SET is_active = $1, updated_at = CURRENT_TIMESTAMP 
+       WHERE id = $2 
+       RETURNING id, is_active`,
+      [parsedData.data.is_active, id]
+    );
+
+    if (result.rowCount === 0) {
+      return NextResponse.json({ message: '서비스 업데이트에 실패했습니다.' }, { status: 500 });
+    }
+
+    return NextResponse.json({ 
+      message: `서비스가 ${parsedData.data.is_active ? '활성화' : '비활성화'}되었습니다.`,
+      data: result.rows[0]
+    });
+
+  } catch (error) {
+    console.error('Error patching service:', error);
+    if (error instanceof DatabaseError) {
+      return NextResponse.json({ message: `데이터베이스 오류 발생: ${error.message}` }, { status: 500 });
+    }
+    return NextResponse.json({ message: '서비스 업데이트 중 오류가 발생했습니다.' }, { status: 500 });
+  }
 } 

@@ -147,9 +147,9 @@ const NewServiceModal: React.FC<NewServiceModalProps> = ({
   
   // 7. 핸들러 및 이펙트 훅 (Handlers and Effect hooks)
   
-  // Realsite 서비스 검색 (이제 통합 검색)
+  // Realsite 서비스 검색 (수정 모드에서도 검색 가능하도록 변경)
   useEffect(() => {
-    if (debouncedSearchTerm && !editingService) {
+    if (debouncedSearchTerm) {
       setIsSearching(true);
       fetch(`/api/realsite-services?query=${debouncedSearchTerm}`)
         .then(res => res.json())
@@ -162,7 +162,7 @@ const NewServiceModal: React.FC<NewServiceModalProps> = ({
     } else {
       setRealSiteServices([]);
     }
-  }, [debouncedSearchTerm, editingService]);
+  }, [debouncedSearchTerm]);
 
   // Realsite 서비스 선택
   const handleSelectRealSiteService = (service: RealSiteService) => {
@@ -204,6 +204,21 @@ const NewServiceModal: React.FC<NewServiceModalProps> = ({
     }
   }, []);
 
+  // 기존 external_id로 외부 서비스 정보를 불러오는 함수
+  const fetchExternalServiceInfo = useCallback(async (externalId: string) => {
+    try {
+      const response = await fetch(`/api/realsite-services?external_id=${externalId}`);
+      if (response.ok) {
+        const data = await response.json();
+        if (Array.isArray(data) && data.length > 0) {
+          setSelectedRealSiteService(data[0]);
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching external service info:', error);
+    }
+  }, []);
+
   // 모달 오픈 시 (수정/새 서비스) 폼 상태 설정
   useEffect(() => {
     if (isOpen) {
@@ -224,6 +239,13 @@ const NewServiceModal: React.FC<NewServiceModalProps> = ({
           fetchServiceTypes(String(editingService.category_id));
         }
 
+        // 기존 external_id가 있으면 해당 외부 서비스 정보를 불러옵니다.
+        if (external_id) {
+          fetchExternalServiceInfo(external_id);
+        } else {
+          setSelectedRealSiteService(null);
+        }
+
       } else {
         // 새 서비스 모드: 폼을 기본값으로 리셋합니다.
         reset();
@@ -231,7 +253,7 @@ const NewServiceModal: React.FC<NewServiceModalProps> = ({
         setServiceTypes([]);
       }
     }
-  }, [editingService, isOpen, reset, fetchServiceTypes]);
+  }, [editingService, isOpen, reset, fetchServiceTypes, fetchExternalServiceInfo]);
 
   // 폼 제출 핸들러
   const onSubmit: SubmitHandler<ServiceFormData> = async (data) => {
@@ -301,7 +323,6 @@ const NewServiceModal: React.FC<NewServiceModalProps> = ({
                 placeholder="서비스명 또는 코드로 검색..."
                 value={realSiteSearchTerm}
                 onChange={(e) => setRealSiteSearchTerm(e.target.value)}
-                disabled={!!editingService}
               />
               {isSearching && <p className="text-sm text-slate-500 mt-1">검색 중...</p>}
               {realSiteServices.length > 0 && (
