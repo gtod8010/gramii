@@ -83,6 +83,7 @@ export async function POST(request: Request) {
       // Realsite API 연동 로직 추가
       const externalId = serviceInfo.external_id;
       let realsiteOrderId: number | null = null;
+      let instamonsterOrderId: string | null = null;
       let vendorName: string | null = null;
       let vendorUnitCost: number | null = null; // per unit cost at order time
 
@@ -202,16 +203,24 @@ export async function POST(request: Request) {
             console.error('외부 서비스 API 응답에 order ID가 없습니다.', externalApiData);
             throw new Error('외부 서비스로부터 유효하지 않은 응답을 받았습니다.');
         }
-        realsiteOrderId = parseInt(externalApiData.order, 10);
+        
+        // 벤더별로 주문 ID 저장
+        if (externalServiceId >= 40000) {
+          // InstaMonster
+          instamonsterOrderId = externalApiData.order.toString();
+        } else {
+          // RealSite, 2PM
+          realsiteOrderId = parseInt(externalApiData.order, 10);
+        }
       }
 
       // 6. 벤더 총 비용 계산 스냅샷
       const vendorTotalCost = vendorUnitCost != null ? Math.floor(vendorUnitCost * quantity) : null;
 
-      // 7. 주문 생성 (realsite_order_id, vendor cost 스냅샷 컬럼 포함)
+      // 7. 주문 생성 (realsite_order_id, instamonster_order_id, vendor cost 스냅샷 컬럼 포함)
       const orderInsertQuery = `
-        INSERT INTO orders (user_id, service_id, quantity, total_price, link, order_status, processed_quantity, realsite_order_id, vendor_name, vendor_unit_cost, vendor_total_cost)
-        VALUES ($1, $2, $3, $4, $5, 'pending', 0, $6, $7, $8, $9)
+        INSERT INTO orders (user_id, service_id, quantity, total_price, link, order_status, processed_quantity, realsite_order_id, instamonster_order_id, vendor_name, vendor_unit_cost, vendor_total_cost)
+        VALUES ($1, $2, $3, $4, $5, 'pending', 0, $6, $7, $8, $9, $10)
         RETURNING *;
       `;
       const orderResult: QueryResult = await client.query(orderInsertQuery, [
@@ -221,6 +230,7 @@ export async function POST(request: Request) {
         calculatedTotalPrice,
         linkValue || null,
         realsiteOrderId,
+        instamonsterOrderId,
         vendorName,
         vendorUnitCost,
         vendorTotalCost,

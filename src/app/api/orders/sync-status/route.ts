@@ -22,68 +22,127 @@ export async function POST(req: NextRequest) {
   const client = await pool.connect();
 
   try {
-    // 1. gramii DB에서 동기화가 필요한 realsite_order_id 목록 조회
+    // 1. DB에서 동기화가 필요한 주문 목록 조회 (RealSite, InstaMonster 모두)
     const query = `
-      SELECT id, realsite_order_id 
+      SELECT id, realsite_order_id, instamonster_order_id, vendor_name
       FROM orders 
-      WHERE id = ANY($1::int[]) AND realsite_order_id IS NOT NULL;
+      WHERE id = ANY($1::int[]) AND (realsite_order_id IS NOT NULL OR instamonster_order_id IS NOT NULL);
     `;
     const { rows: ordersToSync } = await client.query(query, [orderIds]);
 
     if (ordersToSync.length === 0) {
-      return NextResponse.json({ message: '동기화할 Realsite 연동 주문이 없습니다.', updatedCount: 0 });
+      return NextResponse.json({ message: '동기화할 외부 서비스 연동 주문이 없습니다.', updatedCount: 0 });
     }
 
-    const realsiteOrderIds = ordersToSync.map(o => o.realsite_order_id);
-    const realsiteOrderIdsString = realsiteOrderIds.join(',');
+    // 2. 벤더별로 주문 분류
+    const realsiteOrders = ordersToSync.filter(o => o.realsite_order_id);
+    const instamonsterOrders = ordersToSync.filter(o => o.instamonster_order_id);
+    
+    let allStatuses: Record<string, any> = {};
+    
+    // 2-1. RealSite 주문 상태 조회
+    if (realsiteOrders.length > 0) {
+      const realsiteOrderIds = realsiteOrders.map(o => o.realsite_order_id);
+      const realsiteOrderIdsString = realsiteOrderIds.join(',');
+      
+      const siteVariant = process.env.NEXT_PUBLIC_SITE_VARIANT || 'gramii';
+      const apiKey = siteVariant === 'orda'
+        ? process.env.REALSITE_API_KEY_ORDA
+        : process.env.REALSITE_API_KEY_GRAMII;
+      const apiUrl = process.env.REALSITE_API_URL;
 
-    // 2. Realsite API에 상태 일괄 조회 요청
-    const siteVariant = process.env.NEXT_PUBLIC_SITE_VARIANT || 'gramii';
-    const apiKey = siteVariant === 'orda'
-      ? process.env.REALSITE_API_KEY_ORDA
-      : process.env.REALSITE_API_KEY_GRAMII;
-    const apiUrl = process.env.REALSITE_API_URL;
+      if (!apiKey || !apiUrl) {
+        throw new Error('Realsite API 환경 변수가 설정되지 않았습니다.');
+      }
 
-    if (!apiKey || !apiUrl) {
-      throw new Error('Realsite API 환경 변수가 설정되지 않았습니다.');
-    }
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          key: apiKey,
+          action: 'status',
+          orders: realsiteOrderIdsString,
+        }),
+      });
 
-    const response = await fetch(apiUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        key: apiKey,
-        action: 'status',
-        orders: realsiteOrderIdsString,
-      }),
-    });
-
-    if (!response.ok) {
-        const errorBody = await response.text();
-        throw new Error(`Realsite API 통신 오류: ${response.status} ${errorBody}`);
+      if (!response.ok) {
+          const errorBody = await response.text();
+          throw new Error(`Realsite API 통신 오류: ${response.status} ${errorBody}`);
+      }
+      
+      const realsiteStatuses: Record<string, RealSiteOrderStatus> = await response.json();
+      allStatuses = { ...allStatuses, ...realsiteStatuses };
     }
     
-    const realsiteStatuses: Record<string, RealSiteOrderStatus> = await response.json();
+    // 2-2. InstaMonster 주문 상태 조회
+    if (instamonsterOrders.length > 0) {
+      const instamonsterOrderIds = instamonsterOrders.map(o => o.instamonster_order_id);
+      const instamonsterOrderIdsString = instamonsterOrderIds.join(',');
+      
+      const siteVariant = process.env.NEXT_PUBLIC_SITE_VARIANT || 'gramii';
+      const apiKey = siteVariant === 'orda'
+        ? process.env.INSTAMONSTER_API_KEY_ORDA
+        : process.env.INSTAMONSTER_API_KEY_GRAMII;
+      const apiUrl = process.env.INSTAMONSTER_API_URL;
+
+      if (!apiKey || !apiUrl) {
+        throw new Error('InstaMonster API 환경 변수가 설정되지 않았습니다.');
+      }
+
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          key: apiKey,
+          action: 'status',
+          orders: instamonsterOrderIdsString,
+        }),
+      });
+
+      if (!response.ok) {
+          const errorBody = await response.text();
+          throw new Error(`InstaMonster API 통신 오류: ${response.status} ${errorBody}`);
+      }
+      
+      const instamonsterStatuses: Record<string, any> = await response.json();
+      allStatuses = { ...allStatuses, ...instamonsterStatuses };
+    }
     
     // 3. DB 업데이트 (트랜잭션 사용)
     await client.query('BEGIN');
     
     let updatedCount = 0;
-    for (const gramiiOrder of ordersToSync) {
-      const realsiteStatus = realsiteStatuses[gramiiOrder.realsite_order_id];
-      if (realsiteStatus && realsiteStatus.status) {
-        const newStatus = realsiteToGramiiStatusMap[realsiteStatus.status];
+    for (const order of ordersToSync) {
+      let vendorStatus = null;
+      let orderId = null;
+      
+      // 벤더별로 상태 조회
+      if (order.realsite_order_id) {
+        vendorStatus = allStatuses[order.realsite_order_id];
+        orderId = order.realsite_order_id;
+      } else if (order.instamonster_order_id) {
+        vendorStatus = allStatuses[order.instamonster_order_id];
+        orderId = order.instamonster_order_id;
+      }
+      
+      if (vendorStatus && vendorStatus.status) {
+        let newStatus = null;
+        
+        // 벤더별 상태 매핑
+        if (order.realsite_order_id) {
+          // RealSite 상태 매핑
+          newStatus = realsiteToGramiiStatusMap[vendorStatus.status];
+        } else if (order.instamonster_order_id) {
+          // InstaMonster 상태 매핑 (일단 동일하게 처리)
+          newStatus = realsiteToGramiiStatusMap[vendorStatus.status] || vendorStatus.status;
+        }
+        
         if (newStatus) {
-            // processed_quantity도 업데이트 (선택 사항)
-            // const initialQuantity = (await client.query('SELECT quantity FROM orders WHERE id = $1', [gramiiOrder.id])).rows[0].quantity;
-            // const remains = parseInt(realsiteStatus.remains, 10);
-            // const processedQuantity = initialQuantity - remains;
-          
-            const updateQuery = `UPDATE orders SET order_status = $1 WHERE id = $2 AND order_status != $1;`;
-            const updateResult = await client.query(updateQuery, [newStatus, gramiiOrder.id]);
-            if (updateResult.rowCount !== null && updateResult.rowCount > 0) {
-              updatedCount++;
-            }
+          const updateQuery = `UPDATE orders SET order_status = $1 WHERE id = $2 AND order_status != $1;`;
+          const updateResult = await client.query(updateQuery, [newStatus, order.id]);
+          if (updateResult.rowCount !== null && updateResult.rowCount > 0) {
+            updatedCount++;
+          }
         }
       }
     }
