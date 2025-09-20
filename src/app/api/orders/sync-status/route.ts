@@ -22,11 +22,12 @@ export async function POST(req: NextRequest) {
   const client = await pool.connect();
 
   try {
-    // 1. DB에서 동기화가 필요한 주문 목록 조회 (RealSite, InstaMonster 모두)
+    // 1. DB에서 동기화가 필요한 주문 목록 조회 (서비스 ID로 벤더 구분)
     const query = `
-      SELECT id, realsite_order_id, instamonster_order_id, vendor_name
-      FROM orders 
-      WHERE id = ANY($1::int[]) AND (realsite_order_id IS NOT NULL OR instamonster_order_id IS NOT NULL);
+      SELECT o.id, o.realsite_order_id, s.external_id
+      FROM orders o
+      JOIN services s ON o.service_id = s.id
+      WHERE o.id = ANY($1::int[]) AND o.realsite_order_id IS NOT NULL;
     `;
     const { rows: ordersToSync } = await client.query(query, [orderIds]);
 
@@ -34,9 +35,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ message: '동기화할 외부 서비스 연동 주문이 없습니다.', updatedCount: 0 });
     }
 
-    // 2. 벤더별로 주문 분류
-    const realsiteOrders = ordersToSync.filter(o => o.realsite_order_id);
-    const instamonsterOrders = ordersToSync.filter(o => o.instamonster_order_id);
+    // 2. 벤더별로 주문 분류 (external_id로 구분)
+    const realsiteOrders = ordersToSync.filter(o => o.external_id && parseInt(o.external_id) < 20000);
+    const twopmOrders = ordersToSync.filter(o => o.external_id && parseInt(o.external_id) >= 20000 && parseInt(o.external_id) < 40000);
+    const instamonsterOrders = ordersToSync.filter(o => o.external_id && parseInt(o.external_id) >= 40000);
     
     let allStatuses: Record<string, RealSiteOrderStatus> = {};
     
@@ -74,9 +76,40 @@ export async function POST(req: NextRequest) {
       allStatuses = { ...allStatuses, ...realsiteStatuses };
     }
     
-    // 2-2. InstaMonster 주문 상태 조회
+    // 2-2. 2PM 주문 상태 조회
+    if (twopmOrders.length > 0) {
+      const twopmOrderIds = twopmOrders.map(o => o.realsite_order_id);
+      const twopmOrderIdsString = twopmOrderIds.join(',');
+      
+      const apiKey = process.env.TWOPM_API_KEY;
+      const apiUrl = process.env.TWOPM_API_URL;
+
+      if (!apiKey || !apiUrl) {
+        throw new Error('2PM API 환경 변수가 설정되지 않았습니다.');
+      }
+
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          key: apiKey,
+          action: 'status',
+          orders: twopmOrderIdsString,
+        }),
+      });
+
+      if (!response.ok) {
+          const errorBody = await response.text();
+          throw new Error(`2PM API 통신 오류: ${response.status} ${errorBody}`);
+      }
+      
+      const twopmStatuses: Record<string, RealSiteOrderStatus> = await response.json();
+      allStatuses = { ...allStatuses, ...twopmStatuses };
+    }
+    
+    // 2-3. InstaMonster 주문 상태 조회
     if (instamonsterOrders.length > 0) {
-      const instamonsterOrderIds = instamonsterOrders.map(o => o.instamonster_order_id);
+      const instamonsterOrderIds = instamonsterOrders.map(o => o.realsite_order_id);
       const instamonsterOrderIdsString = instamonsterOrderIds.join(',');
       
       const siteVariant = process.env.NEXT_PUBLIC_SITE_VARIANT || 'gramii';
@@ -113,26 +146,11 @@ export async function POST(req: NextRequest) {
     
     let updatedCount = 0;
     for (const order of ordersToSync) {
-      let vendorStatus: RealSiteOrderStatus | undefined = undefined;
-      
-      // 벤더별로 상태 조회
-      if (order.realsite_order_id) {
-        vendorStatus = allStatuses[order.realsite_order_id];
-      } else if (order.instamonster_order_id) {
-        vendorStatus = allStatuses[order.instamonster_order_id];
-      }
+      const vendorStatus = allStatuses[order.realsite_order_id];
       
       if (vendorStatus && vendorStatus.status) {
-        let newStatus = null;
-        
-        // 벤더별 상태 매핑
-        if (order.realsite_order_id) {
-          // RealSite 상태 매핑
-          newStatus = realsiteToGramiiStatusMap[vendorStatus.status];
-        } else if (order.instamonster_order_id) {
-          // InstaMonster 상태 매핑 (일단 동일하게 처리)
-          newStatus = realsiteToGramiiStatusMap[vendorStatus.status] || vendorStatus.status;
-        }
+        // 모든 벤더의 상태를 동일한 매핑 테이블로 처리
+        const newStatus = realsiteToGramiiStatusMap[vendorStatus.status] || vendorStatus.status;
         
         if (newStatus) {
           const updateQuery = `UPDATE orders SET order_status = $1 WHERE id = $2 AND order_status != $1;`;
