@@ -38,7 +38,7 @@ export async function POST(req: NextRequest) {
     const realsiteOrders = ordersToSync.filter(o => o.realsite_order_id);
     const instamonsterOrders = ordersToSync.filter(o => o.instamonster_order_id);
     
-    let allStatuses: Record<string, any> = {};
+    let allStatuses: Record<string, RealSiteOrderStatus> = {};
     
     // 2-1. RealSite 주문 상태 조회
     if (realsiteOrders.length > 0) {
@@ -104,7 +104,7 @@ export async function POST(req: NextRequest) {
           throw new Error(`InstaMonster API 통신 오류: ${response.status} ${errorBody}`);
       }
       
-      const instamonsterStatuses: Record<string, any> = await response.json();
+      const instamonsterStatuses: Record<string, RealSiteOrderStatus> = await response.json();
       allStatuses = { ...allStatuses, ...instamonsterStatuses };
     }
     
@@ -113,16 +113,13 @@ export async function POST(req: NextRequest) {
     
     let updatedCount = 0;
     for (const order of ordersToSync) {
-      let vendorStatus = null;
-      let orderId = null;
+      let vendorStatus: RealSiteOrderStatus | undefined = undefined;
       
       // 벤더별로 상태 조회
       if (order.realsite_order_id) {
         vendorStatus = allStatuses[order.realsite_order_id];
-        orderId = order.realsite_order_id;
       } else if (order.instamonster_order_id) {
         vendorStatus = allStatuses[order.instamonster_order_id];
-        orderId = order.instamonster_order_id;
       }
       
       if (vendorStatus && vendorStatus.status) {
