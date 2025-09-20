@@ -83,8 +83,6 @@ export async function POST(request: Request) {
       // Realsite API 연동 로직 추가
       const externalId = serviceInfo.external_id;
       let realsiteOrderId: number | null = null;
-      let instamonsterOrderId: string | null = null;
-      let vendorName: string | null = null;
       let vendorUnitCost: number | null = null; // per unit cost at order time
 
       if (externalId) {
@@ -116,7 +114,6 @@ export async function POST(request: Request) {
           if (comments) {
             payload.comments = comments;
           }
-          vendorName = 'instamonster';
           // 벤더 단가 스냅샷 시도: realsite_services 테이블을 범용 카탈로그로 사용 (없으면 null)
           try {
             const { rows } = await client.query('SELECT rate FROM realsite_services WHERE realsite_service_id = $1 LIMIT 1', [externalServiceId - 40000]);
@@ -145,7 +142,6 @@ export async function POST(request: Request) {
           if (comments) {
             payload.comments = comments;
           }
-          vendorName = '2pm';
           try {
             const { rows } = await client.query('SELECT rate FROM realsite_services WHERE realsite_service_id = $1 LIMIT 1', [externalServiceId - 20000]);
             if (rows.length > 0 && rows[0].rate != null) {
@@ -175,7 +171,6 @@ export async function POST(request: Request) {
           if (comments) {
             payload.comments = comments;
           }
-          vendorName = 'realsite';
           try {
             const { rows } = await client.query('SELECT rate FROM realsite_services WHERE realsite_service_id = $1 LIMIT 1', [externalServiceId]);
             if (rows.length > 0 && rows[0].rate != null) {
@@ -205,22 +200,17 @@ export async function POST(request: Request) {
         }
         
         // 벤더별로 주문 ID 저장
-        if (externalServiceId >= 40000) {
-          // InstaMonster
-          instamonsterOrderId = externalApiData.order.toString();
-        } else {
-          // RealSite, 2PM
-          realsiteOrderId = parseInt(externalApiData.order, 10);
-        }
+        // 모든 벤더의 주문 ID를 realsite_order_id에 저장
+        realsiteOrderId = parseInt(externalApiData.order, 10);
       }
 
       // 6. 벤더 총 비용 계산 스냅샷
       const vendorTotalCost = vendorUnitCost != null ? Math.floor(vendorUnitCost * quantity) : null;
 
-      // 7. 주문 생성 (realsite_order_id, instamonster_order_id, vendor cost 스냅샷 컬럼 포함)
+      // 7. 주문 생성 (realsite_order_id, vendor cost 스냅샷 컬럼 포함)
       const orderInsertQuery = `
-        INSERT INTO orders (user_id, service_id, quantity, total_price, link, order_status, processed_quantity, realsite_order_id, instamonster_order_id, vendor_name, vendor_unit_cost, vendor_total_cost)
-        VALUES ($1, $2, $3, $4, $5, 'pending', 0, $6, $7, $8, $9, $10)
+        INSERT INTO orders (user_id, service_id, quantity, total_price, link, order_status, processed_quantity, realsite_order_id, vendor_unit_cost, vendor_total_cost)
+        VALUES ($1, $2, $3, $4, $5, 'pending', 0, $6, $7, $8)
         RETURNING *;
       `;
       const orderResult: QueryResult = await client.query(orderInsertQuery, [
@@ -230,8 +220,6 @@ export async function POST(request: Request) {
         calculatedTotalPrice,
         linkValue || null,
         realsiteOrderId,
-        instamonsterOrderId,
-        vendorName,
         vendorUnitCost,
         vendorTotalCost,
       ]);

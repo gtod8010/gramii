@@ -139,6 +139,9 @@ const ManageUsersPage = () => {
   // --- 주문 취소 관련 상태 ---
   const [cancellingOrderId, setCancellingOrderId] = useState<number | null>(null);
 
+  // --- 일괄 동기화 관련 상태 ---
+  const [isSyncingAllOrders, setIsSyncingAllOrders] = useState(false);
+
   const fetchUsers = useCallback(async () => {
     setIsLoadingUsers(true);
     setErrorUsers(null);
@@ -357,6 +360,149 @@ const ManageUsersPage = () => {
       alert(error instanceof Error ? error.message : '주문 취소 중 오류가 발생했습니다.');
     } finally {
       setCancellingOrderId(null);
+    }
+  };
+
+  // 일괄 주문 상태 동기화 함수
+  const handleSyncAllOrders = async () => {
+    if (!selectedUserForModal) return;
+
+    setIsSyncingAllOrders(true);
+    try {
+      const token = localStorage.getItem('jwtToken');
+      const headers: HeadersInit = { 'Content-Type': 'application/json' };
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
+      // 해당 사용자의 모든 주문 ID 가져오기
+      const ordersResponse = await fetch(`/api/orders?userId=${selectedUserForModal.id}&limit=1000`, { headers });
+      if (!ordersResponse.ok) {
+        throw new Error('주문 내역을 불러오는데 실패했습니다.');
+      }
+      const ordersData = await ordersResponse.json();
+      const orderIds = ordersData.orders.map((order: UserOrder) => order.id);
+
+      if (orderIds.length === 0) {
+        alert('동기화할 주문이 없습니다.');
+        return;
+      }
+
+      // 주문 상태 동기화 API 호출
+      const syncResponse = await fetch('/api/orders/sync-status', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ orderIds }),
+      });
+
+      if (!syncResponse.ok) {
+        const errorData = await syncResponse.json();
+        throw new Error(errorData.error || '주문 상태 동기화에 실패했습니다.');
+      }
+
+      const result = await syncResponse.json();
+      alert(`${result.updatedCount}개 주문의 상태가 업데이트되었습니다.`);
+
+      // 활동 내역 새로고침
+      if (isActivityModalOpen && selectedUserForModal) {
+        const fetchAndCombineActivities = async () => {
+          setIsLoadingActivities(true);
+          setErrorActivities(null);
+
+          try {
+            const [ordersResponse, pointsResponse] = await Promise.all([
+              fetch(`/api/orders?userId=${selectedUserForModal.id}&limit=1000`, { headers }),
+              fetch(`/api/users/${selectedUserForModal.id}/point-transactions`, { headers })
+            ]);
+
+            if (!ordersResponse.ok) {
+              throw new Error('주문 내역을 불러오는데 실패했습니다.');
+            }
+            if (!pointsResponse.ok) {
+              throw new Error('포인트 거래 내역을 불러오는데 실패했습니다.');
+            }
+
+            const ordersData = await ordersResponse.json();
+            const pointsData: PointTransaction[] = await pointsResponse.json();
+
+            const orderActivities: ActivityItem[] = ordersData.orders.map((order: UserOrder) => ({
+              id: `order-${order.id}`,
+              type: 'order' as const,
+              date: new Date(order.orderedAt),
+              timestamp: order.orderedAt,
+              summary: order.serviceName,
+              pointChange: -order.orderPrice,
+              orderInfo: {
+                quantity: String(order.initialQuantity),
+                price: order.orderPrice,
+                initialQuantity: order.initialQuantity,
+              },
+              status: order.status,
+              orderId: order.id,
+            }));
+
+            let tempCombinedActivities: ActivityItem[] = [...orderActivities];
+
+            const pointActivities: ActivityItem[] = pointsData
+              .map(tx => {
+                if (tx.transaction_type === 'order_payment' && tx.related_order_id) {
+                  const relatedOrderActivity = tempCombinedActivities.find(act => act.type === 'order' && act.id === `order-${tx.related_order_id}`);
+                  if (relatedOrderActivity) {
+                    relatedOrderActivity.balanceAfter = tx.balance_after_transaction;
+                    if (tx.order_status && tx.order_status !== 'pending') {
+                      return {
+                        id: `tx-${tx.id}`,
+                        type: 'point',
+                        date: new Date(tx.created_at),
+                        timestamp: tx.created_at,
+                        summary: `주문 결제 - ${tx.service_name || '서비스'} (${statusDisplayNames[tx.order_status] || tx.order_status})`,
+                        pointChange: tx.amount,
+                        balanceAfter: tx.balance_after_transaction,
+                        orderInfo: {
+                          quantity: tx.order_quantity?.toString() || '',
+                          price: tx.order_total_price || 0,
+                        }
+                      };
+                    }
+                  }
+                }
+                if (tx.transaction_type === 'order_payment' && !tx.order_status) return null; 
+
+                return {
+                  id: `tx-${tx.id}`,
+                  type: 'point',
+                  date: new Date(tx.created_at),
+                  timestamp: tx.created_at,
+                  summary: pointTransactionTypeDisplayNames[tx.transaction_type] || tx.transaction_type,
+                  pointChange: tx.amount,
+                  balanceAfter: tx.balance_after_transaction, 
+                };
+              }).filter(item => item !== null) as ActivityItem[];
+
+            tempCombinedActivities = [...tempCombinedActivities, ...pointActivities];
+            tempCombinedActivities.sort((a, b) => b.date.getTime() - a.date.getTime());
+            setCurrentUserActivities(tempCombinedActivities);
+
+          } catch (err) {
+            if (err instanceof Error) {
+              setErrorActivities(err.message);
+            } else {
+              setErrorActivities('An unknown error occurred');
+            }
+            setCurrentUserActivities([]);
+          } finally {
+            setIsLoadingActivities(false);
+          }
+        };
+
+        await fetchAndCombineActivities();
+      }
+
+    } catch (error) {
+      console.error('일괄 동기화 오류:', error);
+      alert(error instanceof Error ? error.message : '일괄 동기화 중 오류가 발생했습니다.');
+    } finally {
+      setIsSyncingAllOrders(false);
     }
   };
   
@@ -759,9 +905,21 @@ const ManageUsersPage = () => {
                 <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
                     {selectedUserForModal.name} ({selectedUserForModal.email})님의 활동 내역
                 </h3>
-                <Button onClick={closeActivityModal} variant="outline" size="sm" className="px-2 py-1 text-xs">
-                    X
-                </Button>
+                <div className="flex items-center gap-2">
+                  <Button 
+                    onClick={handleSyncAllOrders} 
+                    variant="outline" 
+                    size="sm" 
+                    className="px-3 py-1 text-xs bg-green-600 text-white hover:bg-green-700"
+                    isLoading={isSyncingAllOrders}
+                    disabled={isSyncingAllOrders}
+                  >
+                    {isSyncingAllOrders ? '동기화 중...' : '주문 상태 동기화'}
+                  </Button>
+                  <Button onClick={closeActivityModal} variant="outline" size="sm" className="px-2 py-1 text-xs">
+                      X
+                  </Button>
+                </div>
             </div>
             
             {isLoadingActivities && <p>활동 내역을 불러오는 중...</p>}

@@ -76,35 +76,42 @@ export async function POST(req: NextRequest) {
       allStatuses = { ...allStatuses, ...realsiteStatuses };
     }
     
-    // 2-2. 2PM 주문 상태 조회
+    // 2-2. 2PM 주문 상태 조회 (gramii만 지원)
     if (twopmOrders.length > 0) {
-      const twopmOrderIds = twopmOrders.map(o => o.realsite_order_id);
-      const twopmOrderIdsString = twopmOrderIds.join(',');
+      const siteVariant = process.env.NEXT_PUBLIC_SITE_VARIANT || 'gramii';
       
-      const apiKey = process.env.TWOPM_API_KEY;
-      const apiUrl = process.env.TWOPM_API_URL;
+      // orda는 2PM을 사용하지 않음
+      if (siteVariant === 'orda') {
+        console.log('orda는 2PM 서비스를 지원하지 않습니다. 2PM 주문을 건너뜁니다.');
+      } else {
+        const twopmOrderIds = twopmOrders.map(o => o.realsite_order_id);
+        const twopmOrderIdsString = twopmOrderIds.join(',');
+        
+        const apiKey = process.env.TWOPM_API_KEY;
+        const apiUrl = process.env.TWOPM_API_URL;
 
-      if (!apiKey || !apiUrl) {
-        throw new Error('2PM API 환경 변수가 설정되지 않았습니다.');
+        if (!apiKey || !apiUrl) {
+          throw new Error('2PM API 환경 변수가 설정되지 않았습니다.');
+        }
+
+        const response = await fetch(apiUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            key: apiKey,
+            action: 'status',
+            orders: twopmOrderIdsString,
+          }),
+        });
+
+        if (!response.ok) {
+            const errorBody = await response.text();
+            throw new Error(`2PM API 통신 오류: ${response.status} ${errorBody}`);
+        }
+        
+        const twopmStatuses: Record<string, RealSiteOrderStatus> = await response.json();
+        allStatuses = { ...allStatuses, ...twopmStatuses };
       }
-
-      const response = await fetch(apiUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          key: apiKey,
-          action: 'status',
-          orders: twopmOrderIdsString,
-        }),
-      });
-
-      if (!response.ok) {
-          const errorBody = await response.text();
-          throw new Error(`2PM API 통신 오류: ${response.status} ${errorBody}`);
-      }
-      
-      const twopmStatuses: Record<string, RealSiteOrderStatus> = await response.json();
-      allStatuses = { ...allStatuses, ...twopmStatuses };
     }
     
     // 2-3. InstaMonster 주문 상태 조회
