@@ -974,7 +974,7 @@ const ManageUsersPage = () => {
                             {activity.balanceAfter?.toLocaleString() || '-'}
                           </td>
                           <td className="px-3 py-2 whitespace-nowrap text-xs text-gray-500 dark:text-gray-400">
-                            {activity.type === 'order' ? activity.status : '-'}
+                            {activity.type === 'order' ? (activity.status ? (statusDisplayNames[activity.status] || activity.status) : '-') : '-'}
                           </td>
                           <td className="px-3 py-2 whitespace-nowrap text-xs">
                             {activity.type === 'order' && activity.orderId && activity.status && ['대기중', 'pending', 'in_progress', '진행중'].includes(activity.status) && (
