@@ -38,7 +38,10 @@ export async function POST(req: NextRequest) {
     const realsiteOrderIdsString = realsiteOrderIds.join(',');
 
     // 2. Realsite API에 상태 일괄 조회 요청
-    const apiKey = process.env.REALSITE_API_KEY;
+    const siteVariant = process.env.NEXT_PUBLIC_SITE_VARIANT || 'gramii';
+    const apiKey = siteVariant === 'orda'
+      ? process.env.REALSITE_API_KEY_ORDA
+      : process.env.REALSITE_API_KEY_GRAMII;
     const apiUrl = process.env.REALSITE_API_URL;
 
     if (!apiKey || !apiUrl) {

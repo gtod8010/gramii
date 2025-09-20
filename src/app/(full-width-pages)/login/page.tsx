@@ -33,6 +33,9 @@ export default function LoginPage() {
         }
         if (data.token) {
           localStorage.setItem('jwtToken', data.token);
+          // 토큰 만료 시간 저장 (7일)
+          const expiryTime = Date.now() + (7 * 24 * 60 * 60 * 1000); // 7일을 밀리초로 변환
+          localStorage.setItem('jwtTokenExpiry', expiryTime.toString());
         }
         router.push('/dashboard');
 

@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import ServiceDescriptionModal from '@/components/services/ServiceDescriptionModal';
 import { ChevronUpIcon, ChevronDownIcon } from '@heroicons/react/24/solid'; // Chevron 아이콘 임포트
+import { apiGet } from '@/lib/apiWrapper';
 
 interface Category {
   id: number;
@@ -183,48 +184,16 @@ const ServiceListDisplay = () => {
     setIsLoading(true);
     setError(null);
 
-    const token = localStorage.getItem('jwtToken');
-    const headers: HeadersInit = {
-      'Content-Type': 'application/json',
-    };
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
-
     try {
-      // 서비스 타입 API 호출 추가
-      const [servicesResponse, specialsResponse, categoriesResponse, serviceTypesResponse] = await Promise.all([
-        fetch('/api/services', { headers }),
-        fetch('/api/specials', { headers }),
-        fetch('/api/categories', { headers }),
-        fetch('/api/service-types', { headers }) // 서비스 타입 fetch 추가
+      // 서비스 타입 API 호출 추가 - apiWrapper 사용으로 자동 토큰 만료 처리
+      const [services, specialsData, categoriesData, serviceTypesData] = await Promise.all([
+        apiGet<ApiService[]>('/api/services'),
+        apiGet<Special[]>('/api/specials'),
+        apiGet<Category[]>('/api/categories'),
+        apiGet<ServiceType[]>('/api/service-types')
       ]);
 
-      if (!servicesResponse.ok) {
-        const errorData = await servicesResponse.json();
-        throw new Error(errorData.message || '서비스 목록을 불러오는데 실패했습니다.');
-      }
-      const services: ApiService[] = await servicesResponse.json();
-
-      if (!specialsResponse.ok) {
-        const errorData = await specialsResponse.json();
-        throw new Error(errorData.message || '스페셜 목록을 불러오는데 실패했습니다.');
-      }
-      const specialsData: Special[] = await specialsResponse.json();
-
-      if (!categoriesResponse.ok) {
-        const errorData = await categoriesResponse.json();
-        throw new Error(errorData.message || '카테고리 목록을 불러오는데 실패했습니다.');
-      }
-      const categoriesData: Category[] = await categoriesResponse.json();
       setCategories(categoriesData);
-
-      // 서비스 타입 데이터 처리
-      if (!serviceTypesResponse.ok) {
-        const errorData = await serviceTypesResponse.json();
-        throw new Error(errorData.message || '서비스 타입 목록을 불러오는데 실패했습니다.');
-      }
-      const serviceTypesData: ServiceType[] = await serviceTypesResponse.json();
       setServiceTypes(serviceTypesData);
       
       // is_active가 true인 서비스만 필터링하여 사용자에게 보여줍니다.

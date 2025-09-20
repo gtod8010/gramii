@@ -114,6 +114,7 @@ const GramiiHomePage = () => {
 
   const handleLogout = () => {
     localStorage.removeItem('jwtToken');
+    localStorage.removeItem('jwtTokenExpiry');
     localStorage.removeItem('loggedInUser');
     setIsLoggedIn(false);
     // 필요하다면 router.push('/') 등을 사용하여 홈으로 이동하거나 페이지를 새로고침할 수 있습니다.

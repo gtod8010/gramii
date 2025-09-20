@@ -6,6 +6,7 @@ import { MagnifyingGlassIcon, ArrowPathIcon } from '@heroicons/react/24/outline'
 import { useUser } from '@/hooks/useUser'; // useUser 훅 임포트
 import { statusColors, statusDisplayNames } from '@/lib/constants';
 import toast from 'react-hot-toast';
+import { apiGet } from '@/lib/apiWrapper';
 
 // API 응답으로 받는 주문 데이터 타입 (API 응답 키와 일치하도록 수정)
 interface Order {
@@ -70,18 +71,12 @@ const OrderHistoryPage = () => {
       if (apiFilterStatus) params.append('status', apiFilterStatus);
       if (searchTerm) params.append('searchTerm', searchTerm);
 
-      const token = localStorage.getItem('jwtToken');
-      const headers: HeadersInit = { 'Content-Type': 'application/json' };
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-      }
-
-      const response = await fetch(`/api/orders?${params.toString()}`, { headers });
-      if (!response.ok) {
-        const errData = await response.json();
-        throw new Error(errData.message || '주문 내역을 가져오는데 실패했습니다.');
-      }
-      const data = await response.json();
+      const data = await apiGet<{
+        orders: Order[],
+        totalPages: number,
+        totalOrders: number,
+        currentPage: number
+      }>(`/api/orders?${params.toString()}`);
       setOrders(data.orders || []);
       setTotalPages(data.totalPages || 0);
       setTotalOrders(data.totalOrders || 0);

@@ -118,7 +118,8 @@ export const statusDisplayNames: { [key: string]: string } = {
   processing: '처리중',
   completed: '완료됨',
   partial: '부분완료됨',
-  canceled: '취소됨',
+  canceled: '주문취소',
+  cancelled: '주문취소', // cancelled도 추가
   // 'refunded': '환불됨' // 필요 시 주석 해제
 };
 

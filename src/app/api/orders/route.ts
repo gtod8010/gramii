@@ -95,7 +95,10 @@ export async function POST(request: Request) {
         // ID 값에 따라 Realsite, 2pm, InstaMonster API로 분기
         if (externalServiceId >= 40000) {
           // InstaMonster API 연동 (ID >= 40000)
-          apiKey = process.env.INSTAMONSTER_API_KEY;
+          const siteVariant = process.env.NEXT_PUBLIC_SITE_VARIANT || 'gramii';
+          apiKey = siteVariant === 'orda'
+            ? process.env.INSTAMONSTER_API_KEY_ORDA
+            : process.env.INSTAMONSTER_API_KEY_GRAMII;
           apiUrl = process.env.INSTAMONSTER_API_URL;
 
           if (!apiKey || !apiUrl) {

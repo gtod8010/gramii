@@ -14,6 +14,7 @@ const OrdaNavbar = () => {
 
   const handleLogout = () => {
     localStorage.removeItem('jwtToken');
+    localStorage.removeItem('jwtTokenExpiry');
     localStorage.removeItem('loggedInUser');
     setIsLoggedIn(false);
     window.location.reload();

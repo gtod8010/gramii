@@ -41,7 +41,10 @@ export async function POST() {
   try {
     await ensureTableExists(client);
 
-    const apiKey = process.env.INSTAMONSTER_API_KEY;
+    const siteVariant = process.env.NEXT_PUBLIC_SITE_VARIANT || 'gramii';
+    const apiKey = siteVariant === 'orda'
+      ? process.env.INSTAMONSTER_API_KEY_ORDA
+      : process.env.INSTAMONSTER_API_KEY_GRAMII;
     const apiUrl = process.env.INSTAMONSTER_API_URL;
 
     if (!apiKey || !apiUrl) {

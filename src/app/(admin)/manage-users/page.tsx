@@ -43,6 +43,11 @@ interface PointTransaction {
   created_at: string;
   related_order_id?: number | null;
   balance_after_transaction?: number; // API 응답에 추가된 필드
+  // 관련 주문 정보 (새로 추가)
+  order_status?: string;
+  order_quantity?: number;
+  order_total_price?: number;
+  service_name?: string;
 }
 
 // 통합 활동 내역 아이템 인터페이스 (수정됨)
@@ -59,7 +64,8 @@ interface ActivityItem {
   };
   pointChange: number; 
   balanceAfter?: number; // 이 필드에 balance_after_transaction 값을 할당
-  status?: string; 
+  status?: string;
+  orderId?: number; // 주문 취소를 위한 주문 ID 추가
 }
 
 // 포인트 거래 유형 한글화
@@ -129,6 +135,9 @@ const ManageUsersPage = () => {
   // --- 카테고리별 서비스 목록 상태 ---
   const [categorizedServices, setCategorizedServices] = useState<Record<string, ServiceListItem[]>>({});
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
+
+  // --- 주문 취소 관련 상태 ---
+  const [cancellingOrderId, setCancellingOrderId] = useState<number | null>(null);
 
   const fetchUsers = useCallback(async () => {
     setIsLoadingUsers(true);
@@ -211,8 +220,144 @@ const ManageUsersPage = () => {
   const closeActivityModal = () => {
     setIsActivityModalOpen(false);
     setSelectedUserForModal(null);
-    setCurrentUserActivities([]); 
+    setCurrentUserActivities([]);
     setErrorActivities(null);
+  };
+
+  // 주문 취소 함수
+  const handleCancelOrder = async (orderId: number) => {
+    if (!confirm('정말로 이 주문을 취소하시겠습니까? 결제된 포인트가 환불됩니다.')) {
+      return;
+    }
+
+    setCancellingOrderId(orderId);
+
+    try {
+      const token = localStorage.getItem('jwtToken');
+      const response = await fetch(`/api/orders/${orderId}/cancel`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': token ? `Bearer ${token}` : '',
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || '주문 취소 중 오류가 발생했습니다.');
+      }
+
+      const result = await response.json();
+      alert(`주문이 성공적으로 취소되었습니다. ${result.refundAmount}P가 환불되었습니다.`);
+      
+      // 활동 내역 새로고침
+      if (isActivityModalOpen && selectedUserForModal) {
+        const fetchAndCombineActivities = async () => {
+          setIsLoadingActivities(true);
+          setErrorActivities(null);
+
+          try {
+            const token = localStorage.getItem('jwtToken');
+            const headers: HeadersInit = { 'Content-Type': 'application/json' };
+            if (token) {
+              headers['Authorization'] = `Bearer ${token}`;
+            }
+
+            const [ordersResponse, pointsResponse] = await Promise.all([
+              fetch(`/api/orders?userId=${selectedUserForModal.id}&limit=1000`, { headers }),
+              fetch(`/api/users/${selectedUserForModal.id}/point-transactions`, { headers })
+            ]);
+
+            if (!ordersResponse.ok) {
+              throw new Error('주문 내역을 불러오는데 실패했습니다.');
+            }
+            if (!pointsResponse.ok) {
+              throw new Error('포인트 거래 내역을 불러오는데 실패했습니다.');
+            }
+
+            const ordersData = await ordersResponse.json();
+            const pointsData: PointTransaction[] = await pointsResponse.json();
+
+            const orderActivities: ActivityItem[] = ordersData.orders.map((order: UserOrder) => ({
+              id: `order-${order.id}`,
+              type: 'order' as const,
+              date: new Date(order.orderedAt),
+              timestamp: order.orderedAt,
+              summary: order.serviceName,
+              pointChange: -order.orderPrice,
+              orderInfo: {
+                quantity: String(order.initialQuantity),
+                price: order.orderPrice,
+                initialQuantity: order.initialQuantity,
+              },
+              status: order.status,
+              orderId: order.id, // 주문 ID 추가
+            }));
+
+            let tempCombinedActivities: ActivityItem[] = [...orderActivities];
+
+            const pointActivities: ActivityItem[] = pointsData
+              .map(tx => {
+                if (tx.transaction_type === 'order_payment' && tx.related_order_id) {
+                  const relatedOrderActivity = tempCombinedActivities.find(act => act.type === 'order' && act.id === `order-${tx.related_order_id}`);
+                  if (relatedOrderActivity) {
+                    relatedOrderActivity.balanceAfter = tx.balance_after_transaction;
+                    // 주문 상태가 다를 경우 포인트 거래와 별도로 표시
+                    if (tx.order_status && tx.order_status !== 'pending') {
+                      return {
+                        id: `tx-${tx.id}`,
+                        type: 'point',
+                        date: new Date(tx.created_at),
+                        timestamp: tx.created_at,
+                        summary: `주문 결제 - ${tx.service_name || '서비스'} (${statusDisplayNames[tx.order_status] || tx.order_status})`,
+                        pointChange: tx.amount,
+                        balanceAfter: tx.balance_after_transaction,
+                        orderInfo: {
+                          quantity: tx.order_quantity?.toString() || '',
+                          price: tx.order_total_price || 0,
+                        }
+                      };
+                    }
+                  }
+                }
+                if (tx.transaction_type === 'order_payment' && !tx.order_status) return null; 
+
+                return {
+                  id: `tx-${tx.id}`,
+                  type: 'point',
+                  date: new Date(tx.created_at),
+                  timestamp: tx.created_at,
+                  summary: pointTransactionTypeDisplayNames[tx.transaction_type] || tx.transaction_type,
+                  pointChange: tx.amount,
+                  balanceAfter: tx.balance_after_transaction, 
+                };
+              }).filter(item => item !== null) as ActivityItem[];
+
+            tempCombinedActivities = [...tempCombinedActivities, ...pointActivities];
+            tempCombinedActivities.sort((a, b) => b.date.getTime() - a.date.getTime());
+            setCurrentUserActivities(tempCombinedActivities);
+
+          } catch (err) {
+            if (err instanceof Error) {
+              setErrorActivities(err.message);
+            } else {
+              setErrorActivities('An unknown error occurred');
+            }
+            setCurrentUserActivities([]);
+          } finally {
+            setIsLoadingActivities(false);
+          }
+        };
+
+        await fetchAndCombineActivities();
+      }
+
+    } catch (error) {
+      console.error('주문 취소 오류:', error);
+      alert(error instanceof Error ? error.message : '주문 취소 중 오류가 발생했습니다.');
+    } finally {
+      setCancellingOrderId(null);
+    }
   };
   
   useEffect(() => {
@@ -243,6 +388,7 @@ const ManageUsersPage = () => {
             },
             pointChange: -order.orderPrice, 
             status: statusDisplayNames[order.status] || order.status,
+            orderId: order.id, // 주문 ID 추가
           }));         
 
           const pointsResponse = await fetch(`/api/users/${selectedUserForModal.id}/point-transactions`); 
@@ -260,9 +406,25 @@ const ManageUsersPage = () => {
                 const relatedOrderActivity = tempCombinedActivities.find(act => act.type === 'order' && act.id === `order-${tx.related_order_id}`);
                 if (relatedOrderActivity) {
                   relatedOrderActivity.balanceAfter = tx.balance_after_transaction;
+                  // 주문 상태가 다를 경우 포인트 거래와 별도로 표시
+                  if (tx.order_status && tx.order_status !== 'pending') {
+                    return {
+                      id: `tx-${tx.id}`,
+                      type: 'point',
+                      date: new Date(tx.created_at),
+                      timestamp: tx.created_at,
+                      summary: `주문 결제 - ${tx.service_name || '서비스'} (${statusDisplayNames[tx.order_status] || tx.order_status})`,
+                      pointChange: tx.amount,
+                      balanceAfter: tx.balance_after_transaction,
+                      orderInfo: {
+                        quantity: tx.order_quantity?.toString() || '',
+                        price: tx.order_total_price || 0,
+                      }
+                    };
+                  }
                 }
               }
-              if (tx.transaction_type === 'order_payment') return null; 
+              if (tx.transaction_type === 'order_payment' && !tx.order_status) return null; 
 
               return {
                 id: `tx-${tx.id}`,
@@ -619,6 +781,7 @@ const ManageUsersPage = () => {
                       <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">변동 포인트</th>
                       <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">사용후 잔액</th>
                       <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">상태</th>
+                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">액션</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
@@ -654,6 +817,20 @@ const ManageUsersPage = () => {
                           </td>
                           <td className="px-3 py-2 whitespace-nowrap text-xs text-gray-500 dark:text-gray-400">
                             {activity.type === 'order' ? activity.status : '-'}
+                          </td>
+                          <td className="px-3 py-2 whitespace-nowrap text-xs">
+                            {activity.type === 'order' && activity.orderId && activity.status && ['대기중', 'pending', 'in_progress', '진행중'].includes(activity.status) && (
+                              <Button
+                                variant="danger"
+                                size="sm"
+                                className="px-2 py-1 text-xs"
+                                onClick={() => handleCancelOrder(activity.orderId!)}
+                                isLoading={cancellingOrderId === activity.orderId}
+                                disabled={cancellingOrderId === activity.orderId}
+                              >
+                                {cancellingOrderId === activity.orderId ? '취소중...' : '취소'}
+                              </Button>
+                            )}
                           </td>
                         </tr>
                       );

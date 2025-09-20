@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-hot-toast';
+import { apiGet } from '@/lib/apiWrapper';
 
 interface User {
   id: number;
@@ -23,29 +24,21 @@ export const useUser = () => {
   const router = useRouter();
 
   const fetchAndUpdateUser = useCallback(async () => {
-    const token = localStorage.getItem('jwtToken');
     const storedUser = localStorage.getItem('loggedInUser');
-    if (!token || !storedUser) return;
+    if (!storedUser) return;
     
     const userId = JSON.parse(storedUser).id;
     if (!userId) return;
 
     try {
-      const response = await fetch(`/api/users/${userId}`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch latest user data');
-      }
-      
-      const latestUser = await response.json();
+      const latestUser = await apiGet<User>(`/api/users/${userId}`);
       
       localStorage.setItem('loggedInUser', JSON.stringify(latestUser));
       setUser(latestUser);
 
     } catch (error) {
       console.error("Failed to fetch and update user:", error);
+      // apiWrapper에서 401 에러 시 자동 로그아웃 처리되므로 추가 처리 불필요
     }
   }, []); // Remove `user` from dependencies
 

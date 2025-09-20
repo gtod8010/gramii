@@ -14,17 +14,23 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
   try {
     const query = `
       SELECT 
-        id,
-        user_id,
-        transaction_type,
-        amount,
-        related_order_id,
-        -- description, -- DB에 description 컬럼이 없어 제거
-        created_at,
-        balance_after_transaction
-      FROM point_transactions
-      WHERE user_id = $1
-      ORDER BY created_at DESC;
+        pt.id,
+        pt.user_id,
+        pt.transaction_type,
+        pt.amount,
+        pt.related_order_id,
+        pt.created_at,
+        pt.balance_after_transaction,
+        -- 관련 주문 정보 (있는 경우)
+        o.order_status,
+        o.quantity as order_quantity,
+        o.total_price as order_total_price,
+        s.name as service_name
+      FROM point_transactions pt
+      LEFT JOIN orders o ON pt.related_order_id = o.id
+      LEFT JOIN services s ON o.service_id = s.id
+      WHERE pt.user_id = $1
+      ORDER BY pt.created_at DESC;
     `;
     
     const result = await pool.query(query, [userId]);
