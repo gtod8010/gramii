@@ -22,7 +22,8 @@ export async function GET(request: NextRequest) {
       'sc.name as category_name',
       's.special_id',
       'sp.name as special_name',
-      'rs.rate as realsite_rate'
+      'rs.rate as realsite_rate',
+      'rs.type'
     ];
     let joinClause = `
       FROM services s

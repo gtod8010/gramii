@@ -121,7 +121,7 @@ export default function OrderPage() {
           maxOrder: service.max_order_quantity,
           description: service.description || '',
           custom_price: service.custom_price ? parseFloat(service.custom_price) : null,
-          type: service.type,
+          type: service.type || 'Default',
         });
       }
 
