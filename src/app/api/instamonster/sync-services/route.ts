@@ -69,19 +69,8 @@ export async function POST() {
       throw new Error('InstaMonster API로부터 유효하지 않은 형식의 데이터를 받았습니다.');
     }
 
-    // 지정된 카테고리 이름 목록으로 필터링 (한국인 관련 서비스 및 프리미엄 서비스)
-    const targetCategoryNames = [
-      // 기존 카테고리
-      '인스타그램 리그램 상위노출 패키지 📈',
-      '인스타그램 추천탭 셀프 상위노출 ⭐',
-      '인스타그램 추천탭 동영상 작업 🚀',
-      '인스타그램 한국인 팔로워 👩‍🚀',
-      '인스타그램 한국인 좋아요❤',
-    ];
-
-    const servicesToSync = allServices.filter(service => 
-      targetCategoryNames.includes(service.category)
-    );
+    // 모든 InstaMonster 서비스를 동기화 (필터링 없음)
+    const servicesToSync = allServices;
 
     await client.query('BEGIN');
 
