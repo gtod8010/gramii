@@ -9,6 +9,7 @@ interface DepositRequest {
   user_name: string;
   user_email: string;
   amount: number;
+  deposit_amount: number | null; // 실제 입금 예상액 (세금계산서 시 VAT 포함)
   depositor_name: string;
   status: 'pending' | 'completed' | 'cancelled';
   receipt_type: 'tax_invoice' | 'cash_receipt' | 'none';
@@ -179,6 +180,7 @@ const RechargeManagementPage = () => {
                     <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-white">회원</th>
                     <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-white">입금자명</th>
                     <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-white">입금액</th>
+                    <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-white">충전포인트</th>
                     <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-white">요청계좌</th>
                     <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-white">영수증</th>
                     <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-white">상태</th>
@@ -188,16 +190,22 @@ const RechargeManagementPage = () => {
                 </thead>
                 <tbody className="divide-y divide-gray-200 dark:divide-gray-600 bg-white dark:bg-gray-800">
                   {loading ? (
-                    <tr><td colSpan={9} className="p-4 text-center">로딩 중...</td></tr>
+                    <tr><td colSpan={10} className="p-4 text-center">로딩 중...</td></tr>
                   ) : error ? (
-                    <tr><td colSpan={9} className="p-4 text-center text-red-500">{error}</td></tr>
+                    <tr><td colSpan={10} className="p-4 text-center text-red-500">{error}</td></tr>
                   ) : (
                     requests.map((req) => (
                       <tr key={req.id}>
                         <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm text-gray-500 dark:text-gray-400 sm:pl-6">{formatDateTime(req.requested_at)}</td>
                         <td className="px-3 py-4 text-sm text-gray-900 dark:text-white">{req.user_name} ({req.user_email})</td>
                         <td className="px-3 py-4 text-sm text-gray-500 dark:text-gray-400">{req.depositor_name}</td>
-                        <td className="px-3 py-4 text-sm text-gray-500 dark:text-gray-400">{req.amount.toLocaleString()}원</td>
+                        <td className="px-3 py-4 text-sm text-gray-500 dark:text-gray-400">
+                          {(req.deposit_amount || req.amount).toLocaleString()}원
+                          {req.receipt_type === 'tax_invoice' && (
+                            <span className="ml-1 text-xs text-blue-500">(VAT포함)</span>
+                          )}
+                        </td>
+                        <td className="px-3 py-4 text-sm font-medium text-gray-900 dark:text-white">{req.amount.toLocaleString()}P</td>
                         <td className="px-3 py-4 text-sm text-gray-500 dark:text-gray-400">{req.account_number || 'N/A'}</td>
                         <td className="px-3 py-4 text-sm text-gray-500 dark:text-gray-400">
                           {req.receipt_type === 'tax_invoice' ? (

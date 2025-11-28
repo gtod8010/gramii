@@ -2,12 +2,12 @@ import { NextResponse } from 'next/server';
 import { pool } from '@/lib/db';
 
 export async function POST(req: Request) {
-  const { amount, depositorName, userId, accountNumber, receiptType, receiptInfo } = await req.json();
+  const { amount, depositAmount, depositorName, userId, accountNumber, receiptType, receiptInfo } = await req.json();
 
   if (!userId) {
     return NextResponse.json({ error: 'Unauthorized: User ID is missing' }, { status: 401 });
   }
-  
+
   if (!amount || typeof amount !== 'number' || amount <= 0 || !depositorName || typeof depositorName !== 'string') {
     return NextResponse.json({ error: 'Invalid input' }, { status: 400 });
   }
@@ -16,19 +16,22 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: '세금계산서 정보가 올바르지 않습니다.' }, { status: 400 });
   }
 
+  // SMS 매칭용 실제 입금 금액 (세금계산서면 VAT 포함, 아니면 amount와 동일)
+  const expectedDepositAmount = depositAmount || amount;
+
   const client = await pool.connect();
   try {
     await client.query('BEGIN');
 
     const query = `
-      INSERT INTO deposit_requests (user_id, amount, depositor_name, status, account_number, receipt_type, receipt_info)
-      VALUES ($1, $2, $3, 'pending', $4, $5, $6)
+      INSERT INTO deposit_requests (user_id, amount, deposit_amount, depositor_name, status, account_number, receipt_type, receipt_info)
+      VALUES ($1, $2, $3, $4, 'pending', $5, $6, $7)
       RETURNING id
     `;
-    
+
     const receiptInfoJson = receiptInfo ? JSON.stringify(receiptInfo) : null;
 
-    const result = await client.query(query, [userId, amount, depositorName, accountNumber, receiptType, receiptInfoJson]);
+    const result = await client.query(query, [userId, amount, expectedDepositAmount, depositorName, accountNumber, receiptType, receiptInfoJson]);
 
     const newDepositId: number = result.rows[0].id;
 
@@ -101,8 +104,9 @@ export async function POST(req: Request) {
     for (const s of smsRows) {
       const { name, amt } = parseSms(String(s.body || ''));
       if (name && amt !== null && !Number.isNaN(amt)) {
-        if (name === depositorName && amt === amount) {
-          // 정확 일치 → 즉시 충전 처리
+        // SMS 입금액(VAT 포함)과 expectedDepositAmount 비교, 충전은 amount(VAT 제외)로 처리
+        if (name === depositorName && amt === expectedDepositAmount) {
+          // 정확 일치 → 즉시 충전 처리 (amount = VAT 제외 금액)
           await client.query(`UPDATE deposit_requests SET status='completed', confirmed_at=NOW() WHERE id=$1`, [newDepositId]);
           const updatedUser = await client.query(`UPDATE users SET points = points + $1 WHERE id = $2 RETURNING points`, [amount, userId]);
           const balanceAfter = updatedUser.rows[0].points;

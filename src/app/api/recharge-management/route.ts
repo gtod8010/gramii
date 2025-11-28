@@ -12,6 +12,7 @@ export async function GET() {
           u.name as user_name,
           u.email as user_email,
           dr.amount,
+          dr.deposit_amount,
           dr.depositor_name,
           dr.status,
           dr.receipt_type,
@@ -25,7 +26,7 @@ export async function GET() {
             SELECT 1
             FROM sms_logs sl
             WHERE sl.body LIKE '%' || dr.depositor_name || '%'
-              AND sl.body LIKE '%' || REPLACE(to_char(dr.amount, '999,999,999'), ' ', '') || '%'
+              AND sl.body LIKE '%' || REPLACE(to_char(COALESCE(dr.deposit_amount, dr.amount), '999,999,999'), ' ', '') || '%'
           ) AS is_sms_received
         FROM
           deposit_requests dr

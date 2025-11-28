@@ -127,11 +127,12 @@ export default function RechargeModal({ isOpen, onClose }: RechargeModalProps) {
     }
 
     try {
-      const amountToCharge = parseInt(amount, 10);
-      const finalAmount = receiptType === 'tax_invoice' ? Math.floor(amountToCharge * 1.1) : amountToCharge;
+      const amountToCharge = parseInt(amount, 10); // 충전될 포인트 (VAT 제외)
+      const depositAmount = receiptType === 'tax_invoice' ? Math.floor(amountToCharge * 1.1) : amountToCharge; // 실제 입금 금액 (VAT 포함)
 
       const payload = {
-        amount: finalAmount,
+        amount: amountToCharge, // DB에는 충전될 포인트 금액 저장 (VAT 제외)
+        depositAmount: depositAmount, // 실제 입금 금액 (SMS 매칭용)
         depositorName: depositorName,
         userId: userId,
         accountNumber: `${depositAccount.bank} ${depositAccount.accountNumber}`, // 계좌번호 정보 추가

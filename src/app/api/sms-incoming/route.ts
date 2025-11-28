@@ -97,12 +97,12 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ message: 'SMS format not supported.' });
       }
 
-      // 3. DB에서 일치하는 충전 요청 검색
+      // 3. DB에서 일치하는 충전 요청 검색 (deposit_amount로 매칭, 없으면 amount로 폴백)
       const findRequestQuery = `
-        SELECT id, user_id, amount, status
+        SELECT id, user_id, amount, deposit_amount, status
         FROM deposit_requests
         WHERE status = 'pending'
-          AND amount = $1
+          AND (deposit_amount = $1 OR (deposit_amount IS NULL AND amount = $1))
           AND depositor_name = $2
           AND requested_at >= NOW() - INTERVAL '3 days'
         ORDER BY requested_at DESC
@@ -112,7 +112,7 @@ export async function POST(request: NextRequest) {
 
       if (requestResult.rows.length > 0) {
         const requestToProcess = requestResult.rows[0];
-        const { id: requestId, user_id: userId } = requestToProcess;
+        const { id: requestId, user_id: userId, amount: chargeAmount } = requestToProcess;
 
         // 4. 트랜잭션으로 DB 업데이트
         await client.query('BEGIN');
@@ -129,25 +129,25 @@ export async function POST(request: NextRequest) {
         ]);
         updatedRequest = updateResult.rows[0];
 
-        // 4-2. users 테이블의 포인트(잔액) 증가 및 최종 잔액 가져오기
+        // 4-2. users 테이블의 포인트(잔액) 증가 및 최종 잔액 가져오기 (chargeAmount = VAT 제외 금액)
         const updateUserQuery = `
-          UPDATE users 
-          SET points = points + $1 
+          UPDATE users
+          SET points = points + $1
           WHERE id = $2
           RETURNING points;
         `;
-        const userUpdateResult = await client.query(updateUserQuery, [amount, userId]);
+        const userUpdateResult = await client.query(updateUserQuery, [chargeAmount, userId]);
         const finalBalance = userUpdateResult.rows[0].points;
 
-        // 4-3. point_transactions 테이블에 기록 추가
+        // 4-3. point_transactions 테이블에 기록 추가 (chargeAmount = VAT 제외 금액)
         const transactionQuery = `
           INSERT INTO point_transactions (user_id, amount, transaction_type, balance_after_transaction)
           VALUES ($1, $2, 'deposit', $3)
         `;
-        await client.query(transactionQuery, [userId, amount, finalBalance]);
+        await client.query(transactionQuery, [userId, chargeAmount, finalBalance]);
 
         await client.query('COMMIT');
-        console.log(`Successfully processed deposit request ID: ${requestId} for user ID: ${userId}. Amount: ${amount}`);
+        console.log(`Successfully processed deposit request ID: ${requestId} for user ID: ${userId}. Deposited: ${amount}, Charged: ${chargeAmount}`);
       } else {
          console.log(`No matching pending deposit request found for amount: ${amount}, name: ${depositorName}`);
       }
