@@ -1,173 +1,107 @@
-# TailAdmin Next.js - Free Next.js Tailwind Admin Dashboard Template
+# Gramii / Orda Service
 
-TailAdmin is a free and open-source admin dashboard template built on **Next.js and Tailwind CSS** providing developers with everything they need to create a feature-rich and data-driven: back-end, dashboard, or admin panel solution for any sort of web project.
+소셜미디어 마케팅 서비스 플랫폼입니다. 하나의 코드베이스로 두 개의 브랜드(Gramii, Orda)를 운영합니다.
 
-![TailAdmin - Next.js Dashboard Preview](./banner.png)
+## 기술 스택
 
-With TailAdmin Next.js, you get access to all the necessary dashboard UI components, elements, and pages required to build a high-quality and complete dashboard or admin panel. Whether you're building a dashboard or admin panel for a complex web application or a simple website. 
+- **Framework**: Next.js 15.2 (App Router)
+- **Frontend**: React 19, TypeScript, Tailwind CSS v4
+- **Database**: PostgreSQL 14+
+- **Authentication**: JWT + bcrypt
+- **External APIs**: RealSite, 2PM, InstaMonster
 
-TailAdmin utilizes the powerful features of **Next.js 15** and common features of Next.js such as server-side rendering (SSR), static site generation (SSG), and seamless API route integration. Combined with the advancements of **React 19** and the robustness of **TypeScript**, TailAdmin is the perfect solution to help get your project up and running quickly.
+## 프로젝트 구조
 
-## Overview
+```
+src/
+├── app/
+│   ├── (admin)/            # 관리자 페이지
+│   ├── (full-width-pages)/ # 로그인, 회원가입
+│   └── api/                # API 라우트
+├── components/             # React 컴포넌트
+├── context/                # React Context
+├── hooks/                  # Custom Hooks
+├── lib/                    # 유틸리티
+└── icons/                  # SVG 아이콘
 
-TailAdmin provides essential UI components and layouts for building feature-rich, data-driven admin dashboards and control panels. It's built on:
-
-- Next.js 15.x
-- React 19
-- TypeScript
-- Tailwind CSS V4
-
-### Quick Links
-- [✨ Visit Website](https://tailadmin.com)
-- [📄 Documentation](https://tailadmin.com/docs)
-- [⬇️ Download](https://tailadmin.com/download)
-- [🖌️ Figma Design File (Community Edition)](https://www.figma.com/community/file/1463141366275764364)
-- [⚡ Get PRO Version](https://tailadmin.com/pricing)
-
-### Demos
-- [Free Version](https://nextjs-free-demo.tailadmin.com)
-- [Pro Version](https://nextjs-demo.tailadmin.com)
-
-### Other Versions
-- [HTML Version](https://github.com/TailAdmin/tailadmin-free-tailwind-dashboard-template)
-- [React Version](https://github.com/TailAdmin/free-react-tailwind-admin-dashboard)
-- [Vue.js Version](https://github.com/TailAdmin/vue-tailwind-admin-dashboard)
-
-## Installation
-
-### Prerequisites
-To get started with TailAdmin, ensure you have the following prerequisites installed and set up:
-
-- Node.js 18.x or later (recommended to use Node.js 20.x or later)
-
-### Cloning the Repository
-Clone the repository using the following command:
-
-```bash
-git clone https://github.com/TailAdmin/free-nextjs-admin-dashboard.git
+android-sms-forwarder/      # Gramii SMS 포워더 앱
+orda-sms-forwarder/         # Orda SMS 포워더 앱
 ```
 
-> Windows Users: place the repository near the root of your drive if you face issues while cloning.
+## 설치 및 실행
 
-1. Install dependencies:
-    ```bash
-    npm install
-    # or
-    yarn install
-    ```
-    > Use `--legacy-peer-deps` flag if you face peer-dependency error during installation.
+### 1. 의존성 설치
 
-2. Start the development server:
-    ```bash
-    npm run dev
-    # or
-    yarn dev
-    ```
+```bash
+npm install
+```
 
-## Components
+### 2. 환경변수 설정
 
-TailAdmin is a pre-designed starting point for building a web-based dashboard using Next.js and Tailwind CSS. The template includes:
+```bash
+cp .env.example .env.local
+# .env.local 파일을 열어 실제 값으로 수정
+```
 
-- Sophisticated and accessible sidebar
-- Data visualization components
-- Profile management and custom 404 page
-- Tables and Charts(Line and Bar)
-- Authentication forms and input elements
-- Alerts, Dropdowns, Modals, Buttons and more
-- Can't forget Dark Mode 🕶️
+### 3. 데이터베이스 설정
 
-All components are built with React and styled using Tailwind CSS for easy customization.
+PostgreSQL에서 데이터베이스 생성:
 
-## Feature Comparison
+```sql
+CREATE DATABASE gramii_db;
+CREATE DATABASE orda_db;
+```
 
-### Free Version
-- 1 Unique Dashboard
-- 30+ dashboard components
-- 50+ UI elements
-- Basic Figma design files
-- Community support
+### 4. 개발 서버 실행
 
-### Pro Version
-- 5 Unique Dashboards: Analytics, Ecommerce, Marketing, CRM, Stocks (more coming soon)
-- 400+ dashboard components and UI elements
-- Complete Figma design file
-- Email support
+```bash
+# Gramii (포트 3000)
+npm run dev:gramii
 
-To learn more about pro version features and pricing, visit our [pricing page](https://tailadmin.com/pricing).
+# Orda (포트 3001)
+npm run dev:orda
+```
 
-## Changelog
+### 5. 프로덕션 빌드
 
-### Version 2.0.2 - [March 25, 2025]
+```bash
+# 빌드
+npm run build:gramii
+npm run build:orda
 
-- Upgraded to Next v15.2.3 for [CVE-2025-29927](https://nextjs.org/blog/cve-2025-29927) concerns
-- Included overrides vectormap for packages to prevent peer dependency errors during installation.
-- Migrated from react-flatpickr to flatpickr package for React 19 support
+# PM2로 실행
+pm2 start ecosystem.config.js
+```
 
-### Version 2.0.1 - [February 27, 2025]
+## 주요 API 엔드포인트
 
-#### Update Overview
+| 엔드포인트 | 설명 |
+|------------|------|
+| `POST /api/auth` | 로그인 |
+| `POST /api/register` | 회원가입 |
+| `GET /api/services` | 서비스 목록 |
+| `POST /api/orders` | 주문 생성 |
+| `GET /api/users` | 사용자 목록 (관리자) |
 
-- Upgraded to Tailwind CSS v4 for better performance and efficiency.
-- Updated class usage to match the latest syntax and features.
-- Replaced deprecated class and optimized styles.
+## 환경변수
 
-#### Next Steps
+`.env.example` 파일을 참고하세요. 실제 값은 Slack 채널 정보탭에서 확인할 수 있습니다.
 
-- Run npm install or yarn install to update dependencies.
-- Check for any style changes or compatibility issues.
-- Refer to the Tailwind CSS v4 [Migration Guide](https://tailwindcss.com/docs/upgrade-guide) on this release. if needed.
-- This update keeps the project up to date with the latest Tailwind improvements. 🚀
+## PM2 명령어
 
-### v2.0.0 (February 2025)
-A major update focused on Next.js 15 implementation and comprehensive redesign.
+```bash
+pm2 list                  # 프로세스 목록
+pm2 logs gramii           # Gramii 로그
+pm2 logs orda             # Orda 로그
+pm2 restart all           # 전체 재시작
+pm2 monit                 # 실시간 모니터링
+```
 
-#### Major Improvements
-- Complete redesign using Next.js 15 App Router and React Server Components
-- Enhanced user interface with Next.js-optimized components
-- Improved responsiveness and accessibility
-- New features including collapsible sidebar, chat screens, and calendar
-- Redesigned authentication using Next.js App Router and server actions
-- Updated data visualization using ApexCharts for React
+## Android SMS Forwarder
 
-#### Breaking Changes
+SMS 자동 포워딩 앱입니다. Android Studio에서 빌드하세요.
 
-- Migrated from Next.js 14 to Next.js 15
-- Chart components now use ApexCharts for React
-- Authentication flow updated to use Server Actions and middleware
-
-[Read more](https://tailadmin.com/docs/update-logs/nextjs) on this release.
-
-#### Breaking Changes
-- Migrated from Next.js 14 to Next.js 15
-- Chart components now use ApexCharts for React
-- Authentication flow updated to use Server Actions and middleware
-
-### v1.3.4 (July 01, 2024)
-- Fixed JSvectormap rendering issues
-
-### v1.3.3 (June 20, 2024)
-- Fixed build error related to Loader component
-
-### v1.3.2 (June 19, 2024)
-- Added ClickOutside component for dropdown menus
-- Refactored sidebar components
-- Updated Jsvectormap package
-
-### v1.3.1 (Feb 12, 2024)
-- Fixed layout naming consistency
-- Updated styles
-
-### v1.3.0 (Feb 05, 2024)
-- Upgraded to Next.js 14
-- Added Flatpickr integration
-- Improved form elements
-- Enhanced multiselect functionality
-- Added default layout component
-
-## License
-
-TailAdmin Next.js Free Version is released under the MIT License.
-
-## Support
-
-If you find this project helpful, please consider giving it a star on GitHub. Your support helps us continue developing and maintaining this template.
+```bash
+cd android-sms-forwarder  # 또는 orda-sms-forwarder
+./gradlew assembleDebug
+```
